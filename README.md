@@ -1,66 +1,30 @@
 # PropDesk
 
-ChatGPT-style support desk for prop-firm traders (FTMO, FundedNext, The5ers, FundingPips, E8, Goat, Alpha Capital, Apex, Topstep, Instant Funding).
+Independent support desk for prop-firm traders. Glass UI, mobile-first, live answers from the selected firm’s official site.
+
+Covers FTMO, FundedNext, The5ers, FundingPips, E8, Goat Funded Trader, Alpha Capital, Apex, Topstep, and Instant Funding.
 
 ## What it does
 
-1. Answers questions from a firm-specific FAQ / rule pattern knowledge base.
-2. Refuses to email the firm for ordinary rule breaches (daily loss, early payout, incomplete KYC, consistency parks).
-3. If the trader claims **firm fault** and attaches evidence, compiles a case and opens an email to the firm’s support inbox with:
-   - the case narrative
-   - account ID
-   - trader email as reply-to / CC so the firm talks to the trader
+- Answers rule questions in short form. Live AI searches the firm’s official site, opens the current FAQ/terms page, and cites it. Offline FAQ engine is the fallback.
+- Escalates only for **firm-side operational fault** with evidence (wrong calc vs dashboard, approved payout past SLA, outage-caused breach, fee with no account, rule not in terms).
+- Compiles a case and opens email to the firm’s support inbox with the trader on CC.
 
-## Run it
+It will not email the firm for ordinary rule breaches (daily loss, consistency parks, early payouts, incomplete KYC).
 
-Open `index.html` in a browser, or:
+## Stack
 
-```bash
-python3 -m http.server 8080
-```
+React 19, TanStack Start, Tailwind v4, Zustand. Live AI uses Grok on the server (`XAI_API_KEY`) with web search scoped to the selected firm’s domain. No browser API keys.
 
-Then visit http://localhost:8080
-
-## Run on phone (Termux)
-
-Paste this once:
+## Run
 
 ```bash
-pkg update -y && pkg install -y git python
-curl -fsSL https://raw.githubusercontent.com/Quantikz/propdesk/main/termux-run.sh -o ~/propdesk-run.sh
-chmod +x ~/propdesk-run.sh
-bash ~/propdesk-run.sh
+npm install
+npm run dev
 ```
 
-Next times just:
+Set `XAI_API_KEY` in the server environment for Live AI + firm-site search. Without it, the FAQ engine still answers.
 
-```bash
-bash ~/propdesk-run.sh
-```
+## Knowledge
 
-Then open http://127.0.0.1:8080 in the phone browser. Keep the Termux session running.
-
-## Add a real model later
-
-The UI already calls `window.PROPDESK_AI.complete`. Two options:
-
-- Backend: `window.PROPDESK_AI_ENDPOINT = "https://your-api/chat"`
-- Browser key (dev only): `localStorage.setItem("PROPDESK_OPENAI_KEY", "sk-...")`
-
-Until then the built-in classifier + FAQ engine runs offline.
-
-## Send mail from a server
-
-By default the case uses `mailto:` so the trader can attach screenshots in their own mailbox.
-
-To send from your stack:
-
-```js
-window.PROPDESK_MAIL_ENDPOINT = "/api/send-case";
-```
-
-POST body: `{ to, cc, subject, text, caseId }`.
-
-## Edit firms / FAQs
-
-All copy lives in `knowledge.js` — add a firm object and tags on topics. Support addresses should be verified against each firm’s current contact page before production.
+Firm snapshots and escalation rules live in `src/lib/propdesk/knowledge.ts`. Live answers prefer the firm’s current website over that snapshot.

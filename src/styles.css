@@ -1,0 +1,156 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: "Instrument Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-bg: #090b10;
+  --color-sidebar: #0c0f16;
+  --color-hover: #161b26;
+  --color-input: #121722cc;
+  --color-elev: #141924e6;
+  --color-line: #2a3244;
+  --color-fg: #eef1f6;
+  --color-muted: #9aa3b5;
+  --color-dim: #6d778c;
+  --color-accent: #3ee0b0;
+  --color-accent-hover: #5aebc0;
+  --color-accent-fg: #05261b;
+  --color-border: #1c2330;
+  --color-ok: #3ee0b0;
+  --color-warn: #e8c36a;
+  --color-bad: #fb8a8a;
+  --color-user-av: #2a3344;
+  --color-glass: #ffffff0a;
+  --color-glass-strong: #ffffff12;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+
+  --breakpoint-desk: 56.25rem;
+
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  --shadow-composer: 0 18px 50px rgba(0, 0, 0, 0.4);
+  --shadow-glass: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 40px rgba(0, 0, 0, 0.28);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-quick: 160ms;
+  --motion-fast: 280ms;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  .glass {
+    background: color-mix(in srgb, var(--color-elev) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-soft {
+    background: var(--color-glass);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-border);
+  }
+
+  .pd-shell {
+    background:
+      radial-gradient(900px 520px at 88% -8%, color-mix(in srgb, var(--firm, var(--color-accent)) 18%, transparent), transparent 58%),
+      radial-gradient(640px 380px at -8% 108%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 52%),
+      var(--color-bg);
+  }
+
+  .pd-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%);
+  }
+
+  .pd-stagger > * {
+    animation: pd-in 480ms var(--ease-smooth-out) both;
+  }
+  .pd-stagger > *:nth-child(1) { animation-delay: 40ms; }
+  .pd-stagger > *:nth-child(2) { animation-delay: 120ms; }
+  .pd-stagger > *:nth-child(3) { animation-delay: 200ms; }
+  .pd-stagger > *:nth-child(4) { animation-delay: 280ms; }
+  .pd-stagger > *:nth-child(5) { animation-delay: 360ms; }
+  .pd-stagger > *:nth-child(6) { animation-delay: 440ms; }
+
+  .pd-msg {
+    animation: pd-in 320ms var(--ease-smooth-out) both;
+  }
+}
+
+@keyframes pd-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes pd-blink {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

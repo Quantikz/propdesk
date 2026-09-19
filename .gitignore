@@ -1,1 +1,11 @@
-local-key.js
+node_modules
+.vercel
+dist
+.output
+screenshots
+artifacts
+.grok
+.env
+.env.*
+*.log
+.DS_Store
