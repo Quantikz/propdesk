@@ -31,7 +31,14 @@ function firmDomains(firmId: string): string[] {
 }
 
 function domainsFor(ids: string[]): string[] {
-  return Array.from(new Set(ids.flatMap(firmDomains))).slice(0, 8);
+  return Array.from(
+    new Set([
+      ...ids.flatMap(firmDomains),
+      "payoutjunction.com",
+      "propfirmmatch.com",
+      "www.propfirmmatch.com",
+    ]),
+  ).slice(0, 10);
 }
 
 function lastUserText(messages: ChatTurn[]) {
@@ -95,6 +102,11 @@ How to know things:
 
 Official pages to open:
 ${siteLines(packIds)}
+Payout trackers (use for last-month / count / largest / processing time — quote the source):
+- https://payoutjunction.com/statistics (on-chain JSON they license for quoting)
+- https://payoutjunction.com/30d
+- https://propfirmmatch.com/payouts
+- https://propfirmmatch.com/payouts-leaderboard
 
 Voice: plain speech, short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. No fake leaderboards. No trade signals.
 

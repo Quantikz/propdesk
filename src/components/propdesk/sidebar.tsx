@@ -1,4 +1,4 @@
-import { Columns2, Plus, Trash2 } from "lucide-react";
+import { Banknote, Columns2, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,7 @@ export function Sidebar({
   const navigate = useNavigate();
   const onDesk = path === "/";
   const onCompare = path.startsWith("/compare");
+  const onPayouts = path.startsWith("/payouts");
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-sidebar">
@@ -80,6 +81,17 @@ export function Sidebar({
         >
           <Columns2 className="size-4" />
           Compare firms
+        </Link>
+        <Link
+          to="/payouts"
+          onClick={onNavigate}
+          className={cn(
+            "flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium",
+            onPayouts ? "bg-hover text-fg" : "text-muted hover:text-fg",
+          )}
+        >
+          <Banknote className="size-4" />
+          Payouts issued
         </Link>
       </nav>
 

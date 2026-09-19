@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
+import { PayoutsView } from "@/components/propdesk/payouts-view";
 import { ProfileDialog } from "@/components/propdesk/profile-dialog";
 import { Sidebar } from "@/components/propdesk/sidebar";
 import { Thread } from "@/components/propdesk/thread";
@@ -19,6 +20,7 @@ export function AppShell() {
   const firm = getFirm(firmId);
   const path = useRouterState({ select: (s) => s.location.pathname });
   const comparing = path.startsWith("/compare");
+  const payouts = path.startsWith("/payouts");
 
   useEffect(() => {
     void useDeskStore.persist.rehydrate();
@@ -71,9 +73,11 @@ export function AppShell() {
       </aside>
 
       <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-l-2 border-l-[var(--firm)]">
-        <Topbar comparing={comparing} />
+        <Topbar comparing={comparing} payouts={payouts} />
         {comparing ? (
           <CompareView />
+        ) : payouts ? (
+          <PayoutsView />
         ) : (
           <>
             <Thread />

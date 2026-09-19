@@ -19,12 +19,20 @@ export function EmptyState() {
         Open around the clock. Replies in seconds. Rules, payouts, drawdown, which plan
         fits you. This desk answers questions — tickets come later.
       </p>
-      <Link
-        to="/compare"
-        className="mt-4 inline-flex min-h-11 w-fit items-center rounded-md border border-line bg-elev px-3.5 text-sm font-medium hover:bg-hover"
-      >
-        Compare firms
-      </Link>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          to="/compare"
+          className="inline-flex min-h-11 items-center rounded-md border border-line bg-elev px-3.5 text-sm font-medium hover:bg-hover"
+        >
+          Compare firms
+        </Link>
+        <Link
+          to="/payouts"
+          className="inline-flex min-h-11 items-center rounded-md border border-line bg-elev px-3.5 text-sm font-medium hover:bg-hover"
+        >
+          Payouts issued
+        </Link>
+      </div>
       <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
         {SUGGESTS.map((s) => (
           <button
