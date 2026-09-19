@@ -8,6 +8,9 @@ export type ChatTurn = { role: "user" | "assistant"; content: string };
 export type Source = { url: string; title?: string };
 export type DeskMode = "desk" | "compare";
 
+const GROQ_CHAT = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_UA = "PropDesk/1.0 (+https://propdesk-beta.vercel.app)";
+
 function lastUserText(messages: ChatTurn[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i]?.role === "user") return messages[i].content;
@@ -145,6 +148,32 @@ function extractText(output: unknown[]): string {
   return [...new Set(parts)].join("\n\n").trim();
 }
 
+function sourcesFromGroq(message: Record<string, unknown>): Source[] {
+  const found = new Map<string, Source>();
+  const add = (raw: string, title?: string) => {
+    const cleaned = cleanUrl(raw);
+    if (cleaned && !found.has(cleaned)) found.set(cleaned, { url: cleaned, title });
+  };
+  const blob = JSON.stringify(message);
+  for (const m of blob.matchAll(/https:\/\/[^\s"'<>\\]+/g)) {
+    add(m[0].replace(/[),.;]+$/, ""));
+  }
+  const tools = message.executed_tools;
+  if (Array.isArray(tools)) {
+    for (const tool of tools) {
+      if (!tool || typeof tool !== "object") continue;
+      const o = tool as Record<string, unknown>;
+      const output = typeof o.output === "string" ? o.output : "";
+      for (const line of output.split("\n")) {
+        const url = line.match(/URL:\s*(https:\/\/\S+)/i)?.[1];
+        const title = line.match(/^Title:\s*(.+)$/i)?.[1];
+        if (url) add(url, title?.trim());
+      }
+    }
+  }
+  return [...found.values()].slice(0, 6);
+}
+
 type GrokOk = { ok: true; text: string; sources: Source[] };
 type GrokErr = { ok: false; error: string };
 
@@ -221,6 +250,91 @@ async function callChat(
   return { ok: true, text, sources: [] };
 }
 
+async function callGroq(
+  apiKey: string,
+  system: string,
+  messages: ChatTurn[],
+  live: boolean,
+): Promise<GrokOk | GrokErr> {
+  const payload: Record<string, unknown> = {
+    model: live ? "groq/compound" : "openai/gpt-oss-20b",
+    messages: [
+      { role: "system", content: system.slice(0, 12000) },
+      ...messages.map((m) => ({
+        role: m.role,
+        content: m.content.slice(0, 2000),
+      })),
+    ],
+  };
+  if (live) {
+    payload.compound_custom = {
+      tools: { enabled_tools: ["web_search", "visit_website"] },
+    };
+  } else {
+    payload.temperature = 0.4;
+    payload.max_tokens = 650;
+  }
+
+  const res = await fetch(GROQ_CHAT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      "User-Agent": GROQ_UA,
+      Accept: "application/json",
+    },
+    signal: AbortSignal.timeout(live ? 40000 : 20000),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) return { ok: false, error: "unavailable" };
+  const body = (await res.json()) as {
+    choices?: { message?: Record<string, unknown> }[];
+  };
+  const message = body.choices?.[0]?.message ?? {};
+  const text = typeof message.content === "string" ? message.content.trim() : "";
+  if (!text) return { ok: false, error: "unavailable" };
+  return { ok: true, text, sources: live ? sourcesFromGroq(message) : [] };
+}
+
+async function completeWithXai(
+  apiKey: string,
+  cat: CatalogPayload,
+  pack: typeof import("./catalog.server"),
+  data: { firmId: string; firmIds: string[]; mode: DeskMode; messages: ChatTurn[] },
+  ids: string[],
+  live: boolean,
+  openWeb: boolean,
+): Promise<GrokOk | GrokErr> {
+  const system = systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, live);
+  const domains = pack.hostsFor(cat, ids);
+  let result: GrokOk | GrokErr;
+  if (live) {
+    try {
+      result = await callResponses(apiKey, system, data.messages, domains, openWeb);
+    } catch {
+      result = { ok: false, error: "unavailable" };
+    }
+    if (!result.ok && !openWeb) {
+      try {
+        result = await callResponses(apiKey, system, data.messages, domains, true);
+      } catch {
+        result = { ok: false, error: "unavailable" };
+      }
+    }
+    if (!result.ok) {
+      result = await callChat(
+        apiKey,
+        systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, false) +
+          "\nThe live pages did not load this turn. Answer from the pack. Do not say that checking websites is out of scope — it is in scope; this turn just failed.",
+        data.messages,
+      );
+    }
+  } else {
+    result = await callChat(apiKey, system, data.messages);
+  }
+  return result;
+}
+
 export const completeTicket = createServerFn({ method: "POST" })
   .validator((input: {
     firmId: string;
@@ -239,8 +353,9 @@ export const completeTicket = createServerFn({ method: "POST" })
     })),
   }))
   .handler(async ({ data }) => {
-    const apiKey = process.env.XAI_API_KEY || "";
-    if (!apiKey) return { ok: false as const, error: "unavailable" };
+    const groqKey = (process.env.GROQ_API_KEY || "").trim();
+    const xaiKey = (process.env.XAI_API_KEY || "").trim();
+    if (!groqKey && !xaiKey) return { ok: false as const, error: "unavailable" };
     if (!data.messages.length) return { ok: false as const, error: "unavailable" };
 
     const pack = await import("./catalog.server");
@@ -251,32 +366,34 @@ export const completeTicket = createServerFn({ method: "POST" })
     const live = data.mode === "compare" || needsWebSearch(q);
     const openWeb = needsWebSearch(q);
     const system = systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, live);
-    const domains = pack.hostsFor(cat, ids);
-    let result: GrokOk | GrokErr;
-    if (live) {
+
+    let result: GrokOk | GrokErr = { ok: false, error: "unavailable" };
+
+    if (groqKey) {
       try {
-        result = await callResponses(apiKey, system, data.messages, domains, openWeb);
+        result = await callGroq(groqKey, system, data.messages, live);
       } catch {
         result = { ok: false, error: "unavailable" };
       }
-      if (!result.ok && !openWeb) {
+      if (!result.ok && live) {
         try {
-          result = await callResponses(apiKey, system, data.messages, domains, true);
+          result = await callGroq(
+            groqKey,
+            systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, false) +
+              "\nThe live pages did not load this turn. Answer from the pack. Do not say that checking websites is out of scope — it is in scope; this turn just failed.",
+            data.messages,
+            false,
+          );
         } catch {
           result = { ok: false, error: "unavailable" };
         }
       }
-      if (!result.ok) {
-        result = await callChat(
-          apiKey,
-          systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, false) +
-            "\nThe live pages did not load this turn. Answer from the pack. Do not say that checking websites is out of scope — it is in scope; this turn just failed.",
-          data.messages,
-        );
-      }
-    } else {
-      result = await callChat(apiKey, system, data.messages);
     }
+
+    if (!result.ok && xaiKey) {
+      result = await completeWithXai(xaiKey, cat, pack, data, ids, live, openWeb);
+    }
+
     return result.ok
       ? { ok: true as const, text: result.text, sources: result.sources }
       : { ok: false as const, error: "unavailable" };
