@@ -16,14 +16,48 @@ It will not email the firm for ordinary rule breaches (daily loss, consistency p
 
 React 19, TanStack Start, Tailwind v4, Zustand. Live AI uses Grok on the server (`XAI_API_KEY`) with web search scoped to the selected firm’s domain. No browser API keys.
 
-## Run
+## Run on a computer
 
 ```bash
+git clone https://github.com/Quantikz/propdesk.git
+cd propdesk
 npm install
 npm run dev
 ```
 
-Set `XAI_API_KEY` in the server environment for Live AI + firm-site search. Without it, the FAQ engine still answers.
+Then open http://127.0.0.1:8080
+
+Set `XAI_API_KEY` in the environment for Live AI + firm-site search. Without it, the FAQ engine still answers.
+
+## Run on Termux (Android)
+
+This is a Node app now, not a static HTML file. First install needs disk space and a few minutes. Keep Termux in the foreground so Android does not kill it.
+
+Paste this once:
+
+```bash
+pkg update -y && pkg install -y git
+curl -fsSL https://raw.githubusercontent.com/Quantikz/propdesk/main/termux-run.sh -o ~/propdesk-run.sh
+chmod +x ~/propdesk-run.sh
+bash ~/propdesk-run.sh
+```
+
+Next times:
+
+```bash
+bash ~/propdesk-run.sh
+```
+
+On this phone open **http://127.0.0.1:8080**. The script also prints a Wi-Fi address (`http://YOUR-PHONE-IP:8080`) so a laptop on the same network can open it.
+
+Optional Live AI in that Termux session:
+
+```bash
+export XAI_API_KEY="xai-..."
+bash ~/propdesk-run.sh
+```
+
+If `pkg install nodejs` fails, try `pkg install nodejs-lts`. If install runs out of memory, close other apps and rerun — PropDesk needs a real Node install, not Python’s http.server.
 
 ## Knowledge
 
