@@ -60,6 +60,20 @@ export function AppShell() {
     return () => window.removeEventListener("resize", onResize);
   }, [setSidebarOpen]);
 
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [sidebarOpen]);
+
   return (
     <div
       className="relative flex h-dvh min-h-0 overflow-hidden bg-bg text-fg"
@@ -71,7 +85,7 @@ export function AppShell() {
 
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-bg/60 backdrop-blur-sm transition-opacity duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
+          "fixed inset-0 z-40 overflow-hidden overscroll-none bg-bg/60 backdrop-blur-sm transition-opacity duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
           sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={() => setSidebarOpen(false)}
@@ -79,7 +93,7 @@ export function AppShell() {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(20rem,90vw)] flex-col border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.4)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(20rem,90vw)] flex-col overflow-hidden border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.4)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!sidebarOpen}
