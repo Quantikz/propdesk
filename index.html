@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PropDesk — AI support for prop firm traders</title>
+  <meta name="description" content="ChatGPT-style support desk for FTMO, FundedNext, Apex and other prop firms. FAQ answers first. Firm-fault cases emailed with evidence." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-top">
+        <button class="btn btn-new" id="newChatBtn" type="button">＋ New ticket</button>
+        <button class="btn icon-btn" id="menuBtn" type="button" title="Menu">☰</button>
+      </div>
+      <div class="brand">
+        <div class="logo">P</div>
+        <div>
+          <h1>PropDesk</h1>
+          <p>Independent trader support</p>
+        </div>
+      </div>
+
+      <div class="firm-box">
+        <label class="mini">Prop firm</label>
+        <select id="firmSelect"></select>
+      </div>
+      <div class="id-box">
+        <label class="mini">Your email (reply-to)</label>
+        <input class="field" id="userEmail" type="email" placeholder="you@email.com" autocomplete="email" />
+        <label class="mini">Account / login ID</label>
+        <input class="field" id="accountId" type="text" placeholder="e.g. FN-104928 or 5120347" />
+      </div>
+
+      <div class="history">
+        <h3>Tickets</h3>
+        <div id="historyList"></div>
+      </div>
+
+      <div class="side-foot">
+        <div class="user-chip" id="userChip">
+          <div class="avatar" id="userAv">T</div>
+          <div>
+            <div id="userLabel">Trader</div>
+            <small id="userSub">Add email &amp; account ID</small>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="main">
+      <header class="topbar">
+        <button class="model-pill" type="button">
+          <span class="dot" id="firmDot"></span>
+          <span id="modelName">FTMO specialist</span>
+        </button>
+        <div class="top-actions">
+          <button class="btn ghost" type="button" onclick="document.getElementById('userChip').click()">Profile</button>
+        </div>
+      </header>
+
+      <div class="thread" id="thread">
+        <div class="thread-inner" id="threadInner">
+          <div class="empty" id="emptyState">
+            <div class="logo">P</div>
+            <h2>How can I help with FTMO?</h2>
+            <p>I answer from the firm’s published rules first. If the firm is at fault and you have evidence, I compile a case and email their support with you on copy.</p>
+            <div class="suggest">
+              <button type="button" data-suggest="What is the daily drawdown on my account and does floating loss count?">
+                <strong>Daily drawdown rules</strong>
+                <em>Does floating loss count against me?</em>
+              </button>
+              <button type="button" data-suggest="My payout has been approved for more than the published SLA and I still have not received funds. I have the approval screenshot.">
+                <strong>Payout past SLA</strong>
+                <em>Approved, still not paid</em>
+              </button>
+              <button type="button" data-suggest="They denied my payout citing consistency. Explain the rule and whether I should keep trading or escalate.">
+                <strong>Payout denied</strong>
+                <em>Consistency or min days?</em>
+              </button>
+              <button type="button" data-suggest="I was breached during a platform outage. I have logs and screenshots. This is the firm's fault.">
+                <strong>Platform outage breach</strong>
+                <em>Escalate with evidence</em>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="attach-row" id="attachRow"></div>
+          <div class="composer-row">
+            <button class="btn" id="attachBtn" type="button" title="Attach evidence">📎</button>
+            <textarea id="composerInput" rows="1" placeholder="Describe the issue. Attach screenshots if the firm is at fault."></textarea>
+            <button class="btn send" id="sendBtn" type="button" disabled>↑</button>
+          </div>
+        </div>
+        <div class="hint">PropDesk is not the firm. Rulebooks change — verify before you size up. Escalations email the firm with your address as reply-to.</div>
+      </div>
+    </section>
+  </div>
+
+  <input id="attachInput" type="file" multiple accept="image/*,.pdf,.csv,.txt,.xlsx" hidden />
+
+  <div class="overlay" id="profileOverlay">
+    <div class="modal">
+      <h3>Trader profile</h3>
+      <p id="profNote">Used as reply-to on every escalation email.</p>
+      <div class="grid">
+        <div>
+          <label class="mini">Email</label>
+          <input class="field" id="profEmail" type="email" placeholder="you@email.com" />
+        </div>
+        <div>
+          <label class="mini">Account / login ID</label>
+          <input class="field" id="profAccount" type="text" placeholder="Account ID" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelProfile" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveProfile" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="knowledge.js"></script>
+  <script src="ai-hook.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
