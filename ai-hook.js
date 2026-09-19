@@ -4,7 +4,7 @@ window.PROPDESK_AI = {
     groq: {
       label: "Groq (free, fast)",
       base: "https://api.groq.com/openai/v1",
-      model: "llama-3.3-70b-versatile",
+      model: "qwen/qwen3.8-27b",
     },
     openrouter: {
       label: "OpenRouter",
@@ -18,7 +18,17 @@ window.PROPDESK_AI = {
     },
   },
 
+  boot() {
+    const b = window.PROPDESK_BOOT;
+    if (!b || !b.key) return;
+    if (b.provider) localStorage.setItem("PROPDESK_PROVIDER", b.provider);
+    localStorage.setItem("PROPDESK_OPENAI_KEY", b.key);
+    if (b.model) localStorage.setItem("PROPDESK_MODEL", b.model);
+    if (b.base) localStorage.setItem("PROPDESK_BASE", b.base);
+  },
+
   settings() {
+    this.boot();
     const provider = localStorage.getItem("PROPDESK_PROVIDER") || "groq";
     const preset = this.presets[provider] || this.presets.groq;
     return {
@@ -32,11 +42,9 @@ window.PROPDESK_AI = {
   async complete({ system, messages, user, files }) {
     const s = this.settings();
     if (!s.key) return null;
-
     const msgs = messages && messages.length
       ? messages
       : [{ role: "user", content: (user || "") + (files && files.length ? "\n\nAttached: " + files.join(", ") : "") }];
-
     const url = s.base.replace(/\/$/, "") + "/chat/completions";
     const res = await fetch(url, {
       method: "POST",
