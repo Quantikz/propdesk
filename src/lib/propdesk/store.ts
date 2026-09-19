@@ -20,6 +20,9 @@ type DeskState = {
   profileOpen: boolean;
   profileForce: boolean;
   toast: string | null;
+  compareIds: string[];
+  compareMessages: ChatMessage[];
+  compareSending: boolean;
   setFirm: (id: string) => void;
   setEmail: (v: string) => void;
   setAccountId: (v: string) => void;
@@ -34,6 +37,9 @@ type DeskState = {
   addFiles: (files: File[]) => void;
   removeFile: (index: number) => void;
   send: (textFromSuggest?: string) => Promise<void>;
+  setCompareIds: (ids: string[]) => void;
+  toggleCompare: (id: string) => void;
+  sendCompare: (textFromSuggest?: string) => Promise<void>;
 };
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -52,6 +58,9 @@ export const useDeskStore = create<DeskState>()(
       profileOpen: false,
       profileForce: false,
       toast: null,
+      compareIds: ["ftmo", "fundednext"],
+      compareMessages: [],
+      compareSending: false,
 
       setFirm: (id) => {
         set({ firmId: id, sidebarOpen: false });
@@ -154,6 +163,8 @@ export const useDeskStore = create<DeskState>()(
           const out = await completeTicket({
             data: {
               firmId: firm.id,
+              firmIds: [firm.id],
+              mode: "desk",
               messages: history,
             },
           });
@@ -162,7 +173,10 @@ export const useDeskStore = create<DeskState>()(
             ? {
                 role: "assistant",
                 content: out.text,
-                chips: [{ text: firm.short, tone: "" }],
+                chips: out.sources?.length
+                  ? [{ text: "Checked live", tone: "ok" }, { text: firm.short, tone: "" }]
+                  : [{ text: firm.short, tone: "" }],
+                sources: out.sources ?? [],
                 ts: Date.now(),
               }
             : {
@@ -184,6 +198,69 @@ export const useDeskStore = create<DeskState>()(
           set({ sending: false });
         }
       },
+
+      setCompareIds: (ids) => {
+        const unique = Array.from(new Set(ids)).slice(0, 4);
+        if (unique.length >= 2) set({ compareIds: unique });
+      },
+      toggleCompare: (id) => {
+        const cur = get().compareIds;
+        if (cur.includes(id)) {
+          if (cur.length <= 2) return;
+          set({ compareIds: cur.filter((x) => x !== id) });
+          return;
+        }
+        if (cur.length >= 4) set({ compareIds: [...cur.slice(1), id] });
+        else set({ compareIds: [...cur, id] });
+      },
+      sendCompare: async (textFromSuggest) => {
+        const text = (textFromSuggest || "").trim();
+        if (!text || get().compareSending) return;
+        const userMsg: ChatMessage = { role: "user", content: text, ts: Date.now() };
+        const ids = get().compareIds;
+        set({
+          compareMessages: [...get().compareMessages, userMsg],
+          compareSending: true,
+          sidebarOpen: false,
+        });
+        try {
+          const history = [...get().compareMessages].map((m) => ({
+            role: m.role,
+            content: m.content,
+          }));
+          const out = await completeTicket({
+            data: {
+              firmId: ids[0] ?? "ftmo",
+              firmIds: ids,
+              mode: "compare",
+              messages: history,
+            },
+          });
+          const label = ids.map((id) => getFirm(id).short).join(" · ");
+          const assistant: ChatMessage = out.ok
+            ? {
+                role: "assistant",
+                content: out.text,
+                chips: out.sources?.length
+                  ? [{ text: "Checked live", tone: "ok" }, { text: label, tone: "" }]
+                  : [{ text: label, tone: "" }],
+                sources: out.sources ?? [],
+                ts: Date.now(),
+              }
+            : {
+                role: "assistant",
+                content: "I missed that — send it once more.",
+                chips: [{ text: label, tone: "warn" }],
+                ts: Date.now(),
+              };
+          set({ compareMessages: [...get().compareMessages, assistant] });
+        } catch (err) {
+          console.error(err);
+          get().showToast("Could not send. Try again.");
+        } finally {
+          set({ compareSending: false });
+        }
+      },
     }),
     {
       name: "propdesk-v2",
@@ -194,6 +271,8 @@ export const useDeskStore = create<DeskState>()(
         accountId: s.accountId,
         chats: s.chats,
         activeId: s.activeId,
+        compareIds: s.compareIds,
+        compareMessages: s.compareMessages,
       }),
     },
   ),

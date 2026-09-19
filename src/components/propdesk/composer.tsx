@@ -3,15 +3,18 @@ import { ArrowUp, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeskStore } from "@/lib/propdesk/store";
 
-export function Composer() {
+export function Composer({ surface = "desk" }: { surface?: "desk" | "compare" }) {
   const pendingFiles = useDeskStore((s) => s.pendingFiles);
-  const sending = useDeskStore((s) => s.sending);
+  const sendingDesk = useDeskStore((s) => s.sending);
+  const sendingCompare = useDeskStore((s) => s.compareSending);
   const addFiles = useDeskStore((s) => s.addFiles);
   const removeFile = useDeskStore((s) => s.removeFile);
-  const send = useDeskStore((s) => s.send);
+  const sendDesk = useDeskStore((s) => s.send);
+  const sendCompare = useDeskStore((s) => s.sendCompare);
   const fileRef = useRef<HTMLInputElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft] = useState("");
+  const sending = surface === "compare" ? sendingCompare : sendingDesk;
 
   function grow() {
     const el = taRef.current;
@@ -32,7 +35,8 @@ export function Composer() {
       taRef.current.value = "";
       grow();
     }
-    await send(value);
+    if (surface === "compare") await sendCompare(value);
+    else await sendDesk(value);
     taRef.current?.focus();
   }
 
@@ -44,11 +48,12 @@ export function Composer() {
   }
 
   const canSend = !sending && draft.trim().length > 0;
+  const showFiles = surface === "desk";
 
   return (
     <div className="shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 desk:px-4 desk:pb-5">
       <div className="mx-auto w-full max-w-[780px] rounded-md border border-line bg-input px-2 py-1.5 desk:px-3 desk:py-2">
-        {pendingFiles.length > 0 ? (
+        {showFiles && pendingFiles.length > 0 ? (
           <div className="flex flex-wrap gap-1.5 px-2 pt-1 pb-2">
             {pendingFiles.map((f, i) => (
               <span
@@ -69,27 +74,31 @@ export function Composer() {
           </div>
         ) : null}
         <div className="flex items-end gap-1">
-          <input
-            ref={fileRef}
-            type="file"
-            multiple
-            accept="image/*,.pdf,.csv,.txt,.xlsx"
-            className="hidden"
-            onChange={(e) => {
-              const list = e.target.files;
-              if (list?.length) addFiles(Array.from(list));
-              e.target.value = "";
-            }}
-          />
-          <Button
-            variant="icon"
-            size="icon"
-            className="size-11 shrink-0 border-0 bg-transparent"
-            aria-label="Attach files"
-            onClick={() => fileRef.current?.click()}
-          >
-            <Paperclip />
-          </Button>
+          {showFiles ? (
+            <>
+              <input
+                ref={fileRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.csv,.txt,.xlsx"
+                className="hidden"
+                onChange={(e) => {
+                  const list = e.target.files;
+                  if (list?.length) addFiles(Array.from(list));
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="icon"
+                size="icon"
+                className="size-11 shrink-0 border-0 bg-transparent"
+                aria-label="Attach files"
+                onClick={() => fileRef.current?.click()}
+              >
+                <Paperclip />
+              </Button>
+            </>
+          ) : null}
           <textarea
             ref={taRef}
             rows={1}
@@ -98,8 +107,12 @@ export function Composer() {
               grow();
             }}
             onKeyDown={onKey}
-            placeholder="Ask a rule, a payout, or which plan fits you."
-            className="max-h-40 min-h-11 flex-1 resize-none bg-transparent py-3 text-base leading-normal text-fg outline-none placeholder:text-dim desk:text-[15px]"
+            placeholder={
+              surface === "compare"
+                ? "Ask about these firms. Say “check” if you want the live rule."
+                : "Ask a rule, a payout, or which plan fits you. Say “check” to verify live."
+            }
+            className="max-h-40 min-h-11 flex-1 resize-none bg-transparent px-2 py-3 text-base leading-normal text-fg outline-none placeholder:text-dim desk:text-[15px]"
           />
           <Button
             variant="send"

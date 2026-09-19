@@ -1,36 +1,181 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getFirm } from "./engine";
-import { faqPack, firmRoster, firmsMentioned } from "./faq";
+import { compareTable, faqPack, firmRoster, firmsMentioned } from "./faq";
 import { KB } from "./knowledge";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 export type Source = { url: string; title?: string };
+export type DeskMode = "desk" | "compare";
 
-function systemPrompt(firmId: string, messages: ChatTurn[]) {
+function firmDomains(firmId: string): string[] {
   const f = getFirm(firmId);
+  let host = "ftmo.com";
+  try {
+    host = new URL(f.portal).hostname.replace(/^www\./, "");
+  } catch {
+    /* keep default */
+  }
+  const extras: Record<string, string[]> = {
+    ftmo: ["help.ftmo.com"],
+    fundednext: ["help.fundednext.com"],
+    the5ers: ["help.the5ers.com"],
+    topstep: ["help.topstep.com", "www.topstep.com"],
+    apex: ["support.apextraderfunding.com"],
+  };
+  return Array.from(new Set([host, ...(extras[firmId] ?? [])])).slice(0, 4);
+}
+
+function domainsFor(ids: string[]): string[] {
+  return Array.from(new Set(ids.flatMap(firmDomains))).slice(0, 8);
+}
+
+function systemPrompt(mode: DeskMode, firmId: string, firmIds: string[], messages: ChatTurn[]) {
   const blob = messages.map((m) => m.content).join("\n");
-  const extra = firmsMentioned(blob, firmId).filter((id) => id !== firmId);
-  const extraPacks = extra.map((id) => faqPack(id)).join("\n\n");
-  return `You work PropDesk’s FAQ desk for ${f.name}. This is pre-support: you answer questions about how programs work. You do not open tickets, email firms, or compile cases. Support comes later.
+  const mentioned = firmsMentioned(blob, firmId);
+  const packIds =
+    mode === "compare"
+      ? Array.from(new Set([...firmIds, ...mentioned])).slice(0, 4)
+      : Array.from(new Set([firmId, ...mentioned])).slice(0, 4);
+  const packs = packIds.map((id) => faqPack(id)).join("\n\n");
+  const names = packIds.map((id) => getFirm(id).name).join(", ");
+  const table = mode === "compare" ? compareTable(firmIds.length ? firmIds : packIds) : "";
+  const domains = domainsFor(packIds).join(", ");
+
+  if (mode === "compare") {
+    return `You work PropDesk’s compare desk. The trader is looking at ${names} side by side. This is pre-support FAQ — no tickets, no emails to firms.
 
 Your work:
-- Answer every question you can from the FAQ packs below. Prefer that pack over guessing.
-- Cover rules, payouts, drawdown, news, EAs, KYC, which plan fits whom, and comparisons when asked.
-- If the pack does not have a number, say so and tell them to read the live dashboard / current terms. Do not invent fees, free retries, dates, or rules.
-- Do not search the web. Do not give trade signals or lot-size advice.
-- You decide how to speak and what to ask next.
+- Answer questions about these firms using the table and FAQ packs first.
+- Help them choose: ask what they care about (news, US access, payout speed, trailing vs static drawdown, 1-step vs 2-step) if they have not said.
+- If they ask you to check, verify, confirm what is current, or the packs disagree / lack a number, search ${domains} and trust the live page over the pack.
+- Do not search for greetings or questions the pack already covers.
+- Do not invent fees, free retries, dates, or rules. No trade signals.
 
-Selected firm FAQ:
-${faqPack(firmId)}
-${extraPacks ? `\nAlso mentioned:\n${extraPacks}\n` : ""}
-Other firms we cover (use when they ask which to pick):
+Compare snapshot:
+${table}
+
+FAQ packs:
+${packs}
+
+${KB.disclaimer}`;
+  }
+
+  const f = getFirm(firmId);
+  return `You work PropDesk’s FAQ desk for ${f.name}. Pre-support: answer how programs work. No tickets, no emails to firms.
+
+Your work:
+- Answer from the FAQ packs first.
+- Cover rules, payouts, drawdown, news, EAs, KYC, which plan fits, and comparisons when asked.
+- If they ask you to check, verify, confirm what is current, or the pack is silent on a specific number, search ${domains} (official firm domains only) and trust the live page over the pack.
+- Do not search for greetings or questions the pack already covers.
+- Do not invent fees, free retries, dates, or rules. No trade signals.
+- You decide how to speak.
+
+FAQ packs:
+${packs}
+
+Other firms we cover:
 ${firmRoster()}
 
 ${KB.disclaimer}`;
 }
 
+function cleanUrl(raw: string): string | null {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return null;
+    ["gclid", "gbraid", "wbraid", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "_gl", "_gs"].forEach(
+      (k) => u.searchParams.delete(k),
+    );
+    u.hash = "";
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+function collectSources(output: unknown[]): Source[] {
+  const found = new Map<string, Source>();
+  const walk = (node: unknown) => {
+    if (!node || typeof node !== "object") return;
+    const o = node as Record<string, unknown>;
+    const url = typeof o.url === "string" ? o.url : typeof o.uri === "string" ? o.uri : "";
+    if (url.startsWith("https://")) {
+      const cleaned = cleanUrl(url);
+      if (cleaned && !found.has(cleaned)) {
+        found.set(cleaned, {
+          url: cleaned,
+          title: typeof o.title === "string" ? o.title : undefined,
+        });
+      }
+    }
+    for (const v of Object.values(o)) {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") walk(v);
+    }
+  };
+  output.forEach(walk);
+  return [...found.values()].slice(0, 6);
+}
+
+function extractText(output: unknown[]): string {
+  const parts: string[] = [];
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    const o = item as { type?: string; content?: { type?: string; text?: string }[] };
+    if (o.type !== "message" || !Array.isArray(o.content)) continue;
+    for (const c of o.content) {
+      if ((c.type === "output_text" || c.type === "text") && c.text) parts.push(c.text);
+    }
+  }
+  return parts.join("\n").trim();
+}
+
 type GrokOk = { ok: true; text: string; sources: Source[] };
 type GrokErr = { ok: false; error: string };
+
+async function callResponses(
+  apiKey: string,
+  system: string,
+  messages: ChatTurn[],
+  domains: string[],
+): Promise<GrokOk | GrokErr> {
+  const res = await fetch("https://api.x.ai/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    signal: AbortSignal.timeout(15000),
+    body: JSON.stringify({
+      model: "grok-4.5",
+      temperature: 0.4,
+      max_output_tokens: 700,
+      max_tool_calls: 2,
+      tools: [
+        {
+          type: "web_search",
+          filters: { allowed_domains: domains },
+        },
+      ],
+      input: [
+        { role: "system", content: system },
+        ...messages.map((m) => ({
+          role: m.role,
+          content: m.content.slice(0, 2000),
+        })),
+      ],
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    return { ok: false, error: `xAI ${res.status} ${err.slice(0, 180)}` };
+  }
+  const body = (await res.json()) as { output?: unknown[] };
+  const text = extractText(body.output ?? []);
+  if (!text) return { ok: false, error: "empty model reply" };
+  return { ok: true, text, sources: collectSources(body.output ?? []) };
+}
 
 async function callChat(
   apiKey: string,
@@ -69,8 +214,17 @@ async function callChat(
 }
 
 export const completeTicket = createServerFn({ method: "POST" })
-  .validator((input: { firmId: string; messages: ChatTurn[] }) => ({
+  .validator((input: {
+    firmId: string;
+    firmIds?: string[];
+    mode?: DeskMode;
+    messages: ChatTurn[];
+  }) => ({
     firmId: String(input.firmId || "ftmo"),
+    firmIds: Array.isArray(input.firmIds)
+      ? input.firmIds.map(String).slice(0, 4)
+      : [],
+    mode: input.mode === "compare" ? ("compare" as const) : ("desk" as const),
     messages: (input.messages || []).slice(-10).map((m) => ({
       role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
       content: String(m.content || "").slice(0, 2000),
@@ -80,8 +234,21 @@ export const completeTicket = createServerFn({ method: "POST" })
     const apiKey = process.env.XAI_API_KEY || "";
     if (!apiKey) return { ok: false as const, error: "unavailable" };
     if (!data.messages.length) return { ok: false as const, error: "no messages" };
-    const system = systemPrompt(data.firmId, data.messages);
-    const result = await callChat(apiKey, system, data.messages);
+    const ids = data.firmIds.length ? data.firmIds : [data.firmId];
+    const system = systemPrompt(data.mode, data.firmId, ids, data.messages);
+    const domains = domainsFor(ids);
+    let result: GrokOk | GrokErr;
+    try {
+      result = await Promise.race([
+        callResponses(apiKey, system, data.messages, domains),
+        new Promise<GrokErr>((resolve) =>
+          setTimeout(() => resolve({ ok: false, error: "timeout" }), 16000),
+        ),
+      ]);
+    } catch {
+      result = { ok: false, error: "search failed" };
+    }
+    if (!result.ok) result = await callChat(apiKey, system, data.messages);
     return result.ok
       ? { ok: true as const, text: result.text, sources: result.sources }
       : { ok: false as const, error: result.error };

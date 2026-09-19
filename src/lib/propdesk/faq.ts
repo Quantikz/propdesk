@@ -142,3 +142,29 @@ export const COMPARE_ROWS: { key: string; label: string; value: (id: string) => 
   { key: "size", label: "Size path", value: (id) => getFirm(id).maxAccount },
   { key: "best", label: "Best for", value: (id) => getFirm(id).notes },
 ];
+
+export function compareTable(ids: string[]): string {
+  const firms = ids.map((id) => getFirm(id));
+  return COMPARE_ROWS.map((row) => {
+    const cells = firms.map((f) => `${f.short}: ${row.value(f.id)}`).join(" | ");
+    return `${row.label} — ${cells}`;
+  }).join("\n");
+}
+
+export const COMPARE_PROMPTS = [
+  {
+    title: "Who is stricter?",
+    blurb: "Daily and max loss",
+    prompt: "Of the firms I have selected, who is stricter on daily and max drawdown, and what actually counts (equity vs EOD)? Check if the pack is vague.",
+  },
+  {
+    title: "I trade news",
+    blurb: "Who actually allows it",
+    prompt: "I trade news. Of these firms, who actually allows it on a funded account, and who has a window I need to respect? Check the current rule if you need to.",
+  },
+  {
+    title: "Payouts",
+    blurb: "Speed and first payout",
+    prompt: "Compare payout speed, split, and what I need before the first payout on these firms.",
+  },
+] as const;
