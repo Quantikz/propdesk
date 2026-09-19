@@ -37,15 +37,24 @@ Paste this once:
 
 ```bash
 pkg update -y && pkg install -y git
-curl -fsSL https://raw.githubusercontent.com/Quantikz/propdesk/main/termux-run.sh -o ~/propdesk-run.sh
-chmod +x ~/propdesk-run.sh
-bash ~/propdesk-run.sh
+cd $HOME
+curl -fsSL https://raw.githubusercontent.com/Quantikz/propdesk/main/termux-run.sh -o propdesk-run.sh
+chmod +x propdesk-run.sh
+bash propdesk-run.sh
+```
+
+If you already cloned the repo:
+
+```bash
+cd $HOME/propdesk
+git pull
+bash termux-run.sh
 ```
 
 Next times:
 
 ```bash
-bash ~/propdesk-run.sh
+bash $HOME/propdesk-run.sh
 ```
 
 On this phone open **http://127.0.0.1:8080**. The script also prints a Wi-Fi address (`http://YOUR-PHONE-IP:8080`) so a laptop on the same network can open it.
