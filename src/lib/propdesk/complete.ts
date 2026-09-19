@@ -11,6 +11,18 @@ export type DeskMode = "desk" | "compare";
 const GROQ_CHAT = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_UA = "PropDesk/1.0 (+https://propdesk-beta.vercel.app)";
 
+function stripProcessTalk(text: string) {
+  const drop =
+    /^(the faq packs are vague|to give you (an |the )?(accurate |exact )?answer|i(?:'m| am) (checking|looking|searching|verifying)|let me (check|verify|look|search|open)|i need to check|correction\s*\/\s*refinement)/i;
+  return text
+    .split(/\n{2,}/)
+    .filter((p) => !drop.test(p.trim()))
+    .join("\n\n")
+    .replace(/\bI am checking[^.]*\./gi, "")
+    .replace(/\bLet me verify[^.]*\./gi, "")
+    .trim();
+}
+
 function lastUserText(messages: ChatTurn[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i]?.role === "user") return messages[i].content;
@@ -85,9 +97,9 @@ Payout trackers (use for last-month / count / largest / processing time — quot
 
 Never mix 1-step, 2-step, instant, and futures SKUs. Ask which plan they bought if it changes the answer.
 
-Voice: plain speech, short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. No fake leaderboards. No trade signals.
+Voice: you are the desk. Answer in one pass. Never describe process. Never say you are checking, searching, looking, verifying, or that the pack is vague. Never say “I need to check” or “let me verify.” If a live page was used, just state the rule — do not announce it. No “typically / usually / often” when the pack has a number. If SKUs differ, name each SKU and its number. Short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. No fake leaderboards. No trade signals.
 
-${live ? "Search now. Then answer. Do not say you will look later." : "Answer from the pack. You may still mention the official URL if they should confirm a number."}
+${live ? "Use official pages if the pack is silent, then answer. Do not mention the search." : "Answer from the pack. Name the official URL only if they should confirm a number."}
 
 ${mode === "compare" ? `Compare snapshot:\n${table}\n` : ""}FAQ packs (background; live pages win):
 ${packs}
@@ -335,25 +347,12 @@ async function callGroq(
     if (searched.ok) return searched;
   }
 
-  const packed = await groqRequest(
-    apiKey,
-    {
-      model: "qwen/qwen3.8-27b",
-      temperature: 0.3,
-      max_tokens: 900,
-      disable_tool_validation: true,
-      messages: packMessages,
-    },
-    15000,
-  );
-  if (packed.ok) return packed;
-
   const withSearch = await groqRequest(
     apiKey,
     {
       model: "openai/gpt-oss-20b",
       temperature: 0.3,
-      max_completion_tokens: 1200,
+      max_completion_tokens: 700,
       reasoning_effort: "low",
       tools: [{ type: "browser_search" }],
       messages: [{ role: "system", content: system.slice(0, 7000) }, ...turns],
@@ -361,6 +360,19 @@ async function callGroq(
     25000,
   );
   if (withSearch.ok) return withSearch;
+
+  const packed = await groqRequest(
+    apiKey,
+    {
+      model: "qwen/qwen3.8-27b",
+      temperature: 0.3,
+      max_tokens: 500,
+      disable_tool_validation: true,
+      messages: packMessages,
+    },
+    15000,
+  );
+  if (packed.ok) return packed;
 
   return groqRequest(
     apiKey,
@@ -439,7 +451,7 @@ export const completeTicket = createServerFn({ method: "POST" })
 
     const ids = orderFirmIds(data.firmIds.length ? data.firmIds : [data.firmId]);
     const q = lastUserText(data.messages);
-    const live = data.mode === "compare" || needsWebSearch(q);
+    const live = needsWebSearch(q);
     const openWeb = needsWebSearch(q);
     const system = systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, live);
 
@@ -471,6 +483,6 @@ export const completeTicket = createServerFn({ method: "POST" })
     }
 
     return result.ok
-      ? { ok: true as const, text: result.text, sources: result.sources }
+      ? { ok: true as const, text: stripProcessTalk(result.text) || result.text, sources: result.sources }
       : { ok: false as const, error: "unavailable" };
   });
