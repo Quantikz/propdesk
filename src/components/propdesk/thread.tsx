@@ -38,15 +38,9 @@ export function Thread() {
         ) : (
           <div>
             {messages.map((m, i) => (
-              <div key={`${m.ts}-${i}`} className={i > 0 ? "border-t border-border/70" : undefined}>
-                <MessageBubble message={m} />
-              </div>
+              <MessageBubble key={`${m.ts}-${i}`} message={m} />
             ))}
-            {sending ? (
-              <div className="border-t border-border/70">
-                <TypingRow />
-              </div>
-            ) : null}
+            {sending ? <TypingRow /> : null}
           </div>
         )}
       </div>

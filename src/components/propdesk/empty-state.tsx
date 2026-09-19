@@ -10,15 +10,14 @@ export function EmptyState() {
 
   return (
     <div className="flex w-full flex-1 flex-col justify-start px-1 desk:justify-center">
-      <p className="font-mono text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} desk</p>
-      <h2 className="mt-2 max-w-lg text-2xl font-semibold tracking-tight desk:text-[1.75rem]">
+      <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · 24/7</p>
+      <h2 className="font-display mt-2 max-w-lg text-2xl font-semibold tracking-tight desk:text-[1.85rem]">
         What happened on the {firm.name} account?
       </h2>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted">
-        Ask a rule. Live searches the firm’s site. FAQ uses the snapshot. Escalate only
-        with screenshots.
+        Open around the clock. Replies in seconds. Tell it in your words — I’ll follow from there.
       </p>
-      <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2">
+      <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
         {SUGGESTS.map((s) => (
           <button
             key={s.title}

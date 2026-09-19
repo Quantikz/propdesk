@@ -118,16 +118,21 @@ export function think(
   files: FileRef[],
   email: string,
   accountId: string,
+  priorUserTurns = 0,
 ): EngineReply {
   const { intent, topic, selfHit } = classify(userText, files.length > 0);
+  const trimmed = userText.trim();
+  const greet =
+    /^(hi|hello|hey|yo|sup|hiya|good\s+(morning|afternoon|evening)|help|please help|what can you do)[\s!.?]*$/i.test(
+      trimmed,
+    );
 
   if (intent === "escalate") {
     const draft = buildCase(firm, userText, files, email, accountId);
     return {
       text:
-        `I treated this as a firm-side issue because you described an operational failure and attached evidence.\n\n` +
-        `I will not argue trading performance. I compiled a case for ${firm.name} support (${firm.supportEmail}) with your email as the reply-to so they talk to you, not to this desk.\n\n` +
-        `Review the draft below. Send it only if the facts are accurate. Attach the same files to the email — mailbox drafts cannot carry browser uploads automatically.\n\n` +
+        `I’ve treated this as a firm-side issue because you described an operational failure and attached evidence.\n\n` +
+        `I compiled a letter to ${firm.name} support (${firm.supportEmail}) with you as reply-to. Read it. Send it only if the facts are right, and attach the same files to the email.\n\n` +
         KB.disclaimer,
       chips: [
         { text: "Firm-fault path", tone: "bad" },
@@ -141,18 +146,21 @@ export function think(
   if (intent === "need_evidence") {
     return {
       text:
-        `This sounds like it could be on ${firm.name} — but I will not email them without evidence. Empty accusations get ignored and can flag your profile.\n\n` +
-        `Attach at least two of:\n` +
-        `• Dashboard screenshot showing the rule / payout status\n` +
-        `• Account statement or trade list with server timestamps\n` +
-        `• Denial / breach email with the exact wording\n` +
-        `• Payment receipt if this is a double charge or missing account\n\n` +
-        `Also confirm your email and account ID in the menu so the case has a reply path.\n\n` +
-        `Then resend the same description. If the facts hold, I will compile and open an email to ${firm.supportEmail}.`,
+        `That could be on ${firm.name} — I’m not writing to them yet.\n\n` +
+        `Tell me the sequence first: what you saw, roughly when, and the exact wording on the page or email. If you already have that screen, attach it. I’ll only ask for account details if we actually send a case.`,
       chips: [
-        { text: "Evidence required", tone: "warn" },
+        { text: "Tell me more", tone: "warn" },
         { text: firm.short, tone: "" },
       ],
+    };
+  }
+
+  if (greet || (!topic && priorUserTurns <= 1)) {
+    return {
+      text:
+        `I’m here. What happened on the ${firm.name} account?\n\n` +
+        `Start from what you saw — a number that looked wrong, a payout that didn’t land, a breach you didn’t expect. I’ll ask for screenshots only if we need to write to the firm.`,
+      chips: [{ text: "Listening", tone: "ok" }],
     };
   }
 
@@ -160,7 +168,9 @@ export function think(
     let extra = "";
     if (selfHit) {
       extra =
-        "\n\nFrom what you wrote, this looks like a rule you triggered — not a back-office error. I can still explain the rule and the cleanest next step. I will not email the firm just to relitigate a loss.";
+        "\n\nFrom what you wrote this sounds like a rule you hit, not a back-office error. I can still walk the rule. I won’t email the firm just to relitigate a loss.";
+    } else {
+      extra = "\n\nIf that’s not the screen you’re on, paste what it actually says.";
     }
     return {
       text: topic.answer(firm) + extra,
@@ -173,11 +183,9 @@ export function think(
 
   return {
     text:
-      `I need two things to answer this for ${firm.name}:\n` +
-      `1. Exact plan name (from the dashboard, not the ad)\n` +
-      `2. What the dashboard or email actually says — paste it\n\n` +
-      `If this is an operational fault, attach screenshots. I only escalate with evidence.`,
-    chips: [{ text: "Need a bit more", tone: "warn" }],
+      `I’ve got that. What did the dashboard or the email actually say — the wording, not a summary?\n\n` +
+      `That’s enough for the next step. Screenshots only if you want this written to ${firm.name}.`,
+    chips: [{ text: "One more beat", tone: "warn" }],
   };
 }
 
@@ -203,19 +211,16 @@ export const SUGGESTS = [
   {
     title: "Payout past SLA",
     blurb: "Approved, still not paid",
-    prompt:
-      "My payout has been approved for more than the published SLA and I still have not received funds. I have the approval screenshot.",
+    prompt: "My payout was approved and I still have not received the funds. I want to understand what should happen next.",
   },
   {
     title: "Payout denied",
     blurb: "Consistency or min days?",
-    prompt:
-      "They denied my payout citing consistency. Explain the rule and whether I should keep trading or escalate.",
+    prompt: "They denied my payout citing consistency. Can you walk me through that rule?",
   },
   {
-    title: "Platform outage breach",
-    blurb: "Escalate with evidence",
-    prompt:
-      "I was breached during a platform outage. I have logs and screenshots. This is the firm's fault.",
+    title: "Platform outage",
+    blurb: "Breached while it was down",
+    prompt: "I was breached while the platform was having issues. I want to talk through what happened before we decide anything.",
   },
 ] as const;

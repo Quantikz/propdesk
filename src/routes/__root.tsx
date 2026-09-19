@@ -19,9 +19,9 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Independent support desk for prop-firm traders. Live answers from the firm's current rules, escalate only with evidence.",
+          "Independent prop-firm support desk. Open 24/7. Replies in seconds.",
       },
-      { name: "theme-color", content: "#0c0d10" },
+      { name: "theme-color", content: "#141210" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
     ],
     links: [
@@ -33,7 +33,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap",
       },
     ],
   }),

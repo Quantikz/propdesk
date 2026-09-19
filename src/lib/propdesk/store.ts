@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Chat, ChatMessage, PendingFile } from "./types";
-import { completeTicket, getAiStatus } from "./complete";
-import { classify, getFirm, isValidEmail, think, type EngineReply } from "./engine";
+import { completeTicket } from "./complete";
+import { buildCase, classify, getFirm, isValidEmail } from "./engine";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -19,9 +19,6 @@ type DeskState = {
   sidebarOpen: boolean;
   profileOpen: boolean;
   profileForce: boolean;
-  aiOpen: boolean;
-  liveAi: boolean;
-  clientKey: string;
   toast: string | null;
   setFirm: (id: string) => void;
   setEmail: (v: string) => void;
@@ -30,10 +27,6 @@ type DeskState = {
   openProfile: (force?: boolean) => void;
   closeProfile: () => void;
   saveProfile: (email: string, accountId: string) => void;
-  openAi: () => void;
-  closeAi: () => void;
-  setLiveAi: (v: boolean) => void;
-  setClientKey: (v: string) => void;
   showToast: (msg: string) => void;
   newChat: () => void;
   openChat: (id: string) => void;
@@ -58,9 +51,6 @@ export const useDeskStore = create<DeskState>()(
       sidebarOpen: false,
       profileOpen: false,
       profileForce: false,
-      aiOpen: false,
-      liveAi: true,
-      clientKey: "",
       toast: null,
 
       setFirm: (id) => {
@@ -80,24 +70,6 @@ export const useDeskStore = create<DeskState>()(
           profileOpen: false,
           profileForce: false,
         }),
-      openAi: () => set({ aiOpen: true, sidebarOpen: false }),
-      closeAi: () => set({ aiOpen: false }),
-      setLiveAi: (v) => {
-        set({ liveAi: v });
-        get().showToast(v ? "Live on — searches the firm site" : "FAQ on — snapshot only");
-        if (v && !get().clientKey) {
-          void getAiStatus()
-            .then((s) => {
-              if (!s.hosted) get().openAi();
-            })
-            .catch(() => get().openAi());
-        }
-      },
-      setClientKey: (v) => {
-        const key = v.trim();
-        set({ clientKey: key.startsWith("xai-") ? key : "" });
-        if (key.startsWith("xai-")) get().showToast("xAI key saved on this device");
-      },
       showToast: (msg) => {
         if (toastTimer) clearTimeout(toastTimer);
         set({ toast: msg });
@@ -181,61 +153,42 @@ export const useDeskStore = create<DeskState>()(
           const firm = getFirm(get().firmId);
           const email = get().email;
           const accountId = get().accountId;
-          let reply: EngineReply | null = null;
+          const history =
+            get()
+              .chats.find((c) => c.id === chatId)
+              ?.messages.map((m) => ({ role: m.role, content: m.content })) ?? [];
 
-          const useLive = get().liveAi && intent !== "escalate";
+          const out = await completeTicket({
+            data: {
+              firmId: firm.id,
+              email,
+              accountId,
+              files: files.map((f) => f.name),
+              messages: history,
+            },
+          });
 
-          if (useLive) {
-            const history =
-              get()
-                .chats.find((c) => c.id === chatId)
-                ?.messages.map((m) => ({ role: m.role, content: m.content })) ?? [];
-            const out = await completeTicket({
-              data: {
-                firmId: firm.id,
-                email,
-                accountId,
-                files: files.map((f) => f.name),
-                messages: history,
-                clientKey: get().clientKey,
-              },
-            });
-            if (out.ok) {
-              reply = {
-                text: out.text,
-                chips: [
-                  { text: out.sources?.length ? "Live site" : "Live", tone: "ok" },
-                  { text: firm.short, tone: "" },
-                ],
+          const assistant: ChatMessage = out.ok
+            ? {
+                role: "assistant",
+                content: out.text,
+                chips: out.sources?.length
+                  ? [{ text: "From the site", tone: "ok" }, { text: firm.short, tone: "" }]
+                  : [{ text: firm.short, tone: "" }],
                 sources: out.sources ?? [],
+                caseDraft:
+                  intent === "escalate" && files.length > 0
+                    ? buildCase(firm, text, files, email, accountId)
+                    : null,
+                ts: Date.now(),
+              }
+            : {
+                role: "assistant",
+                content: "I missed that — send it once more.",
+                chips: [{ text: firm.short, tone: "warn" }],
+                ts: Date.now(),
               };
-            } else if (out.error === "AI is not available") {
-              get().openAi();
-              get().showToast("Live needs an xAI key on this device");
-              reply = {
-                text: "Live is on, but this device has no xAI key — so I cannot search the firm site.\n\nPaste a key in Answer mode, or tap FAQ and ask again for the snapshot engine.",
-                chips: [
-                  { text: "No key", tone: "warn" },
-                  { text: firm.short, tone: "" },
-                ],
-              };
-            }
-          }
 
-          if (!reply) {
-            if (useLive) get().showToast("Live search missed — FAQ snapshot");
-            else await new Promise((r) => setTimeout(r, 280));
-            reply = think(firm, text, files, email, accountId);
-          }
-
-          const assistant: ChatMessage = {
-            role: "assistant",
-            content: reply.text,
-            chips: reply.chips,
-            caseDraft: reply.caseDraft ?? null,
-            sources: reply.sources,
-            ts: Date.now(),
-          };
           set({
             chats: get().chats.map((c) =>
               c.id === chatId ? { ...c, messages: [...c.messages, assistant] } : c,
@@ -243,14 +196,14 @@ export const useDeskStore = create<DeskState>()(
           });
         } catch (err) {
           console.error(err);
-          get().showToast("Could not draft a reply. Try again.");
+          get().showToast("Could not send. Try again.");
         } finally {
           set({ sending: false });
         }
       },
     }),
     {
-      name: "propdesk-v1",
+      name: "propdesk-v2",
       skipHydration: true,
       partialize: (s) => ({
         firmId: s.firmId,
@@ -258,8 +211,6 @@ export const useDeskStore = create<DeskState>()(
         accountId: s.accountId,
         chats: s.chats,
         activeId: s.activeId,
-        liveAi: s.liveAi,
-        clientKey: s.clientKey,
       }),
     },
   ),

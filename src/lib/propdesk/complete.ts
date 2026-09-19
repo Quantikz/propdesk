@@ -45,27 +45,26 @@ function firmBrief(firmId: string) {
 function systemPrompt(firmId: string, email: string, accountId: string, files: string[]) {
   const f = getFirm(firmId);
   const domains = firmDomains(firmId);
-  return `You are PropDesk, an independent support agent for ${f.name} traders.
+  return `You work PropDesk, an independent support desk for traders at ${f.name}. You are not ${f.name}, not a lawyer, and not the firm's staff.
 
-Voice: short, direct, accurate. Lead with the ruling in the first sentence. Then 2–5 bullets of what to do next. No filler. Do not use [1] footnote markers — sources render separately.
-
-How to know things:
-- Use web search on ${domains.join(", ")}. Open the official FAQ / terms page before answering a rule question.
-- Trust the live page over the snapshot below. If they disagree, follow the site and say so.
-- If a number is plan-specific, say "check the live dashboard card" instead of guessing.
-- Never invent a free retry, refund, payout date, or a rule that is not on the site or snapshot.
+Your work:
+- Hear the trader. Find out what happened before you conclude anything.
+- When a rule, payout, drawdown, news, EA, KYC, or terms question is in play, look it up on ${domains.join(", ")}. The live site beats the snapshot below.
+- Explain what the current rules mean for this person.
+- Draft a case the trader can send to ${f.name} support (${f.supportEmail}) only when the firm itself is at fault and there is evidence. Firm-fault means: figures that do not match the dashboard, an approved payout that has not been paid past the SLA, a breach caused by an outage, a charge for an account that was never issued, or a penalty that is not in the current terms.
+- Ordinary losses, daily drawdown hits, consistency parks, requesting payout too early, and unfinished KYC stay with the trader. You still explain them.
+- Do not invent money, retries, dates, or rules that are not on the site.
 - Do not give trade signals or lot-size advice.
 
-Firm snapshot (may be stale):
+You decide how to speak, what to ask next, and when you have enough to act.
+
+On file:
+- Email: ${email || "not given"}
+- Account / login: ${accountId || "not given"}
+- Files this turn: ${files.length ? files.join(", ") : "none"}
+
+Snapshot of ${f.name} (may be stale — search the site):
 ${firmBrief(firmId)}
-
-Trader email (reply-to): ${email || "(not set)"}
-Account / login ID: ${accountId || "(not set)"}
-Attached this turn: ${files.length ? files.join(", ") : "(none)"}
-
-Escalate by compiling a case ONLY for firm-side operational fault with evidence. Never escalate normal rule breaches, consistency parks, early payouts, or incomplete KYC.
-
-If they greet or are vague, ask 2 sharp questions for ${f.name}: plan name, and what the dashboard actually shows.
 
 ${KB.disclaimer}`;
 }
@@ -154,7 +153,7 @@ async function callResponses(
     },
     body: JSON.stringify({
       model: "grok-4.5",
-      temperature: 0.2,
+      temperature: 0.55,
       max_output_tokens: 700,
       max_tool_calls: 4,
       tools: [
@@ -195,7 +194,7 @@ async function callChatFallback(
     },
     body: JSON.stringify({
       model: "grok-4.5",
-      temperature: 0.2,
+      temperature: 0.55,
       max_tokens: 700,
       messages: [
         { role: "system", content: system },
@@ -225,7 +224,6 @@ export const completeTicket = createServerFn({ method: "POST" })
     accountId: string;
     files: string[];
     messages: ChatTurn[];
-    clientKey?: string;
   }) => ({
     firmId: String(input.firmId || "ftmo"),
     email: String(input.email || "").slice(0, 200),
@@ -235,12 +233,9 @@ export const completeTicket = createServerFn({ method: "POST" })
       role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
       content: String(m.content || "").slice(0, 2000),
     })),
-    clientKey: String(input.clientKey || "").slice(0, 200),
   }))
   .handler(async ({ data }) => {
-    const hosted = process.env.XAI_API_KEY || "";
-    const pasted = data.clientKey.startsWith("xai-") ? data.clientKey : "";
-    const apiKey = hosted || pasted;
+    const apiKey = process.env.XAI_API_KEY || "";
     if (!apiKey) return { ok: false as const, error: "AI is not available" };
     if (!data.messages.length) return { ok: false as const, error: "no messages" };
 

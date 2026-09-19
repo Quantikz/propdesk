@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { AiDialog } from "@/components/propdesk/ai-dialog";
 import { Composer } from "@/components/propdesk/composer";
 import { ProfileDialog } from "@/components/propdesk/profile-dialog";
 import { Sidebar } from "@/components/propdesk/sidebar";
@@ -74,7 +73,6 @@ export function AppShell() {
       </section>
 
       <ProfileDialog />
-      <AiDialog />
 
       <div
         role="status"

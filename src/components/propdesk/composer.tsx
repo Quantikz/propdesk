@@ -98,7 +98,7 @@ export function Composer() {
               grow();
             }}
             onKeyDown={onKey}
-            placeholder="Ask the rule. Attach screenshots if the firm is at fault."
+            placeholder="What happened? Write it in your words."
             className="max-h-40 min-h-11 flex-1 resize-none bg-transparent py-3 text-base leading-normal text-fg outline-none placeholder:text-dim desk:text-[15px]"
           />
           <Button

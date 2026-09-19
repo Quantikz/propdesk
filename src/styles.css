@@ -1,38 +1,44 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@import "tailwindcss";
+@import "tw-animate-css";
+
 @theme {
-  --font-sans: "IBM Plex Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Source Sans 3", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --color-bg: #0c0d10;
-  --color-sidebar: #090a0c;
-  --color-hover: #17191f;
-  --color-input: #12141a;
-  --color-elev: #12141a;
-  --color-line: #2a2e38;
-  --color-fg: #eceef2;
-  --color-muted: #9aa0aa;
-  --color-dim: #6d7380;
-  --color-accent: #d4d8e0;
-  --color-accent-hover: #e8eaee;
-  --color-accent-fg: #0c0d10;
-  --color-border: #1e222b;
+  --color-bg: #141210;
+  --color-sidebar: #100e0c;
+  --color-hover: #1e1b17;
+  --color-input: #1a1714;
+  --color-elev: #1a1714;
+  --color-line: #322d27;
+  --color-fg: #f1ece3;
+  --color-muted: #a39b8e;
+  --color-dim: #746c62;
+  --color-paper: #efe6d4;
+  --color-ink: #161310;
+  --color-accent: #efe6d4;
+  --color-accent-hover: #f6f0e4;
+  --color-accent-fg: #161310;
+  --color-border: #2a261f;
   --color-ok: #7d9e78;
   --color-warn: #c4b07a;
   --color-bad: #c47a72;
-  --color-user-av: #1c1f27;
+  --color-user-av: #2a261f;
 
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --radius-xl: 10px;
-  --radius-2xl: 12px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
 
   --breakpoint-desk: 56.25rem;
 
   --shadow-border: 0 0 0 1px color-mix(in srgb, var(--color-fg) 10%, transparent);
-  --shadow-border-hover: 0 0 0 1px color-mix(in srgb, var(--color-fg) 22%, transparent);
+  --shadow-border-hover: 0 0 0 1px color-mix(in srgb, var(--color-fg) 20%, transparent);
   --shadow-composer: none;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -70,6 +76,7 @@
   h1,
   h2,
   h3 {
+    font-family: var(--font-display);
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
