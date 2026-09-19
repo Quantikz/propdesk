@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Chat, ChatMessage, PendingFile } from "./types";
 import { completeTicket } from "./complete";
-import { buildCase, classify, getFirm, isValidEmail } from "./engine";
+import { getFirm } from "./engine";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -144,15 +144,8 @@ export const useDeskStore = create<DeskState>()(
 
         set({ chats, activeId: chatId, pendingFiles: [], sending: true, sidebarOpen: false });
 
-        const { intent } = classify(text, files.length > 0);
-        if (intent === "escalate" && !isValidEmail(get().email)) {
-          set({ profileOpen: true, profileForce: true });
-        }
-
         try {
           const firm = getFirm(get().firmId);
-          const email = get().email;
-          const accountId = get().accountId;
           const history =
             get()
               .chats.find((c) => c.id === chatId)
@@ -161,9 +154,6 @@ export const useDeskStore = create<DeskState>()(
           const out = await completeTicket({
             data: {
               firmId: firm.id,
-              email,
-              accountId,
-              files: files.map((f) => f.name),
               messages: history,
             },
           });
@@ -172,14 +162,7 @@ export const useDeskStore = create<DeskState>()(
             ? {
                 role: "assistant",
                 content: out.text,
-                chips: out.sources?.length
-                  ? [{ text: "From the site", tone: "ok" }, { text: firm.short, tone: "" }]
-                  : [{ text: firm.short, tone: "" }],
-                sources: out.sources ?? [],
-                caseDraft:
-                  intent === "escalate" && files.length > 0
-                    ? buildCase(firm, text, files, email, accountId)
-                    : null,
+                chips: [{ text: firm.short, tone: "" }],
                 ts: Date.now(),
               }
             : {

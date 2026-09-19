@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getFirm } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 
-export function Topbar() {
+export function Topbar({ comparing = false }: { comparing?: boolean }) {
   const firmId = useDeskStore((s) => s.firmId);
   const setSidebarOpen = useDeskStore((s) => s.setSidebarOpen);
   const openProfile = useDeskStore((s) => s.openProfile);
@@ -28,7 +28,7 @@ export function Topbar() {
             aria-hidden
           />
           <span className="truncate font-display text-sm font-semibold desk:text-base">
-            {firm.short}
+            {comparing ? "Compare" : firm.short}
             <span className="ml-1.5 font-sans font-medium text-dim">24/7</span>
           </span>
         </div>

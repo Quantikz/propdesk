@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { SUGGESTS, getFirm } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 
@@ -10,13 +11,20 @@ export function EmptyState() {
 
   return (
     <div className="flex w-full flex-1 flex-col justify-start px-1 desk:justify-center">
-      <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · 24/7</p>
+      <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · 24/7 FAQ</p>
       <h2 className="font-display mt-2 max-w-lg text-2xl font-semibold tracking-tight desk:text-[1.85rem]">
-        What happened on the {firm.name} account?
+        Ask anything about {firm.name}
       </h2>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted">
-        Open around the clock. Replies in seconds. Tell it in your words — I’ll follow from there.
+        Open around the clock. Replies in seconds. Rules, payouts, drawdown, which plan
+        fits you. This desk answers questions — tickets come later.
       </p>
+      <Link
+        to="/compare"
+        className="mt-4 inline-flex min-h-11 w-fit items-center rounded-md border border-line bg-elev px-3.5 text-sm font-medium hover:bg-hover"
+      >
+        Compare firms
+      </Link>
       <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
         {SUGGESTS.map((s) => (
           <button

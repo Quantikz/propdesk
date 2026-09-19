@@ -1,16 +1,14 @@
 # PropDesk
 
-Independent support desk for prop-firm traders. Open 24/7. Replies in seconds.
+Independent FAQ desk for prop-firm traders. Open 24/7. Replies in seconds. Compare firms side by side.
 
 Covers FTMO, FundedNext, The5ers, FundingPips, E8, Goat Funded Trader, Alpha Capital, Apex, Topstep, and Instant Funding.
 
 ## What it does
 
-- Hears what happened, then checks the selected firm’s current rules on their official site.
-- Escalates only for **firm-side operational fault** with evidence (wrong calc vs dashboard, approved payout past SLA, outage-caused breach, fee with no account, rule not in terms).
-- Compiles a letter and opens email to the firm’s support inbox with the trader on CC.
-
-It will not email the firm for ordinary rule breaches (daily loss, consistency parks, early payouts, incomplete KYC).
+- Answers program questions from a packed FAQ per firm (drawdown, payouts, news, EAs, KYC, which plan fits).
+- Does **not** open tickets or email firms yet — that comes later.
+- Compare two to four firms on the rules that actually differ.
 
 ## Stack
 

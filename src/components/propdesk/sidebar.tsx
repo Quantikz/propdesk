@@ -1,4 +1,5 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Columns2, Plus, Trash2 } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,10 @@ export function Sidebar({
   const openProfile = useDeskStore((s) => s.openProfile);
 
   const initial = (email || "T").trim()[0]?.toUpperCase() || "T";
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const onDesk = path === "/";
+  const onCompare = path.startsWith("/compare");
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-sidebar">
@@ -45,6 +50,7 @@ export function Sidebar({
           className="min-h-11 flex-1"
           onClick={() => {
             newChat();
+            void navigate({ to: "/" });
             onNavigate?.();
           }}
         >
@@ -52,6 +58,30 @@ export function Sidebar({
           New ticket
         </Button>
       </div>
+
+      <nav className="flex shrink-0 flex-col gap-1 px-3 pb-3">
+        <Link
+          to="/"
+          onClick={onNavigate}
+          className={cn(
+            "flex min-h-11 items-center rounded-md px-3 text-sm font-medium",
+            onDesk ? "bg-hover text-fg" : "text-muted hover:text-fg",
+          )}
+        >
+          Desk
+        </Link>
+        <Link
+          to="/compare"
+          onClick={onNavigate}
+          className={cn(
+            "flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium",
+            onCompare ? "bg-hover text-fg" : "text-muted hover:text-fg",
+          )}
+        >
+          <Columns2 className="size-4" />
+          Compare firms
+        </Link>
+      </nav>
 
       <div className="shrink-0 px-3 pb-3">
         <Label htmlFor={`${idPrefix}-firmSelect`}>Prop firm</Label>

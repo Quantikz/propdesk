@@ -204,23 +204,23 @@ export function downloadCase(draft: CaseDraft) {
 
 export const SUGGESTS = [
   {
-    title: "Daily drawdown rules",
-    blurb: "Does floating loss count against me?",
-    prompt: "What is the daily drawdown on my account and does floating loss count?",
+    title: "Daily drawdown",
+    blurb: "Does floating loss count?",
+    prompt: "How does daily drawdown work on this firm, and does floating loss count?",
   },
   {
-    title: "Payout past SLA",
-    blurb: "Approved, still not paid",
-    prompt: "My payout was approved and I still have not received the funds. I want to understand what should happen next.",
+    title: "Payouts",
+    blurb: "Split, timing, first payout",
+    prompt: "How do payouts work here — split, how often, and what I need before the first one?",
   },
   {
-    title: "Payout denied",
-    blurb: "Consistency or min days?",
-    prompt: "They denied my payout citing consistency. Can you walk me through that rule?",
+    title: "News and EAs",
+    blurb: "What is actually allowed?",
+    prompt: "Can I trade news and use an EA on this plan? What gets accounts flagged?",
   },
   {
-    title: "Platform outage",
-    blurb: "Breached while it was down",
-    prompt: "I was breached while the platform was having issues. I want to talk through what happened before we decide anything.",
+    title: "Which plan fits",
+    blurb: "1-step, 2-step, or instant",
+    prompt: "I am trying to pick a plan. Help me understand 1-step vs 2-step vs instant on this firm, and when another firm would fit better.",
   },
 ] as const;

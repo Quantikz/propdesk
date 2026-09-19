@@ -98,7 +98,7 @@ export function Composer() {
               grow();
             }}
             onKeyDown={onKey}
-            placeholder="What happened? Write it in your words."
+            placeholder="Ask a rule, a payout, or which plan fits you."
             className="max-h-40 min-h-11 flex-1 resize-none bg-transparent py-3 text-base leading-normal text-fg outline-none placeholder:text-dim desk:text-[15px]"
           />
           <Button

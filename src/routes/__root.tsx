@@ -19,7 +19,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Independent prop-firm support desk. Open 24/7. Replies in seconds.",
+          "Independent prop-firm FAQ desk. Open 24/7. Replies in seconds. Compare firms.",
       },
       { name: "theme-color", content: "#141210" },
       { name: "apple-mobile-web-app-capable", content: "yes" },

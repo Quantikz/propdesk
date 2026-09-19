@@ -32,9 +32,7 @@ export function ProfileDialog() {
       <DialogContent>
         <DialogTitle className="pr-10 text-lg font-semibold">Trader profile</DialogTitle>
         <DialogDescription className="mt-1 mb-4 text-[13px] leading-relaxed text-muted">
-          {force
-            ? "Add a real email before I send anything to the firm. They need a reply path."
-            : "Used as reply-to on every escalation email."}
+          Optional. Saved on this device for when tickets exist. Not required for FAQ.
         </DialogDescription>
         <div className="grid gap-3">
           <div>

@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useRouterState } from "@tanstack/react-router";
+import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
 import { ProfileDialog } from "@/components/propdesk/profile-dialog";
 import { Sidebar } from "@/components/propdesk/sidebar";
@@ -15,6 +17,8 @@ export function AppShell() {
   const toast = useDeskStore((s) => s.toast);
   const firmId = useDeskStore((s) => s.firmId);
   const firm = getFirm(firmId);
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const comparing = path.startsWith("/compare");
 
   useEffect(() => {
     void useDeskStore.persist.rehydrate();
@@ -67,9 +71,15 @@ export function AppShell() {
       </aside>
 
       <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-l-2 border-l-[var(--firm)]">
-        <Topbar />
-        <Thread />
-        <Composer />
+        <Topbar comparing={comparing} />
+        {comparing ? (
+          <CompareView />
+        ) : (
+          <>
+            <Thread />
+            <Composer />
+          </>
+        )}
       </section>
 
       <ProfileDialog />
