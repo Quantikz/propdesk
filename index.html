@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>PropDesk — AI support for prop firm traders</title>
-  <meta name="description" content="ChatGPT-style support desk for FTMO, FundedNext, Apex and other prop firms. FAQ answers first. Firm-fault cases emailed with evidence." />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="mobile.css" />
 </head>
 <body>
   <div class="app">
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
     <aside class="sidebar" id="sidebar">
       <div class="side-top">
         <button class="btn btn-new" id="newChatBtn" type="button">＋ New ticket</button>
@@ -47,10 +48,13 @@
     </aside>
     <section class="main">
       <header class="topbar">
-        <button class="model-pill" type="button">
-          <span class="dot" id="firmDot"></span>
-          <span id="modelName">FTMO specialist</span>
-        </button>
+        <div class="top-left">
+          <button class="btn icon-btn menu-mobile" type="button" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Open menu">☰</button>
+          <button class="model-pill" type="button">
+            <span class="dot" id="firmDot"></span>
+            <span id="modelName">FTMO specialist</span>
+          </button>
+        </div>
         <div class="top-actions">
           <button class="btn ghost" id="aiSettingsBtn" type="button">AI</button>
           <button class="btn ghost" type="button" onclick="document.getElementById('userChip').click()">Profile</button>
@@ -92,7 +96,6 @@
             <button class="btn send" id="sendBtn" type="button" disabled>↑</button>
           </div>
         </div>
-        <div class="hint">PropDesk is not the firm. Rulebooks change — verify before you size up. Escalations email the firm with your address as reply-to.</div>
       </div>
     </section>
   </div>
@@ -100,7 +103,7 @@
   <div class="overlay" id="profileOverlay">
     <div class="modal">
       <h3>Trader profile</h3>
-      <p id="profNote">Used as reply-to on every escalation email.</p>
+      <p>Used as reply-to on every escalation email.</p>
       <div class="grid">
         <div>
           <label class="mini">Email</label>
@@ -120,12 +123,12 @@
   <div class="overlay" id="aiOverlay">
     <div class="modal">
       <h3>Live AI</h3>
-      <p>Without a key, PropDesk uses a keyword FAQ. Paste a Groq / OpenRouter / OpenAI key to make the agent actually reason.</p>
+      <p>Paste a Groq / OpenRouter / OpenAI key to make the agent reason beyond the FAQ.</p>
       <div class="grid">
         <div>
           <label class="mini">Provider</label>
           <select id="aiProvider" class="field">
-            <option value="groq">Groq (free key at console.groq.com)</option>
+            <option value="groq">Groq</option>
             <option value="openrouter">OpenRouter</option>
             <option value="openai">OpenAI</option>
           </select>
