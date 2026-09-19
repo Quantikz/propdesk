@@ -250,50 +250,103 @@ async function callChat(
   return { ok: true, text, sources: [] };
 }
 
+async function groqRequest(
+  apiKey: string,
+  payload: Record<string, unknown>,
+  timeoutMs: number,
+): Promise<GrokOk | GrokErr> {
+  const live = String(payload.model || "").includes("compound");
+  const run = async () =>
+    fetch(GROQ_CHAT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "User-Agent": GROQ_UA,
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(timeoutMs),
+      body: JSON.stringify(payload),
+    });
+
+  let res: Response;
+  try {
+    res = await run();
+  } catch (err) {
+    console.error("[desk] groq network", err instanceof Error ? err.message : "fail");
+    return { ok: false, error: "unavailable" };
+  }
+  if (res.status === 429) {
+    await new Promise((r) => setTimeout(r, 900));
+    try {
+      res = await run();
+    } catch {
+      return { ok: false, error: "unavailable" };
+    }
+  }
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    console.error("[desk] groq", res.status, err.slice(0, 240));
+    return { ok: false, error: "unavailable" };
+  }
+  const body = (await res.json()) as {
+    choices?: { message?: Record<string, unknown> }[];
+  };
+  const message = body.choices?.[0]?.message ?? {};
+  const text = typeof message.content === "string" ? message.content.trim() : "";
+  if (!text) {
+    console.error("[desk] groq empty", payload.model);
+    return { ok: false, error: "unavailable" };
+  }
+  return { ok: true, text, sources: live ? sourcesFromGroq(message) : [] };
+}
+
 async function callGroq(
   apiKey: string,
   system: string,
   messages: ChatTurn[],
   live: boolean,
 ): Promise<GrokOk | GrokErr> {
-  const payload: Record<string, unknown> = {
-    model: live ? "groq/compound" : "openai/gpt-oss-20b",
-    messages: [
-      { role: "system", content: system.slice(0, 12000) },
-      ...messages.map((m) => ({
-        role: m.role,
-        content: m.content.slice(0, 2000),
-      })),
-    ],
-  };
+  const turns = messages.map((m) => ({
+    role: m.role,
+    content: m.content.slice(0, 1600),
+  }));
+
   if (live) {
-    payload.compound_custom = {
-      tools: { enabled_tools: ["web_search", "visit_website"] },
-    };
-  } else {
-    payload.temperature = 0.4;
-    payload.max_tokens = 650;
+    const searched = await groqRequest(
+      apiKey,
+      {
+        model: "groq/compound-mini",
+        messages: [{ role: "system", content: system.slice(0, 6500) }, ...turns],
+      },
+      22000,
+    );
+    if (searched.ok) return searched;
   }
 
-  const res = await fetch(GROQ_CHAT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "User-Agent": GROQ_UA,
-      Accept: "application/json",
+  const packed = await groqRequest(
+    apiKey,
+    {
+      model: "qwen/qwen3.8-27b",
+      temperature: 0.3,
+      max_tokens: 900,
+      messages: [{ role: "system", content: system.slice(0, 9000) }, ...turns],
     },
-    signal: AbortSignal.timeout(live ? 40000 : 20000),
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) return { ok: false, error: "unavailable" };
-  const body = (await res.json()) as {
-    choices?: { message?: Record<string, unknown> }[];
-  };
-  const message = body.choices?.[0]?.message ?? {};
-  const text = typeof message.content === "string" ? message.content.trim() : "";
-  if (!text) return { ok: false, error: "unavailable" };
-  return { ok: true, text, sources: live ? sourcesFromGroq(message) : [] };
+    15000,
+  );
+  if (packed.ok) return packed;
+
+  return groqRequest(
+    apiKey,
+    {
+      model: "openai/gpt-oss-20b",
+      temperature: 0.3,
+      max_completion_tokens: 1400,
+      reasoning_effort: "low",
+      messages: [{ role: "system", content: system.slice(0, 8000) }, ...turns],
+    },
+    15000,
+  );
 }
 
 async function completeWithXai(
