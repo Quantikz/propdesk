@@ -21,7 +21,6 @@
           <p>Independent trader support</p>
         </div>
       </div>
-
       <div class="firm-box">
         <label class="mini">Prop firm</label>
         <select id="firmSelect"></select>
@@ -32,12 +31,10 @@
         <label class="mini">Account / login ID</label>
         <input class="field" id="accountId" type="text" placeholder="e.g. FN-104928 or 5120347" />
       </div>
-
       <div class="history">
         <h3>Tickets</h3>
         <div id="historyList"></div>
       </div>
-
       <div class="side-foot">
         <div class="user-chip" id="userChip">
           <div class="avatar" id="userAv">T</div>
@@ -48,7 +45,6 @@
         </div>
       </div>
     </aside>
-
     <section class="main">
       <header class="topbar">
         <button class="model-pill" type="button">
@@ -56,10 +52,10 @@
           <span id="modelName">FTMO specialist</span>
         </button>
         <div class="top-actions">
+          <button class="btn ghost" id="aiSettingsBtn" type="button">AI</button>
           <button class="btn ghost" type="button" onclick="document.getElementById('userChip').click()">Profile</button>
         </div>
       </header>
-
       <div class="thread" id="thread">
         <div class="thread-inner" id="threadInner">
           <div class="empty" id="emptyState">
@@ -87,7 +83,6 @@
           </div>
         </div>
       </div>
-
       <div class="composer-wrap">
         <div class="composer">
           <div class="attach-row" id="attachRow"></div>
@@ -101,9 +96,7 @@
       </div>
     </section>
   </div>
-
   <input id="attachInput" type="file" multiple accept="image/*,.pdf,.csv,.txt,.xlsx" hidden />
-
   <div class="overlay" id="profileOverlay">
     <div class="modal">
       <h3>Trader profile</h3>
@@ -124,9 +117,35 @@
       </div>
     </div>
   </div>
-
+  <div class="overlay" id="aiOverlay">
+    <div class="modal">
+      <h3>Live AI</h3>
+      <p>Without a key, PropDesk uses a keyword FAQ. Paste a Groq / OpenRouter / OpenAI key to make the agent actually reason.</p>
+      <div class="grid">
+        <div>
+          <label class="mini">Provider</label>
+          <select id="aiProvider" class="field">
+            <option value="groq">Groq (free key at console.groq.com)</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="openai">OpenAI</option>
+          </select>
+        </div>
+        <div>
+          <label class="mini">API key</label>
+          <input class="field" id="aiKey" type="password" placeholder="gsk_... or sk-..." autocomplete="off" />
+        </div>
+        <div>
+          <label class="mini">Model</label>
+          <input class="field" id="aiModel" type="text" placeholder="llama-3.3-70b-versatile" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelAI" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveAI" type="button">Save AI</button>
+      </div>
+    </div>
+  </div>
   <div class="toast" id="toast"></div>
-
   <script src="knowledge.js"></script>
   <script src="ai-hook.js"></script>
   <script src="app.js"></script>
