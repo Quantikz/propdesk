@@ -1,51 +1,56 @@
-/* Optional live-model hook.
-   Leave this file as-is to run on the built-in FAQ engine.
-   To plug a real model later, either:
-
-   1) Set localStorage.PROPDESK_OPENAI_KEY and uncomment the fetch below, or
-   2) Point window.PROPDESK_AI_ENDPOINT at your own backend that accepts
-      { system, user, firm } and returns { text }.
-
-   Escalation email backend (optional):
-     window.PROPDESK_MAIL_ENDPOINT = "/api/send-case";
-*/
-
+/* Live model client. Keys stay in the phone browser (localStorage). */
 window.PROPDESK_AI = {
-  async complete({ system, user, firm, files }) {
-    const endpoint = window.PROPDESK_AI_ENDPOINT || localStorage.getItem("PROPDESK_AI_ENDPOINT");
-    const key = localStorage.getItem("PROPDESK_OPENAI_KEY");
+  presets: {
+    groq: {
+      label: "Groq (free, fast)",
+      base: "https://api.groq.com/openai/v1",
+      model: "llama-3.3-70b-versatile",
+    },
+    openrouter: {
+      label: "OpenRouter",
+      base: "https://openrouter.ai/api/v1",
+      model: "openai/gpt-4o-mini",
+    },
+    openai: {
+      label: "OpenAI",
+      base: "https://api.openai.com/v1",
+      model: "gpt-4o-mini",
+    },
+  },
 
-    if (endpoint) {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system, user, firm, files }),
-      });
-      if (!res.ok) throw new Error("AI endpoint " + res.status);
-      return res.json();
+  settings() {
+    const provider = localStorage.getItem("PROPDESK_PROVIDER") || "groq";
+    const preset = this.presets[provider] || this.presets.groq;
+    return {
+      provider,
+      key: localStorage.getItem("PROPDESK_OPENAI_KEY") || "",
+      base: localStorage.getItem("PROPDESK_BASE") || preset.base,
+      model: localStorage.getItem("PROPDESK_MODEL") || preset.model,
+    };
+  },
+
+  async complete({ system, messages }) {
+    const s = this.settings();
+    if (!s.key) return null;
+
+    const url = s.base.replace(/\/$/, "") + "/chat/completions";
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + s.key,
+      },
+      body: JSON.stringify({
+        model: s.model,
+        temperature: 0.3,
+        messages: [{ role: "system", content: system }, ...messages],
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error("AI " + res.status + " " + err.slice(0, 180));
     }
-
-    if (key) {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + key,
-        },
-        body: JSON.stringify({
-          model: localStorage.getItem("PROPDESK_MODEL") || "gpt-4o-mini",
-          temperature: 0.2,
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user + (files && files.length ? "\n\nAttached: " + files.join(", ") : "") },
-          ],
-        }),
-      });
-      if (!res.ok) throw new Error("OpenAI " + res.status);
-      const data = await res.json();
-      return { text: data.choices[0].message.content };
-    }
-
-    return null;
+    const data = await res.json();
+    return { text: data.choices[0].message.content };
   },
 };
