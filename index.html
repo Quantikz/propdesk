@@ -3,17 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>PropDesk — AI support for prop firm traders</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="mobile.css" />
+  <title>PropDesk</title>
+  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="mobile.css?v=7" />
+  <link rel="stylesheet" href="fix.css?v=7" />
 </head>
 <body>
   <div class="app">
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
     <aside class="sidebar" id="sidebar">
       <div class="side-top">
-        <button class="btn btn-new" id="newChatBtn" type="button">＋ New ticket</button>
-        <button class="btn icon-btn" id="menuBtn" type="button" title="Menu">☰</button>
+        <button class="btn btn-new" id="newChatBtn" type="button">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          New ticket
+        </button>
+        <button class="btn icon-btn" id="menuBtn" type="button" aria-label="Menu">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
       </div>
       <div class="brand">
         <div class="logo">P</div>
@@ -49,14 +55,16 @@
     <section class="main">
       <header class="topbar">
         <div class="top-left">
-          <button class="btn icon-btn menu-mobile" type="button" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Open menu">☰</button>
+          <button class="btn icon-btn menu-mobile" type="button" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Open menu">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
           <button class="model-pill" type="button">
             <span class="dot" id="firmDot"></span>
             <span id="modelName">FTMO specialist</span>
           </button>
         </div>
         <div class="top-actions">
-          <button class="btn ghost" id="aiSettingsBtn" type="button">AI</button>
+          <button class="btn ghost" id="aiSettingsBtn" type="button" onclick="document.getElementById('aiOverlay').classList.add('show')">AI</button>
           <button class="btn ghost" type="button" onclick="document.getElementById('userChip').click()">Profile</button>
         </div>
       </header>
@@ -91,9 +99,13 @@
         <div class="composer">
           <div class="attach-row" id="attachRow"></div>
           <div class="composer-row">
-            <button class="btn" id="attachBtn" type="button" title="Attach evidence">📎</button>
+            <button class="btn icon-btn" id="attachBtn" type="button" aria-label="Attach">
+              <svg viewBox="0 0 24 24"><path d="M21.4 11.6l-8.5 8.5a6 6 0 01-8.5-8.5l8.5-8.5a4 4 0 015.7 5.7l-8.6 8.5a2 2 0 01-2.8-2.8l7.8-7.8"/></svg>
+            </button>
             <textarea id="composerInput" rows="1" placeholder="Describe the issue. Attach screenshots if the firm is at fault."></textarea>
-            <button class="btn send" id="sendBtn" type="button" disabled>↑</button>
+            <button class="btn send" id="sendBtn" type="button" disabled aria-label="Send">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -103,7 +115,7 @@
   <div class="overlay" id="profileOverlay">
     <div class="modal">
       <h3>Trader profile</h3>
-      <p>Used as reply-to on every escalation email.</p>
+      <p id="profNote">Used as reply-to on every escalation email.</p>
       <div class="grid">
         <div>
           <label class="mini">Email</label>
@@ -149,9 +161,9 @@
     </div>
   </div>
   <div class="toast" id="toast"></div>
-  <script src="local-key.js"></script>
-  <script src="knowledge.js"></script>
-  <script src="ai-hook.js"></script>
-  <script src="app.js"></script>
+  <script src="knowledge.js?v=7"></script>
+  <script src="ai-hook.js?v=7"></script>
+  <script src="app.js?v=7"></script>
+  <script src="ui.js?v=7"></script>
 </body>
 </html>
