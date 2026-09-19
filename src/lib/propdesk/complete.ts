@@ -29,7 +29,31 @@ function domainsFor(ids: string[]): string[] {
   return Array.from(new Set(ids.flatMap(firmDomains))).slice(0, 8);
 }
 
-function systemPrompt(mode: DeskMode, firmId: string, firmIds: string[], messages: ChatTurn[]) {
+function lastUserText(messages: ChatTurn[]) {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]?.role === "user") return messages[i].content;
+  }
+  return "";
+}
+
+function needsWebSearch(text: string) {
+  const t = text.toLowerCase();
+  return (
+    /last month|this month|this week|yesterday|today|right now|currently|as of|2025|2026/.test(t) ||
+    /highest payout|biggest payout|single payout|largest payout|payout proof|who paid|must pay/.test(t) ||
+    /average (payout|processing)|processing time|how long.{0,20}payout|payout.{0,20}(sla|speed|time)/.test(t) ||
+    /leaderboard|most paid|reliability|do they (actually )?pay/.test(t) ||
+    /\b(check|verify|confirm|live look|look up|search|current rule)\b/.test(t)
+  );
+}
+
+function systemPrompt(
+  mode: DeskMode,
+  firmId: string,
+  firmIds: string[],
+  messages: ChatTurn[],
+  live: boolean,
+) {
   const blob = messages.map((m) => m.content).join("\n");
   const mentioned = firmsMentioned(blob, firmId);
   const packIds =
@@ -39,43 +63,22 @@ function systemPrompt(mode: DeskMode, firmId: string, firmIds: string[], message
   const packs = packIds.map((id) => faqPack(id)).join("\n\n");
   const names = packIds.map((id) => getFirm(id).name).join(", ");
   const table = mode === "compare" ? compareTable(firmIds.length ? firmIds : packIds) : "";
-  const domains = domainsFor(packIds).join(", ");
+  const who = mode === "compare" ? names : getFirm(firmId).name;
 
-  if (mode === "compare") {
-    return `You work PropDesk’s compare desk. The trader is looking at ${names} side by side. This is pre-support FAQ — no tickets, no emails to firms.
+  const liveBlock = live
+    ? `The FAQ pack does not answer this. Search the public web first — official firm pages, help centers, and recent payout-proof / processing-time reports. Then answer with what you found. Do not say you will look it up later. Do not say “the pack doesn’t have it” without searching. If there is no ranked last-month leaderboard, say that after the search and report published split, advertised processing time, and any recent payout-proof commentary. Name sources in plain words.`
+    : `Answer from the FAQ packs. Do not search.`;
 
-Your work:
-- Answer in plain speech. Short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine.
-- Use the FAQ packs for rules. Search ${domains} when they ask for current / last-month / highest / average / “must payout” figures, or when the pack is silent.
-- Official sites almost never publish a ranked “highest payout last month” or “biggest single payout.” After you look, say that in one sentence, then compare what they *do* publish: profit split, advertised processing time after approval, KYC, consistency gates.
-- Do not invent a leaderboard. Do not refuse and dump the pack as a table.
-- Help them choose. No trade signals.
+  return `You work PropDesk’s ${mode === "compare" ? "compare" : "FAQ"} desk for ${who}. Pre-support only — no tickets, no emails to firms.
 
-Compare snapshot:
-${table}
+${liveBlock}
 
-FAQ packs:
+Voice: plain speech, short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. Do not invent fees, retries, dates, or a fake leaderboard. No trade signals.
+
+${mode === "compare" ? `Compare snapshot:\n${table}\n` : ""}FAQ packs (background only${live ? " — search beats these if they disagree" : ""}):
 ${packs}
 
-${KB.disclaimer}`;
-  }
-
-  const f = getFirm(firmId);
-  return `You work PropDesk’s FAQ desk for ${f.name}. Pre-support: answer how programs work. No tickets, no emails to firms.
-
-Your work:
-- Answer from the FAQ packs first, in plain speech. No markdown tables, no ### headings, no | pipes.
-- Cover rules, payouts, drawdown, news, EAs, KYC, which plan fits, and comparisons when asked.
-- Search ${domains} when they ask to check / verify / confirm what is current, or ask for last-month / highest / average numbers the pack does not have. Trust the live page over the pack.
-- If official pages do not publish that number, say so after looking — then give the published split and processing time.
-- Do not invent fees, free retries, dates, leaderboards, or rules. No trade signals.
-
-FAQ packs:
-${packs}
-
-Other firms we cover:
-${firmRoster()}
-
+${mode === "compare" ? "" : `Other firms we cover:\n${firmRoster()}\n`}
 ${KB.disclaimer}`;
 }
 
@@ -119,15 +122,16 @@ function collectSources(output: unknown[]): Source[] {
 
 function extractText(output: unknown[]): string {
   const parts: string[] = [];
-  for (const item of output) {
-    if (!item || typeof item !== "object") continue;
-    const o = item as { type?: string; content?: { type?: string; text?: string }[] };
-    if (o.type !== "message" || !Array.isArray(o.content)) continue;
-    for (const c of o.content) {
-      if ((c.type === "output_text" || c.type === "text") && c.text) parts.push(c.text);
+  const walk = (node: unknown) => {
+    if (!node || typeof node !== "object") return;
+    const o = node as { type?: string; text?: string; content?: unknown };
+    if ((o.type === "output_text" || o.type === "text") && typeof o.text === "string" && o.text.trim()) {
+      parts.push(o.text.trim());
     }
-  }
-  return parts.join("\n").trim();
+    if (Array.isArray(o.content)) o.content.forEach(walk);
+  };
+  output.forEach(walk);
+  return [...new Set(parts)].join("\n\n").trim();
 }
 
 type GrokOk = { ok: true; text: string; sources: Source[] };
@@ -138,25 +142,25 @@ async function callResponses(
   system: string,
   messages: ChatTurn[],
   domains: string[],
+  openWeb: boolean,
 ): Promise<GrokOk | GrokErr> {
+  const tool: Record<string, unknown> = { type: "web_search" };
+  if (!openWeb && domains.length) {
+    tool.filters = { allowed_domains: domains };
+  }
   const res = await fetch("https://api.x.ai/v1/responses", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    signal: AbortSignal.timeout(15000),
+    signal: AbortSignal.timeout(openWeb ? 35000 : 12000),
     body: JSON.stringify({
       model: "grok-4.5",
       temperature: 0.4,
       max_output_tokens: 700,
-      max_tool_calls: 2,
-      tools: [
-        {
-          type: "web_search",
-          filters: { allowed_domains: domains },
-        },
-      ],
+      max_tool_calls: openWeb ? 4 : 2,
+      tools: [tool],
       input: [
         { role: "system", content: system },
         ...messages.map((m) => ({
@@ -234,20 +238,28 @@ export const completeTicket = createServerFn({ method: "POST" })
     if (!apiKey) return { ok: false as const, error: "unavailable" };
     if (!data.messages.length) return { ok: false as const, error: "no messages" };
     const ids = data.firmIds.length ? data.firmIds : [data.firmId];
-    const system = systemPrompt(data.mode, data.firmId, ids, data.messages);
+    const live = needsWebSearch(lastUserText(data.messages));
+    const system = systemPrompt(data.mode, data.firmId, ids, data.messages, live);
     const domains = domainsFor(ids);
     let result: GrokOk | GrokErr;
-    try {
-      result = await Promise.race([
-        callResponses(apiKey, system, data.messages, domains),
-        new Promise<GrokErr>((resolve) =>
-          setTimeout(() => resolve({ ok: false, error: "timeout" }), 16000),
-        ),
-      ]);
-    } catch {
-      result = { ok: false, error: "search failed" };
+    if (live) {
+      try {
+        result = await callResponses(apiKey, system, data.messages, domains, true);
+      } catch {
+        result = { ok: false, error: "search failed" };
+      }
+      if (!result.ok) {
+        const fallback = systemPrompt(data.mode, data.firmId, ids, data.messages, false);
+        result = await callChat(
+          apiKey,
+          fallback +
+            "\nLive web lookup failed this turn. Say you could not reach live pages, then answer from the pack. Do not pretend you searched.",
+          data.messages,
+        );
+      }
+    } else {
+      result = await callChat(apiKey, system, data.messages);
     }
-    if (!result.ok) result = await callChat(apiKey, system, data.messages);
     return result.ok
       ? { ok: true as const, text: result.text, sources: result.sources }
       : { ok: false as const, error: result.error };
