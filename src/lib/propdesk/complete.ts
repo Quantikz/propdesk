@@ -255,7 +255,7 @@ async function groqRequest(
   payload: Record<string, unknown>,
   timeoutMs: number,
 ): Promise<GrokOk | GrokErr> {
-  const live = String(payload.model || "").includes("compound");
+  const live = String(payload.model || "").includes("compound") || Array.isArray(payload.tools);
   const run = async () =>
     fetch(GROQ_CHAT, {
       method: "POST",
@@ -284,14 +284,21 @@ async function groqRequest(
       return { ok: false, error: "unavailable" };
     }
   }
-  if (!res.ok) {
-    const err = await res.text().catch(() => "");
-    console.error("[desk] groq", res.status, err.slice(0, 240));
+
+  let body: {
+    error?: { message?: string; code?: string };
+    choices?: { message?: Record<string, unknown> }[];
+  } = {};
+  try {
+    body = (await res.json()) as typeof body;
+  } catch {
+    console.error("[desk] groq bad json", res.status);
     return { ok: false, error: "unavailable" };
   }
-  const body = (await res.json()) as {
-    choices?: { message?: Record<string, unknown> }[];
-  };
+  if (!res.ok || body.error) {
+    console.error("[desk] groq", res.status, body.error?.code || "", (body.error?.message || "").slice(0, 180));
+    return { ok: false, error: "unavailable" };
+  }
   const message = body.choices?.[0]?.message ?? {};
   const text = typeof message.content === "string" ? message.content.trim() : "";
   if (!text) {
@@ -311,13 +318,17 @@ async function callGroq(
     role: m.role,
     content: m.content.slice(0, 1600),
   }));
+  const packSystem =
+    system.slice(0, 8000) +
+    "\nAnswer from the pack. Do not request tools. If a number is missing, say what to confirm on the official help page.";
+  const packMessages = [{ role: "system" as const, content: packSystem }, ...turns];
 
   if (live) {
     const searched = await groqRequest(
       apiKey,
       {
         model: "groq/compound-mini",
-        messages: [{ role: "system", content: system.slice(0, 6500) }, ...turns],
+        messages: [{ role: "system", content: system.slice(0, 6000) }, ...turns],
       },
       22000,
     );
@@ -330,22 +341,34 @@ async function callGroq(
       model: "qwen/qwen3.8-27b",
       temperature: 0.3,
       max_tokens: 900,
-      messages: [{ role: "system", content: system.slice(0, 9000) }, ...turns],
+      disable_tool_validation: true,
+      messages: packMessages,
     },
     15000,
   );
   if (packed.ok) return packed;
 
-  return groqRequest(
+  const withSearch = await groqRequest(
     apiKey,
     {
       model: "openai/gpt-oss-20b",
       temperature: 0.3,
-      max_completion_tokens: 1400,
+      max_completion_tokens: 1200,
       reasoning_effort: "low",
-      messages: [{ role: "system", content: system.slice(0, 8000) }, ...turns],
+      tools: [{ type: "browser_search" }],
+      messages: [{ role: "system", content: system.slice(0, 7000) }, ...turns],
     },
-    15000,
+    25000,
+  );
+  if (withSearch.ok) return withSearch;
+
+  return groqRequest(
+    apiKey,
+    {
+      model: "groq/compound-mini",
+      messages: packMessages,
+    },
+    22000,
   );
 }
 
