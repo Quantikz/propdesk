@@ -1,4 +1,4 @@
-import { getSql, type Sql } from "@/lib/db";
+import type { Sql } from "@/lib/db";
 import { faqItems } from "./faq";
 import { FIRST, PLANS } from "./plans";
 import { KB } from "./knowledge";
@@ -109,6 +109,33 @@ async function ensureSeed(sql: Sql) {
   }
 }
 
+function packedCatalog(): CatalogPayload {
+  const firms = orderFirmIds(Object.keys(KB.firms)).map((id) => KB.firms[id]);
+  const faqs: Record<string, FaqItem[]> = {};
+  const plans: Record<string, Plan[]> = {};
+  const first: Record<string, FirstPayout> = {};
+  const links: Record<string, FirmLink[]> = {};
+  const hosts: Record<string, string[]> = {};
+  for (const f of firms) {
+    faqs[f.id] = faqItems(f.id);
+    plans[f.id] = PLANS[f.id] ?? [];
+    if (FIRST[f.id]) first[f.id] = FIRST[f.id];
+    const ls: FirmLink[] = [{ kind: "portal", title: "Official site", url: f.portal }];
+    const pfm = PFM_FIRM[f.id];
+    if (pfm) ls.push({ kind: "payouts_pfm", title: "Prop Firm Match payouts", url: pfm });
+    const pj = pjUrl(f.id);
+    if (pj) ls.push({ kind: "payouts_pj", title: "Payout Junction", url: pj });
+    for (const host of HELP_HOSTS[f.id] ?? []) {
+      ls.push({ kind: "help", title: "Help center", url: `https://${host}` });
+    }
+    links[f.id] = ls;
+    hosts[f.id] = Array.from(
+      new Set([portalHost(f.portal), ...(HELP_HOSTS[f.id] ?? [])].filter(Boolean)),
+    );
+  }
+  return { firms, faqs, plans, first, links, hosts };
+}
+
 function parseJsonList(raw: string): string[] {
   try {
     const v = JSON.parse(raw) as unknown;
@@ -119,6 +146,7 @@ function parseJsonList(raw: string): string[] {
 }
 
 export async function loadDeskCatalog(): Promise<CatalogPayload> {
+  const { getSql } = await import("@/lib/db");
   const sql = await getSql();
   await ensureSeed(sql);
 
@@ -238,9 +266,15 @@ let memo: { at: number; data: CatalogPayload } | null = null;
 
 export async function cachedCatalog(): Promise<CatalogPayload> {
   if (memo && Date.now() - memo.at < 60_000) return memo.data;
-  const data = await loadDeskCatalog();
-  memo = { at: Date.now(), data };
-  return data;
+  try {
+    const data = await loadDeskCatalog();
+    memo = { at: Date.now(), data };
+    return data;
+  } catch {
+    const data = packedCatalog();
+    memo = { at: Date.now(), data };
+    return data;
+  }
 }
 
 export function firmFromCatalog(cat: CatalogPayload, id: string): Firm {
