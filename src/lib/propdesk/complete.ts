@@ -1,60 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getFirm, orderFirmIds } from "./engine";
-import { compareTable, faqPack, firmRoster, firmsMentioned } from "./faq";
+import { orderFirmIds } from "./engine";
+import { firmsMentioned } from "./faq";
 import { KB } from "./knowledge";
+import type { CatalogPayload } from "./catalog-cache";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 export type Source = { url: string; title?: string };
 export type DeskMode = "desk" | "compare";
-
-function firmDomains(firmId: string): string[] {
-  const f = getFirm(firmId);
-  let host = "ftmo.com";
-  try {
-    host = new URL(f.portal).hostname.replace(/^www\./, "");
-  } catch {
-    /* keep default */
-  }
-  const extras: Record<string, string[]> = {
-    ftmo: ["help.ftmo.com"],
-    fundednext: ["help.fundednext.com"],
-    the5ers: ["help.the5ers.com"],
-    topstep: ["help.topstep.com", "www.topstep.com"],
-    apex: ["support.apextraderfunding.com"],
-    goat: ["goatfundedtrader.com", "www.goatfundedtrader.com"],
-    fundingpips: ["fundingpips.com", "www.fundingpips.com"],
-    e8: ["e8markets.com", "www.e8markets.com"],
-    instant: ["instantfunding.io", "www.instantfunding.io"],
-    acg: ["alphacapitalgroup.uk", "www.alphacapitalgroup.uk"],
-  };
-  return Array.from(new Set([host, ...(extras[firmId] ?? [])])).slice(0, 4);
-}
-
-function domainsFor(ids: string[]): string[] {
-  return Array.from(
-    new Set([
-      ...ids.flatMap(firmDomains),
-      "payoutjunction.com",
-      "propfirmmatch.com",
-      "www.propfirmmatch.com",
-    ]),
-  ).slice(0, 10);
-}
 
 function lastUserText(messages: ChatTurn[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i]?.role === "user") return messages[i].content;
   }
   return "";
-}
-
-function siteLines(ids: string[]): string {
-  return orderFirmIds(ids)
-    .map((id) => {
-      const f = getFirm(id);
-      return `- ${f.name}: ${f.portal}`;
-    })
-    .join("\n");
 }
 
 function needsWebSearch(text: string) {
@@ -71,6 +29,13 @@ function needsWebSearch(text: string) {
 }
 
 function systemPrompt(
+  cat: CatalogPayload,
+  pack: {
+    faqPackFromCatalog: (c: CatalogPayload, id: string) => string;
+    rosterFromCatalog: (c: CatalogPayload) => string;
+    compareFromCatalog: (c: CatalogPayload, ids: string[]) => string;
+    firmFromCatalog: (c: CatalogPayload, id: string) => { name: string; portal: string };
+  },
   mode: DeskMode,
   firmId: string,
   firmIds: string[],
@@ -84,10 +49,16 @@ function systemPrompt(
       ? Array.from(new Set([...firmIds, ...mentioned]))
       : Array.from(new Set([firmId, ...mentioned])),
   ).slice(0, 4);
-  const packs = packIds.map((id) => faqPack(id)).join("\n\n");
-  const names = packIds.map((id) => getFirm(id).name).join(", ");
-  const table = mode === "compare" ? compareTable(packIds) : "";
-  const who = mode === "compare" ? names : getFirm(firmId).name;
+  const packs = packIds.map((id) => pack.faqPackFromCatalog(cat, id)).join("\n\n");
+  const names = packIds.map((id) => pack.firmFromCatalog(cat, id).name).join(", ");
+  const table = mode === "compare" ? pack.compareFromCatalog(cat, packIds) : "";
+  const who = mode === "compare" ? names : pack.firmFromCatalog(cat, firmId).name;
+  const sites = packIds
+    .map((id) => {
+      const f = pack.firmFromCatalog(cat, id);
+      return `- ${f.name}: ${f.portal}`;
+    })
+    .join("\n");
 
   return `You work PropDesk’s ${mode === "compare" ? "compare" : "FAQ"} desk for ${who}. Pre-support: you answer questions. You do not open tickets or email firms.
 
@@ -101,7 +72,7 @@ How to know things:
 - When you list firms, put Goat Funded Trader first if it is in the set. Do not invent facts for it.
 
 Official pages to open:
-${siteLines(packIds)}
+${sites}
 Payout trackers (use for last-month / count / largest / processing time — quote the source):
 - https://payoutjunction.com/statistics (on-chain JSON they license for quoting)
 - https://payoutjunction.com/30d
@@ -118,7 +89,7 @@ ${live ? "Search now. Then answer. Do not say you will look later." : "Answer fr
 ${mode === "compare" ? `Compare snapshot:\n${table}\n` : ""}FAQ packs (background; live pages win):
 ${packs}
 
-${mode === "compare" ? "" : `Other firms we cover (Goat Funded Trader first):\n${firmRoster()}\n`}
+${mode === "compare" ? "" : `Other firms we cover (Goat Funded Trader first):\n${pack.rosterFromCatalog(cat)}\n`}
 ${KB.disclaimer}`;
 }
 
@@ -210,13 +181,10 @@ async function callResponses(
       ],
     }),
   });
-  if (!res.ok) {
-    const err = await res.text();
-    return { ok: false, error: `xAI ${res.status} ${err.slice(0, 180)}` };
-  }
+  if (!res.ok) return { ok: false, error: "unavailable" };
   const body = (await res.json()) as { output?: unknown[] };
   const text = extractText(body.output ?? []);
-  if (!text) return { ok: false, error: "empty model reply" };
+  if (!text) return { ok: false, error: "unavailable" };
   return { ok: true, text, sources: collectSources(body.output ?? []) };
 }
 
@@ -244,15 +212,12 @@ async function callChat(
       ],
     }),
   });
-  if (!res.ok) {
-    const err = await res.text();
-    return { ok: false, error: `xAI ${res.status} ${err.slice(0, 180)}` };
-  }
+  if (!res.ok) return { ok: false, error: "unavailable" };
   const body = (await res.json()) as {
     choices?: { message?: { content?: string } }[];
   };
   const text = body.choices?.[0]?.message?.content?.trim() ?? "";
-  if (!text) return { ok: false, error: "empty model reply" };
+  if (!text) return { ok: false, error: "unavailable" };
   return { ok: true, text, sources: [] };
 }
 
@@ -263,7 +228,7 @@ export const completeTicket = createServerFn({ method: "POST" })
     mode?: DeskMode;
     messages: ChatTurn[];
   }) => ({
-    firmId: String(input.firmId || "ftmo"),
+    firmId: String(input.firmId || "goat"),
     firmIds: Array.isArray(input.firmIds)
       ? input.firmIds.map(String).slice(0, 4)
       : [],
@@ -276,31 +241,35 @@ export const completeTicket = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const apiKey = process.env.XAI_API_KEY || "";
     if (!apiKey) return { ok: false as const, error: "unavailable" };
-    if (!data.messages.length) return { ok: false as const, error: "no messages" };
+    if (!data.messages.length) return { ok: false as const, error: "unavailable" };
+
+    const pack = await import("./catalog.server");
+    const cat = await pack.cachedCatalog();
+
     const ids = orderFirmIds(data.firmIds.length ? data.firmIds : [data.firmId]);
     const q = lastUserText(data.messages);
     const live = data.mode === "compare" || needsWebSearch(q);
     const openWeb = needsWebSearch(q);
-    const system = systemPrompt(data.mode, data.firmId, ids, data.messages, live);
-    const domains = domainsFor(ids);
+    const system = systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, live);
+    const domains = pack.hostsFor(cat, ids);
     let result: GrokOk | GrokErr;
     if (live) {
       try {
         result = await callResponses(apiKey, system, data.messages, domains, openWeb);
       } catch {
-        result = { ok: false, error: "search failed" };
+        result = { ok: false, error: "unavailable" };
       }
       if (!result.ok && !openWeb) {
         try {
           result = await callResponses(apiKey, system, data.messages, domains, true);
         } catch {
-          result = { ok: false, error: "search failed" };
+          result = { ok: false, error: "unavailable" };
         }
       }
       if (!result.ok) {
         result = await callChat(
           apiKey,
-          systemPrompt(data.mode, data.firmId, ids, data.messages, false) +
+          systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, false) +
             "\nThe live pages did not load this turn. Answer from the pack. Do not say that checking websites is out of scope — it is in scope; this turn just failed.",
           data.messages,
         );
@@ -310,5 +279,5 @@ export const completeTicket = createServerFn({ method: "POST" })
     }
     return result.ok
       ? { ok: true as const, text: result.text, sources: result.sources }
-      : { ok: false as const, error: result.error };
+      : { ok: false as const, error: "unavailable" };
   });

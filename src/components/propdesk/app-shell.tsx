@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
@@ -7,6 +7,8 @@ import { ProfileDialog } from "@/components/propdesk/profile-dialog";
 import { Sidebar } from "@/components/propdesk/sidebar";
 import { Thread } from "@/components/propdesk/thread";
 import { Topbar } from "@/components/propdesk/topbar";
+import { hydrateCatalog } from "@/lib/propdesk/catalog-cache";
+import { getCatalog } from "@/lib/propdesk/catalog";
 import { getFirm } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 import { cn } from "@/lib/utils";
@@ -17,6 +19,7 @@ export function AppShell() {
   const setSidebarOpen = useDeskStore((s) => s.setSidebarOpen);
   const toast = useDeskStore((s) => s.toast);
   const firmId = useDeskStore((s) => s.firmId);
+  const [, setCatalogTick] = useState(0);
   const firm = getFirm(firmId);
   const path = useRouterState({ select: (s) => s.location.pathname });
   const comparing = path.startsWith("/compare");
@@ -24,6 +27,19 @@ export function AppShell() {
 
   useEffect(() => {
     void useDeskStore.persist.rehydrate();
+  }, []);
+
+  useEffect(() => {
+    void getCatalog()
+      .then((cat) => {
+        if (cat?.firms?.length) {
+          hydrateCatalog(cat);
+          setCatalogTick((n) => n + 1);
+        }
+      })
+      .catch(() => {
+        /* packed fallback in engine */
+      });
   }, []);
 
   useEffect(() => {
@@ -86,17 +102,12 @@ export function AppShell() {
         )}
       </section>
 
+      {toast ? (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-paper px-4 py-2 text-sm text-ink shadow-lg">
+          {toast}
+        </div>
+      ) : null}
       <ProfileDialog />
-
-      <div
-        role="status"
-        className={cn(
-          "pointer-events-none fixed bottom-[5.5rem] left-1/2 z-[60] max-w-[calc(100vw-2rem)] -translate-x-1/2 truncate rounded-sm border border-line bg-elev px-4 py-2.5 text-sm text-fg transition-opacity duration-[var(--motion-quick)] desk:bottom-6",
-          toast ? "opacity-100" : "opacity-0",
-        )}
-      >
-        {toast}
-      </div>
     </div>
   );
 }

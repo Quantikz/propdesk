@@ -1,4 +1,5 @@
 import { getFirm } from "./engine";
+import { catalogOverlay } from "./catalog-cache";
 
 export type PlanKind = "1-step" | "2-step" | "instant" | "futures" | "scale";
 
@@ -137,10 +138,14 @@ export const FIRST: Record<string, FirstPayout> = {
 };
 
 export function plansFor(firmId: string): Plan[] {
+  const over = catalogOverlay()?.plans[firmId];
+  if (over?.length) return over;
   return PLANS[firmId] ?? PLANS.goat;
 }
 
 export function firstPayout(firmId: string): FirstPayout {
+  const over = catalogOverlay()?.first[firmId];
+  if (over) return over;
   return FIRST[firmId] ?? FIRST.goat;
 }
 

@@ -1,4 +1,5 @@
 import { firmList, getFirm, orderFirmIds } from "./engine";
+import { catalogOverlay } from "./catalog-cache";
 import { firstPayout, plansLine, plansPack } from "./plans";
 
 export type FaqItem = { q: string; a: string };
@@ -84,6 +85,8 @@ const PACKS: Record<string, FaqItem[]> = {
 };
 
 export function faqItems(firmId: string): FaqItem[] {
+  const over = catalogOverlay()?.faqs[firmId];
+  if (over?.length) return over;
   return PACKS[firmId] ?? PACKS.ftmo;
 }
 

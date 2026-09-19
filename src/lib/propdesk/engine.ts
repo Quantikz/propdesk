@@ -1,3 +1,4 @@
+import { catalogOverlay } from "./catalog-cache";
 import { KB } from "./knowledge";
 import type { CaseDraft, ChipTone, FileRef, Firm } from "./types";
 
@@ -8,12 +9,22 @@ export function orderFirmIds(ids: string[]): string[] {
   return [...head, ...rest];
 }
 
+function firmMap(): Record<string, Firm> {
+  const overlay = catalogOverlay();
+  if (overlay?.firms.length) {
+    return Object.fromEntries(overlay.firms.map((f) => [f.id, f]));
+  }
+  return KB.firms;
+}
+
 export function getFirm(id: string): Firm {
-  return KB.firms[id] ?? KB.firms.goat ?? KB.firms.ftmo;
+  const map = firmMap();
+  return map[id] ?? map.goat ?? KB.firms.goat ?? KB.firms.ftmo;
 }
 
 export function firmList(): Firm[] {
-  return orderFirmIds(Object.keys(KB.firms)).map((id) => KB.firms[id]);
+  const map = firmMap();
+  return orderFirmIds(Object.keys(map)).map((id) => map[id]);
 }
 
 function uid() {
@@ -119,115 +130,41 @@ export type EngineReply = {
   sources?: { url: string; title?: string }[];
 };
 
-export function think(
-  firm: Firm,
-  userText: string,
-  files: FileRef[],
-  email: string,
-  accountId: string,
-  priorUserTurns = 0,
-): EngineReply {
-  const { intent, topic, selfHit } = classify(userText, files.length > 0);
-  const trimmed = userText.trim();
-  const greet =
-    /^(hi|hello|hey|yo|sup|hiya|good\s+(morning|afternoon|evening)|help|please help|what can you do)[\s!.?]*$/i.test(
-      trimmed,
-    );
-
-  if (intent === "escalate") {
-    const draft = buildCase(firm, userText, files, email, accountId);
-    return {
-      text:
-        `I’ve treated this as a firm-side issue because you described an operational failure and attached evidence.\n\n` +
-        `I compiled a letter to ${firm.name} support (${firm.supportEmail}) with you as reply-to. Read it. Send it only if the facts are right, and attach the same files to the email.\n\n` +
-        KB.disclaimer,
-      chips: [
-        { text: "Firm-fault path", tone: "bad" },
-        { text: draft.id, tone: "warn" },
-        { text: files.length + " file(s)", tone: "ok" },
-      ],
-      caseDraft: draft,
-    };
-  }
-
-  if (intent === "need_evidence") {
-    return {
-      text:
-        `That could be on ${firm.name} — I’m not writing to them yet.\n\n` +
-        `Tell me the sequence first: what you saw, roughly when, and the exact wording on the page or email. If you already have that screen, attach it. I’ll only ask for account details if we actually send a case.`,
-      chips: [
-        { text: "Tell me more", tone: "warn" },
-        { text: firm.short, tone: "" },
-      ],
-    };
-  }
-
-  if (greet || (!topic && priorUserTurns <= 1)) {
-    return {
-      text:
-        `I’m here. What happened on the ${firm.name} account?\n\n` +
-        `Start from what you saw — a number that looked wrong, a payout that didn’t land, a breach you didn’t expect. I’ll ask for screenshots only if we need to write to the firm.`,
-      chips: [{ text: "Listening", tone: "ok" }],
-    };
-  }
-
-  if (topic) {
-    let extra = "";
-    if (selfHit) {
-      extra =
-        "\n\nFrom what you wrote this sounds like a rule you hit, not a back-office error. I can still walk the rule. I won’t email the firm just to relitigate a loss.";
-    } else {
-      extra = "\n\nIf that’s not the screen you’re on, paste what it actually says.";
-    }
-    return {
-      text: topic.answer(firm) + extra,
-      chips: [
-        { text: topic.title, tone: "ok" },
-        { text: firm.short, tone: "" },
-      ],
-    };
-  }
-
-  return {
-    text:
-      `I’ve got that. What did the dashboard or the email actually say — the wording, not a summary?\n\n` +
-      `That’s enough for the next step. Screenshots only if you want this written to ${firm.name}.`,
-    chips: [{ text: "One more beat", tone: "warn" }],
-  };
-}
-
-export function mailtoHref(draft: CaseDraft, email: string) {
-  return `mailto:${encodeURIComponent(draft.to)}?cc=${encodeURIComponent(email)}&subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}`;
-}
-
-export function downloadCase(draft: CaseDraft) {
-  const blob = new Blob([draft.body], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${draft.id}.txt`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
 export const SUGGESTS = [
   {
     title: "Daily drawdown",
     blurb: "Does floating loss count?",
-    prompt: "How does daily drawdown work on this firm, and does floating loss count?",
+    prompt: "Does floating (open) loss count against daily drawdown on this firm, or is it end-of-day / balance based? Check the current rule if the pack is vague.",
   },
   {
     title: "Payouts",
     blurb: "Split, timing, first payout",
-    prompt: "How do payouts work here — split, how often, and what I need before the first one?",
+    prompt: "Walk the first-payout checklist on this firm: KYC, min days, consistency, news, and how to request. Don’t mix 1-step with 2-step.",
   },
   {
     title: "News and EAs",
     blurb: "What is actually allowed?",
-    prompt: "Can I trade news and use an EA on this plan? What gets accounts flagged?",
+    prompt: "Can I trade news and use an EA on a funded account here? What is actually banned vs allowed on the plan?",
   },
   {
     title: "Which plan fits",
     blurb: "1-step, 2-step, or instant",
-    prompt: "I am trying to pick a plan. Help me understand 1-step vs 2-step vs instant on this firm, and when another firm would fit better.",
+    prompt: "Which plan on this firm should I actually buy — 1-step, 2-step, instant, or futures — and what changes on payouts and drawdown?",
   },
 ] as const;
+
+export function mailtoHref(draft: CaseDraft, replyTo: string) {
+  const cc = replyTo ? `&cc=${encodeURIComponent(replyTo)}` : "";
+  return `mailto:${encodeURIComponent(draft.to)}?subject=${encodeURIComponent(draft.subject)}${cc}&body=${encodeURIComponent(draft.body)}`;
+}
+
+export function downloadCase(draft: CaseDraft) {
+  const blob = new Blob([draft.body], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${draft.id}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
