@@ -29,9 +29,13 @@ window.PROPDESK_AI = {
     };
   },
 
-  async complete({ system, messages }) {
+  async complete({ system, messages, user, files }) {
     const s = this.settings();
     if (!s.key) return null;
+
+    const msgs = messages && messages.length
+      ? messages
+      : [{ role: "user", content: (user || "") + (files && files.length ? "\n\nAttached: " + files.join(", ") : "") }];
 
     const url = s.base.replace(/\/$/, "") + "/chat/completions";
     const res = await fetch(url, {
@@ -43,7 +47,7 @@ window.PROPDESK_AI = {
       body: JSON.stringify({
         model: s.model,
         temperature: 0.3,
-        messages: [{ role: "system", content: system }, ...messages],
+        messages: [{ role: "system", content: system }, ...msgs],
       }),
     });
     if (!res.ok) {
