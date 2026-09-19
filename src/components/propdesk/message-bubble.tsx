@@ -31,7 +31,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
               : "rounded-[1.15rem] rounded-bl-sm border border-line bg-elev text-fg",
           )}
         >
-          <div className={cn("whitespace-pre-wrap break-words", isUser && "text-ink")}>
+          <div className={cn("break-words", isUser ? "whitespace-pre-wrap text-ink" : "text-fg")}>
             <RichText text={message.content} />
           </div>
           {message.files && message.files.length > 0 ? (
