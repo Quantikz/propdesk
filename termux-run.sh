@@ -27,8 +27,13 @@ export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=2048}"
 # Optional Live AI. Leave unset to use the FAQ engine.
 # export XAI_API_KEY="xai-..."
 
-LAN_IP="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") { print $(i + 1); exit }}')"
-LAN_IP="${LAN_IP:-$(ip -4 addr show wlan0 2>/dev/null | awk '/inet /{print $2}' | cut -d/ -f1 | head -1)}"
+LAN_IP=""
+if command -v ip >/dev/null 2>&1; then
+  LAN_IP="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") { print $(i + 1); exit }}' || true)"
+  if [[ -z "$LAN_IP" ]]; then
+    LAN_IP="$(ip -4 addr show wlan0 2>/dev/null | awk '/inet /{print $2}' | cut -d/ -f1 | head -1 || true)"
+  fi
+fi
 
 if command -v termux-wake-lock >/dev/null 2>&1; then
   termux-wake-lock || true
