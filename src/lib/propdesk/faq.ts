@@ -1,4 +1,5 @@
 import { firmList, getFirm, orderFirmIds } from "./engine";
+import { firstPayout, plansLine, plansPack } from "./plans";
 
 export type FaqItem = { q: string; a: string };
 
@@ -103,6 +104,8 @@ export function faqPack(firmId: string): string {
     `Size path: ${f.maxAccount}`,
     `Notes: ${f.notes}`,
     "",
+    plansPack(firmId),
+    "",
     ...items.map((i) => `Q: ${i.q}\nA: ${i.a}`),
   ];
   return lines.join("\n");
@@ -130,10 +133,11 @@ export function firmsMentioned(text: string, currentId: string): string[] {
 }
 
 export const COMPARE_ROWS: { key: string; label: string; value: (id: string) => string }[] = [
-  { key: "models", label: "Evaluation", value: (id) => getFirm(id).models.join(" · ") },
+  { key: "plans", label: "Plans", value: (id) => plansLine(id) },
   { key: "platforms", label: "Platforms", value: (id) => getFirm(id).platforms.join(", ") },
   { key: "split", label: "Profit split", value: (id) => getFirm(id).profitSplit },
-  { key: "payout", label: "Payout", value: (id) => getFirm(id).payoutCycle },
+  { key: "first", label: "First payout", value: (id) => firstPayout(id).request },
+  { key: "payout", label: "Payout cycle", value: (id) => getFirm(id).payoutCycle },
   { key: "drawdown", label: "Drawdown", value: (id) => getFirm(id).drawdown },
   { key: "consistency", label: "Consistency", value: (id) => getFirm(id).consistency },
   { key: "news", label: "News", value: (id) => getFirm(id).news },
@@ -165,6 +169,11 @@ export const COMPARE_PROMPTS = [
   {
     title: "Payouts",
     blurb: "Speed and first payout",
-    prompt: "Compare payout speed, split, and what I need before the first payout on these firms.",
+    prompt: "Compare payout speed, split, and the first-payout checklist on these firms. Use the packed plans — 1-step vs 2-step vs instant are not the same book.",
+  },
+  {
+    title: "Which plan",
+    blurb: "1-step, 2-step, instant",
+    prompt: "Of the firms I selected, walk the actual plans (1-step vs 2-step vs instant vs futures). I need to know which SKU I would buy, not a generic firm pitch.",
   },
 ] as const;

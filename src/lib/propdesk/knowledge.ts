@@ -84,7 +84,7 @@ export const KB: KnowledgeBase = {
     goat: {
       id: "goat", name: "Goat Funded Trader", short: "Goat", color: "#eab308",
       supportEmail: "support@goatfundedtrader.com", portal: "https://goatfundedtrader.com",
-      models: ["2-Step", "1-Step"],
+      models: ["1-Step", "2-Step"],
       platforms: ["MT5", "cTrader", "Match-Trader", "TradeLocker"],
       profitSplit: "Up to 80–100% depending on add-ons",
       payoutCycle: "Frequent; confirm current SLA in dashboard",

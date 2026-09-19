@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import {
   count,
-  coveredFirms,
   getPayoutFeed,
   money,
   PFM_LEADERS,
@@ -25,7 +24,6 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 export function PayoutsView() {
   const [feed, setFeed] = useState<PayoutFeed | null>(null);
-  const firms = coveredFirms();
 
   useEffect(() => {
     void getPayoutFeed().then(setFeed);
@@ -34,6 +32,7 @@ export function PayoutsView() {
   const asOf = feed?.asOf
     ? new Date(feed.asOf).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
     : null;
+  const ours = feed?.ours ?? [];
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -51,7 +50,7 @@ export function PayoutsView() {
           <a href={PFM_PAYOUTS} target="_blank" rel="noreferrer" className="text-fg underline-offset-2 hover:underline">
             Prop Firm Match
           </a>
-          . We do not invent a leaderboard. Bank wires that never hit a chain will not show here.
+          . Bank wires that never hit a chain will not show here.
         </p>
 
         {!feed ? (
@@ -93,9 +92,81 @@ export function PayoutsView() {
               />
             </div>
             {asOf ? <p className="mt-2 text-xs text-dim">Junction stamp {asOf}</p> : null}
+          </>
+        )}
 
-            <h3 className="font-display mt-8 text-lg font-semibold">Last 30 days · on-chain</h3>
-            <p className="mt-1 text-xs text-dim">Top share of tracked dollars. Goat Funded Trader is listed with our firms below even if it is not in this top five.</p>
+        <h3 className="font-display mt-8 text-lg font-semibold">Firms on this desk</h3>
+        <p className="mt-1 text-xs text-dim">
+          Goat Funded Trader first. 30-day and all-time are Junction on-chain. FTMO / Apex / Topstep
+          often pay by wire — quiet here does not mean they don’t pay. Match is linked, not copied.
+        </p>
+        <div className="mt-3 overflow-x-auto overscroll-x-contain">
+          <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-10 bg-bg py-2 pr-3 font-medium text-dim">Firm</th>
+                <th className="py-2 pr-3 font-medium text-dim">30 days</th>
+                <th className="py-2 pr-3 font-medium text-dim">Payouts</th>
+                <th className="py-2 pr-3 font-medium text-dim">All-time</th>
+                <th className="py-2 pr-3 font-medium text-dim">Largest</th>
+                <th className="py-2 font-medium text-dim">Open</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ours.map((f) => (
+                <tr key={f.id} className="border-t border-border">
+                  <td className="sticky left-0 z-10 bg-bg py-2.5 pr-3">
+                    <span className="flex items-center gap-2 font-medium">
+                      <span className="size-2 shrink-0 rounded-full" style={{ background: f.color }} />
+                      {f.short}
+                    </span>
+                  </td>
+                  {f.last30d || f.allTime ? (
+                    <>
+                      <td className="py-2.5 pr-3 tabular-nums">{f.last30d ? money(f.last30d.usd) : "—"}</td>
+                      <td className="py-2.5 pr-3 tabular-nums">
+                        {f.last30d ? count(f.last30d.count) : "—"}
+                      </td>
+                      <td className="py-2.5 pr-3 tabular-nums">{f.allTime ? money(f.allTime.usd) : "—"}</td>
+                      <td className="py-2.5 pr-3 tabular-nums">
+                        {f.allTime?.largest ? money(f.allTime.largest) : "—"}
+                      </td>
+                    </>
+                  ) : (
+                    <td className="py-2.5 pr-3 text-muted" colSpan={4}>
+                      Not on this chain — open Match
+                    </td>
+                  )}
+                  <td className="py-2.5">
+                    <span className="flex gap-3 text-xs">
+                      <a
+                        href={f.pj}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-muted hover:text-fg"
+                      >
+                        Junction <ExternalLink className="size-3" />
+                      </a>
+                      <a
+                        href={f.pfm}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-muted hover:text-fg"
+                      >
+                        Match <ExternalLink className="size-3" />
+                      </a>
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {feed?.ok && feed.top30d.length ? (
+          <>
+            <h3 className="font-display mt-8 text-lg font-semibold">Last 30 days · industry top</h3>
+            <p className="mt-1 text-xs text-dim">Share of tracked dollars across all Junction firms, not only this desk.</p>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[28rem] border-collapse text-left text-sm">
                 <thead>
@@ -124,41 +195,7 @@ export function PayoutsView() {
               </p>
             ) : null}
           </>
-        )}
-
-        <h3 className="font-display mt-8 text-lg font-semibold">Firms on this desk</h3>
-        <p className="mt-1 text-xs text-dim">Goat Funded Trader first. Open the live tracker — we do not republish Prop Firm Match’s table.</p>
-        <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {firms.map((f) => (
-            <li
-              key={f.id}
-              className="flex min-h-12 items-center justify-between gap-3 rounded-md border border-line bg-elev px-3.5"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="size-2 shrink-0 rounded-full" style={{ background: f.color }} />
-                <span className="truncate font-medium">{f.name}</span>
-              </span>
-              <span className="flex shrink-0 gap-3 text-xs">
-                <a
-                  href={f.pj}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-muted hover:text-fg"
-                >
-                  Junction <ExternalLink className="size-3" />
-                </a>
-                <a
-                  href={f.pfm}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-muted hover:text-fg"
-                >
-                  Match <ExternalLink className="size-3" />
-                </a>
-              </span>
-            </li>
-          ))}
-        </ul>
+        ) : null}
 
         <p className="mt-6 max-w-2xl text-xs leading-relaxed text-dim">
           Payout Junction figures are free to quote with attribution (
@@ -173,7 +210,7 @@ export function PayoutsView() {
           <a href={PFM_LEADERS} className="underline-offset-2 hover:underline" target="_blank" rel="noreferrer">
             Match trader leaderboard
           </a>
-          . Ask the desk if you want those pages read into an answer.
+          .
         </p>
       </div>
     </div>

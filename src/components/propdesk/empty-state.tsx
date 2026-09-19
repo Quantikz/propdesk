@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SUGGESTS, getFirm } from "@/lib/propdesk/engine";
+import { firstPayout, plansFor } from "@/lib/propdesk/plans";
 import { useDeskStore } from "@/lib/propdesk/store";
 
 export function EmptyState() {
@@ -8,6 +9,8 @@ export function EmptyState() {
   const send = useDeskStore((s) => s.send);
   const sending = useDeskStore((s) => s.sending);
   const firm = getFirm(firmId);
+  const fp = firstPayout(firmId);
+  const plans = plansFor(firmId);
 
   return (
     <div className="flex w-full flex-1 flex-col justify-start px-1 desk:justify-center">
@@ -33,6 +36,33 @@ export function EmptyState() {
           Payouts issued
         </Link>
       </div>
+
+      <div className="mt-5 max-w-lg rounded-lg border border-line bg-elev px-3.5 py-3">
+        <p className="text-[11px] tracking-[0.12em] text-dim uppercase">Plans on this firm</p>
+        <p className="mt-1.5 text-sm text-fg">{plans.map((p) => p.name).join(" · ")}</p>
+        <p className="mt-1 text-xs text-muted">
+          {plans[0]?.note} Don’t mix 1-step numbers with 2-step.
+        </p>
+        <p className="mt-3 text-[11px] tracking-[0.12em] text-dim uppercase">First payout</p>
+        <ul className="mt-1.5 space-y-1 text-sm text-muted">
+          <li>
+            <span className="text-fg">KYC.</span> {fp.kyc}
+          </li>
+          <li>
+            <span className="text-fg">Days.</span> {fp.minDays}
+          </li>
+          <li>
+            <span className="text-fg">Consistency.</span> {fp.consistency}
+          </li>
+          <li>
+            <span className="text-fg">News.</span> {fp.news}
+          </li>
+          <li>
+            <span className="text-fg">Request.</span> {fp.request}
+          </li>
+        </ul>
+      </div>
+
       <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
         {SUGGESTS.map((s) => (
           <button
