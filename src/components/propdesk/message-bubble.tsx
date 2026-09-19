@@ -14,7 +14,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
   return (
-    <article className="pd-msg grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 py-4 first:pt-0 desk:gap-4 desk:py-5">
+    <article className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 py-4 first:pt-0 desk:gap-4 desk:py-5">
       {isUser ? (
         <div className="grid size-9 place-items-center rounded-lg bg-user-av text-xs font-bold shadow-[var(--shadow-border)]">
           {initial}
@@ -63,7 +63,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
           </div>
         ) : null}
         {message.caseDraft ? (
-          <div className="glass mt-3.5 rounded-xl p-3.5 desk:p-4">
+          <div className="mt-3.5 rounded-md border border-line bg-elev p-3.5 desk:p-4">
             <h4 className="mb-2 text-sm font-semibold">Escalation case — ready to send</h4>
             <pre className="max-h-52 overflow-auto whitespace-pre-wrap rounded-lg bg-bg/70 p-3 font-mono text-xs leading-relaxed text-muted">
               {message.caseDraft.body}
@@ -108,7 +108,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
 export function TypingRow() {
   return (
-    <article className="pd-msg grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 py-4 desk:gap-4">
+    <article className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 py-4 desk:gap-4">
       <Logo className="size-9" />
       <div>
         <div className="mb-1.5 text-sm font-semibold">PropDesk</div>
@@ -116,7 +116,7 @@ export function TypingRow() {
           {[0, 1, 2].map((i) => (
             <i
               key={i}
-              className="size-1.5 rounded-full bg-accent"
+              className="size-1.5 rounded-full bg-fg"
               style={{
                 animation: "pd-blink 1.2s infinite",
                 animationDelay: `${i * 0.15}s`,

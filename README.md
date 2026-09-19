@@ -59,12 +59,14 @@ bash $HOME/propdesk-run.sh
 
 On this phone open **http://127.0.0.1:8080**. The script also prints a Wi-Fi address (`http://YOUR-PHONE-IP:8080`) so a laptop on the same network can open it.
 
-Optional Live AI in that Termux session:
+The top bar has **FAQ | Live**. FAQ works with no key. Live searches the firm’s site and needs an xAI key on Termux:
 
 ```bash
 export XAI_API_KEY="xai-..."
-bash ~/propdesk-run.sh
+bash $HOME/propdesk-run.sh
 ```
+
+Or paste the key in **Answer mode** (sidebar) — it stays on this device only.
 
 If `pkg install nodejs` fails, try `pkg install nodejs-lts`. If install runs out of memory, close other apps and rerun — PropDesk needs a real Node install, not Python’s http.server.
 

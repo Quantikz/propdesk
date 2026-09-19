@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Chat, ChatMessage, PendingFile } from "./types";
-import { completeTicket } from "./complete";
+import { completeTicket, getAiStatus } from "./complete";
 import { classify, getFirm, isValidEmail, think, type EngineReply } from "./engine";
 
 function uid() {
@@ -21,6 +21,7 @@ type DeskState = {
   profileForce: boolean;
   aiOpen: boolean;
   liveAi: boolean;
+  clientKey: string;
   toast: string | null;
   setFirm: (id: string) => void;
   setEmail: (v: string) => void;
@@ -32,6 +33,7 @@ type DeskState = {
   openAi: () => void;
   closeAi: () => void;
   setLiveAi: (v: boolean) => void;
+  setClientKey: (v: string) => void;
   showToast: (msg: string) => void;
   newChat: () => void;
   openChat: (id: string) => void;
@@ -58,6 +60,7 @@ export const useDeskStore = create<DeskState>()(
       profileForce: false,
       aiOpen: false,
       liveAi: true,
+      clientKey: "",
       toast: null,
 
       setFirm: (id) => {
@@ -80,8 +83,20 @@ export const useDeskStore = create<DeskState>()(
       openAi: () => set({ aiOpen: true, sidebarOpen: false }),
       closeAi: () => set({ aiOpen: false }),
       setLiveAi: (v) => {
-        set({ liveAi: v, aiOpen: false });
-        get().showToast(v ? "Live AI on — Grok will reply" : "Live AI off — FAQ engine only");
+        set({ liveAi: v });
+        get().showToast(v ? "Live on — searches the firm site" : "FAQ on — snapshot only");
+        if (v && !get().clientKey) {
+          void getAiStatus()
+            .then((s) => {
+              if (!s.hosted) get().openAi();
+            })
+            .catch(() => get().openAi());
+        }
+      },
+      setClientKey: (v) => {
+        const key = v.trim();
+        set({ clientKey: key.startsWith("xai-") ? key : "" });
+        if (key.startsWith("xai-")) get().showToast("xAI key saved on this device");
       },
       showToast: (msg) => {
         if (toastTimer) clearTimeout(toastTimer);
@@ -182,22 +197,33 @@ export const useDeskStore = create<DeskState>()(
                 accountId,
                 files: files.map((f) => f.name),
                 messages: history,
+                clientKey: get().clientKey,
               },
             });
             if (out.ok) {
               reply = {
                 text: out.text,
                 chips: [
-                  { text: out.sources?.length ? "Live site" : "Live AI", tone: "ok" },
+                  { text: out.sources?.length ? "Live site" : "Live", tone: "ok" },
                   { text: firm.short, tone: "" },
                 ],
                 sources: out.sources ?? [],
+              };
+            } else if (out.error === "AI is not available") {
+              get().openAi();
+              get().showToast("Live needs an xAI key on this device");
+              reply = {
+                text: "Live is on, but this device has no xAI key — so I cannot search the firm site.\n\nPaste a key in Answer mode, or tap FAQ and ask again for the snapshot engine.",
+                chips: [
+                  { text: "No key", tone: "warn" },
+                  { text: firm.short, tone: "" },
+                ],
               };
             }
           }
 
           if (!reply) {
-            if (useLive) get().showToast("Live AI missed — using FAQ engine");
+            if (useLive) get().showToast("Live search missed — FAQ snapshot");
             else await new Promise((r) => setTimeout(r, 280));
             reply = think(firm, text, files, email, accountId);
           }
@@ -233,6 +259,7 @@ export const useDeskStore = create<DeskState>()(
         chats: s.chats,
         activeId: s.activeId,
         liveAi: s.liveAi,
+        clientKey: s.clientKey,
       }),
     },
   ),

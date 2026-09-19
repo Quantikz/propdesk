@@ -35,7 +35,7 @@ export function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "glass fixed top-1/2 left-1/2 z-50 w-[min(32.5rem,calc(100vw-1.5rem))] max-h-[min(88dvh,40rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl p-5",
+          "fixed top-1/2 left-1/2 z-50 w-[min(32.5rem,calc(100vw-1.5rem))] max-h-[min(88dvh,40rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-line bg-elev p-5 shadow-[0_16px_40px_rgba(0,0,0,0.45)]",
           "focus:outline-none",
           className,
         )}

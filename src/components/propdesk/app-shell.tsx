@@ -41,11 +41,10 @@ export function AppShell() {
 
   return (
     <div
-      className="pd-shell relative flex h-dvh min-h-0 overflow-hidden text-fg"
+      className="relative flex h-dvh min-h-0 overflow-hidden bg-bg text-fg"
       style={{ "--firm": firm.color } as CSSProperties}
     >
-      <div className="pd-grid pointer-events-none absolute inset-0" aria-hidden />
-      <aside className="relative z-10 hidden h-full w-72 shrink-0 flex-col border-r border-border/80 desk:flex">
+      <aside className="relative z-10 hidden h-full w-72 shrink-0 flex-col border-r border-border desk:flex">
         <Sidebar idPrefix="desk" />
       </aside>
 
@@ -59,7 +58,7 @@ export function AppShell() {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(18.75rem,86vw)] flex-col glass shadow-[8px_0_32px_rgba(0,0,0,0.45)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(18.75rem,86vw)] flex-col border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.4)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!sidebarOpen}
@@ -68,7 +67,7 @@ export function AppShell() {
         <Sidebar idPrefix="mobile" onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
-      <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
+      <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-l-2 border-l-[var(--firm)]">
         <Topbar />
         <Thread />
         <Composer />
@@ -80,7 +79,7 @@ export function AppShell() {
       <div
         role="status"
         className={cn(
-          "pointer-events-none fixed bottom-[5.5rem] left-1/2 z-[60] max-w-[calc(100vw-2rem)] -translate-x-1/2 truncate rounded-full glass px-4 py-2.5 text-sm text-fg transition-opacity duration-[var(--motion-quick)] desk:bottom-6",
+          "pointer-events-none fixed bottom-[5.5rem] left-1/2 z-[60] max-w-[calc(100vw-2rem)] -translate-x-1/2 truncate rounded-sm border border-line bg-elev px-4 py-2.5 text-sm text-fg transition-opacity duration-[var(--motion-quick)] desk:bottom-6",
           toast ? "opacity-100" : "opacity-0",
         )}
       >

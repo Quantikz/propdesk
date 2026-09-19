@@ -133,7 +133,8 @@ function extractText(output: unknown[]): string {
 }
 
 export const getAiStatus = createServerFn({ method: "POST" }).handler(async () => {
-  return { available: Boolean(process.env.XAI_API_KEY) };
+  return { hosted: Boolean(process.env.XAI_API_KEY) };
+
 });
 
 type GrokOk = { ok: true; text: string; sources: Source[] };
@@ -224,6 +225,7 @@ export const completeTicket = createServerFn({ method: "POST" })
     accountId: string;
     files: string[];
     messages: ChatTurn[];
+    clientKey?: string;
   }) => ({
     firmId: String(input.firmId || "ftmo"),
     email: String(input.email || "").slice(0, 200),
@@ -233,9 +235,12 @@ export const completeTicket = createServerFn({ method: "POST" })
       role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
       content: String(m.content || "").slice(0, 2000),
     })),
+    clientKey: String(input.clientKey || "").slice(0, 200),
   }))
   .handler(async ({ data }) => {
-    const apiKey = process.env.XAI_API_KEY;
+    const hosted = process.env.XAI_API_KEY || "";
+    const pasted = data.clientKey.startsWith("xai-") ? data.clientKey : "";
+    const apiKey = hosted || pasted;
     if (!apiKey) return { ok: false as const, error: "AI is not available" };
     if (!data.messages.length) return { ok: false as const, error: "no messages" };
 

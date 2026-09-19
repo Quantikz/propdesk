@@ -26,23 +26,25 @@ export function Sidebar({
   const openChat = useDeskStore((s) => s.openChat);
   const deleteChat = useDeskStore((s) => s.deleteChat);
   const openProfile = useDeskStore((s) => s.openProfile);
+  const openAi = useDeskStore((s) => s.openAi);
+  const liveAi = useDeskStore((s) => s.liveAi);
 
   const initial = (email || "T").trim()[0]?.toUpperCase() || "T";
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-sidebar/80 backdrop-blur-xl">
+    <div className="flex h-full min-h-0 w-full flex-col bg-sidebar">
       <div className="flex shrink-0 items-center gap-2.5 px-4 pt-4 pb-3">
         <Logo />
         <div className="min-w-0">
           <h1 className="text-base font-semibold tracking-tight">PropDesk</h1>
-          <p className="text-xs text-dim">Independent trader support</p>
+          <p className="text-xs text-dim">Trader support desk</p>
         </div>
       </div>
 
       <div className="flex shrink-0 gap-2 px-3 pb-3">
         <Button
           variant="new"
-          className="min-h-11 flex-1 glass-soft"
+          className="min-h-11 flex-1"
           onClick={() => {
             newChat();
             onNavigate?.();
@@ -139,6 +141,14 @@ export function Sidebar({
       </div>
 
       <div className="shrink-0 border-t border-border p-3">
+        <button
+          type="button"
+          onClick={() => openAi()}
+          className="mb-1 flex min-h-11 w-full items-center justify-between rounded-lg px-2 text-left text-sm transition-colors duration-[var(--motion-quick)] hover:bg-hover"
+        >
+          <span className="text-muted">Answer mode</span>
+          <span className="font-medium">{liveAi ? "Live" : "FAQ"}</span>
+        </button>
         <button
           type="button"
           onClick={() => openProfile(false)}

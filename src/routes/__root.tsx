@@ -1,11 +1,13 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
+import { AppNotFound } from "@/lib/error-component";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "PropDesk";
 
 export const Route = createRootRoute({
+  notFoundComponent: AppNotFound,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -19,7 +21,7 @@ export const Route = createRootRoute({
         content:
           "Independent support desk for prop-firm traders. Live answers from the firm's current rules, escalate only with evidence.",
       },
-      { name: "theme-color", content: "#090b10" },
+      { name: "theme-color", content: "#0c0d10" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
     ],
     links: [
@@ -31,7 +33,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
       },
     ],
   }),

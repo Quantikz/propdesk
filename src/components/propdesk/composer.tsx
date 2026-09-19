@@ -47,7 +47,7 @@ export function Composer() {
 
   return (
     <div className="shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 desk:px-4 desk:pb-5">
-      <div className="glass mx-auto w-full max-w-[780px] rounded-2xl px-2 py-2 desk:rounded-[28px] desk:px-3 desk:py-2">
+      <div className="mx-auto w-full max-w-[780px] rounded-md border border-line bg-input px-2 py-1.5 desk:px-3 desk:py-2">
         {pendingFiles.length > 0 ? (
           <div className="flex flex-wrap gap-1.5 px-2 pt-1 pb-2">
             {pendingFiles.map((f, i) => (
