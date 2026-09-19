@@ -24,7 +24,18 @@ export function getFirm(id: string): Firm {
 
 export function firmList(): Firm[] {
   const map = firmMap();
-  return orderFirmIds(Object.keys(map)).map((id) => map[id]);
+  const seen = new Set<string>();
+  const out: Firm[] = [];
+  for (const id of orderFirmIds(Object.keys(map))) {
+    const f = map[id];
+    if (!f) continue;
+    const key = f.name.trim().toLowerCase();
+    if (seen.has(id) || seen.has(key)) continue;
+    seen.add(id);
+    seen.add(key);
+    out.push(f);
+  }
+  return out;
 }
 
 function uid() {
@@ -134,7 +145,7 @@ export const SUGGESTS = [
   {
     title: "Daily drawdown",
     blurb: "Does floating loss count?",
-    prompt: "Does floating (open) loss count against daily drawdown on this firm, or is it end-of-day / balance based? Check the current rule if the pack is vague.",
+    prompt: "Does floating (open) loss count against daily drawdown on this firm, or is it end-of-day / balance based?",
   },
   {
     title: "Payouts",
@@ -167,4 +178,3 @@ export function downloadCase(draft: CaseDraft) {
   a.click();
   URL.revokeObjectURL(url);
 }
-
