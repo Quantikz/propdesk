@@ -1,4 +1,5 @@
-import { Banknote, Columns2, Plus, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { Banknote, Columns2, Inbox, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,33 @@ import { Logo } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 import { cn } from "@/lib/utils";
+
+const fieldLabel = "mb-1.5 block text-sm font-medium normal-case tracking-normal text-muted";
+
+function NavLink({
+  to,
+  active,
+  onNavigate,
+  children,
+}: {
+  to: "/" | "/compare" | "/payouts";
+  active: boolean;
+  onNavigate?: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      to={to}
+      onClick={onNavigate}
+      className={cn(
+        "flex min-h-12 items-center gap-3 rounded-lg px-3 text-base font-medium",
+        active ? "bg-paper text-ink" : "text-muted hover:bg-hover hover:text-fg",
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
 
 export function Sidebar({
   onNavigate,
@@ -37,18 +65,18 @@ export function Sidebar({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-sidebar">
-      <div className="flex shrink-0 items-center gap-2.5 px-4 pt-4 pb-3">
+      <div className="flex shrink-0 items-center gap-3 px-4 pt-5 pb-4">
         <Logo />
         <div className="min-w-0">
           <h1 className="brand-name">PropDesk</h1>
-          <p className="text-xs text-dim">24/7 · replies in seconds</p>
+          <p className="mt-0.5 text-sm text-muted">24/7 · replies in seconds</p>
         </div>
       </div>
 
-      <div className="flex shrink-0 gap-2 px-3 pb-3">
+      <div className="shrink-0 px-3 pb-3">
         <Button
           variant="new"
-          className="min-h-11 flex-1"
+          className="h-12 min-h-12 w-full text-base"
           onClick={() => {
             newChat();
             void navigate({ to: "/" });
@@ -60,60 +88,44 @@ export function Sidebar({
         </Button>
       </div>
 
-      <nav className="flex shrink-0 flex-col gap-1 px-3 pb-3">
-        <Link
-          to="/"
-          onClick={onNavigate}
-          className={cn(
-            "flex min-h-11 items-center rounded-md px-3 text-sm font-medium",
-            onDesk ? "bg-hover text-fg" : "text-muted hover:text-fg",
-          )}
-        >
+      <nav className="mx-3 mb-4 flex shrink-0 flex-col gap-1 rounded-xl border border-line bg-elev p-1.5">
+        <NavLink to="/" active={onDesk} onNavigate={onNavigate}>
+          <Inbox className="size-5 shrink-0" />
           Desk
-        </Link>
-        <Link
-          to="/compare"
-          onClick={onNavigate}
-          className={cn(
-            "flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium",
-            onCompare ? "bg-hover text-fg" : "text-muted hover:text-fg",
-          )}
-        >
-          <Columns2 className="size-4" />
-          Compare firms
-        </Link>
-        <Link
-          to="/payouts"
-          onClick={onNavigate}
-          className={cn(
-            "flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium",
-            onPayouts ? "bg-hover text-fg" : "text-muted hover:text-fg",
-          )}
-        >
-          <Banknote className="size-4" />
-          Payouts issued
-        </Link>
+        </NavLink>
+        <NavLink to="/compare" active={onCompare} onNavigate={onNavigate}>
+          <Columns2 className="size-5 shrink-0" />
+          Compare
+        </NavLink>
+        <NavLink to="/payouts" active={onPayouts} onNavigate={onNavigate}>
+          <Banknote className="size-5 shrink-0" />
+          Payouts
+        </NavLink>
       </nav>
 
-      <div className="shrink-0 px-3 pb-3">
-        <Label htmlFor={`${idPrefix}-firmSelect`}>Prop firm</Label>
-        <select
-          id={`${idPrefix}-firmSelect`}
-          value={firmId}
-          onChange={(e) => setFirm(e.target.value)}
-          className="h-11 w-full min-w-0 rounded-md border border-line bg-input px-3 text-base text-fg outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/25 desk:text-sm"
-        >
-          {firmList().map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid shrink-0 gap-2 px-3 pb-3">
+      <div className="mx-3 mb-3 shrink-0 rounded-xl border border-line bg-elev p-3.5">
+        <p className="mb-3 text-sm font-medium text-fg">This trader</p>
         <div>
-          <Label htmlFor={`${idPrefix}-userEmail`}>Your email (reply-to)</Label>
+          <Label htmlFor={`${idPrefix}-firmSelect`} className={fieldLabel}>
+            Firm
+          </Label>
+          <select
+            id={`${idPrefix}-firmSelect`}
+            value={firmId}
+            onChange={(e) => setFirm(e.target.value)}
+            className="h-12 w-full min-w-0 rounded-md border border-line bg-input px-3 text-base text-fg outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/25"
+          >
+            {firmList().map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mt-3">
+          <Label htmlFor={`${idPrefix}-userEmail`} className={fieldLabel}>
+            Email
+          </Label>
           <Input
             id={`${idPrefix}-userEmail`}
             type="email"
@@ -122,35 +134,37 @@ export function Sidebar({
             placeholder="you@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="h-12 text-base"
           />
         </div>
-        <div>
-          <Label htmlFor={`${idPrefix}-accountId`}>Account / login ID</Label>
+        <div className="mt-3">
+          <Label htmlFor={`${idPrefix}-accountId`} className={fieldLabel}>
+            Account ID
+          </Label>
           <Input
             id={`${idPrefix}-accountId`}
             type="text"
             autoComplete="off"
-            placeholder="e.g. FN-104928 or 5120347"
+            placeholder="FN-104928"
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
+            className="h-12 text-base"
           />
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 pb-2">
-        <h2 className="shrink-0 px-2 py-2 font-sans text-xs font-medium uppercase tracking-[0.08em] text-dim">
-          Tickets
-        </h2>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 pb-2">
+        <h2 className="shrink-0 px-1 pb-2 text-sm font-medium text-fg">Tickets</h2>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-line bg-elev">
           {chats.length === 0 ? (
-            <div className="px-2.5 py-2 text-sm text-muted">No tickets yet</div>
+            <div className="px-3.5 py-3 text-sm text-muted">No tickets yet</div>
           ) : (
             chats.map((c) => (
               <div
                 key={c.id}
                 className={cn(
-                  "group flex items-center gap-1 rounded-lg transition-colors duration-[var(--motion-quick)]",
-                  c.id === activeId && "bg-hover shadow-[var(--shadow-border)]",
+                  "group flex items-center gap-1 border-b border-border last:border-b-0",
+                  c.id === activeId && "bg-hover",
                 )}
               >
                 <button
@@ -160,7 +174,7 @@ export function Sidebar({
                     onNavigate?.();
                   }}
                   className={cn(
-                    "min-h-11 min-w-0 flex-1 truncate px-2.5 text-left text-sm",
+                    "min-h-12 min-w-0 flex-1 truncate px-3.5 text-left text-base",
                     c.id === activeId ? "text-fg" : "text-muted hover:text-fg",
                   )}
                 >
@@ -169,10 +183,10 @@ export function Sidebar({
                 <button
                   type="button"
                   aria-label={`Delete ${c.title}`}
-                  className="grid size-11 shrink-0 place-items-center text-dim opacity-100 hover:text-fg desk:opacity-0 desk:group-hover:opacity-100"
+                  className="grid size-12 shrink-0 place-items-center text-dim hover:text-fg"
                   onClick={() => deleteChat(c.id)}
                 >
-                  <Trash2 className="size-3.5" />
+                  <Trash2 className="size-4" />
                 </button>
               </div>
             ))
@@ -184,14 +198,14 @@ export function Sidebar({
         <button
           type="button"
           onClick={() => openProfile(false)}
-          className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-2 text-left transition-colors duration-[var(--motion-quick)] hover:bg-hover"
+          className="flex min-h-12 w-full items-center gap-3 rounded-lg px-2 text-left hover:bg-hover"
         >
-          <div className="grid size-8 shrink-0 place-items-center rounded-full bg-user-av text-sm font-semibold">
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-user-av text-base font-semibold">
             {initial}
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{email || "Trader"}</div>
-            <small className="block truncate text-xs text-dim">
+            <div className="truncate text-base font-medium">{email || "Trader"}</div>
+            <small className="block truncate text-sm text-dim">
               {accountId ? `Acct ${accountId}` : "Add email & account ID"}
             </small>
           </div>

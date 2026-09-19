@@ -49,7 +49,7 @@ export function AppShell() {
       className="relative flex h-dvh min-h-0 overflow-hidden bg-bg text-fg"
       style={{ "--firm": firm.color } as CSSProperties}
     >
-      <aside className="relative z-10 hidden h-full w-72 shrink-0 flex-col border-r border-border desk:flex">
+      <aside className="relative z-10 hidden h-full w-80 shrink-0 flex-col border-r border-border desk:flex">
         <Sidebar idPrefix="desk" />
       </aside>
 
@@ -63,7 +63,7 @@ export function AppShell() {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(18.75rem,86vw)] flex-col border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.4)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(20rem,90vw)] flex-col border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.4)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!sidebarOpen}
