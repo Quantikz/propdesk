@@ -1,12 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@import "tailwindcss";
-@import "tw-animate-css";
-
 @theme {
   --font-sans: "Source Sans 3", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", serif;
+  --font-display: "Source Serif 4", "Source Serif Pro", "Georgia", "Times New Roman", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --color-bg: #141210;
@@ -65,6 +62,8 @@
     background: var(--color-bg);
     color: var(--color-fg);
     font-family: var(--font-sans);
+    font-size: 1.0125rem;
+    line-height: 1.5;
     overflow: hidden;
   }
 
@@ -77,13 +76,35 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    letter-spacing: -0.038em;
+    line-height: 1.12;
     text-wrap: balance;
   }
 
   p {
     text-wrap: pretty;
   }
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: clamp(1.95rem, 1.15rem + 2.6vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
 }
 
 @keyframes pd-blink {

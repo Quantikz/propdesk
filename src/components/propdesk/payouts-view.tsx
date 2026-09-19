@@ -16,7 +16,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
   return (
     <div className="rounded-md border border-line bg-elev px-3.5 py-3">
       <p className="text-[11px] tracking-[0.12em] text-dim uppercase">{label}</p>
-      <p className="font-display mt-1 text-xl font-semibold tabular-nums">{value}</p>
+      <p className="font-display mt-1 text-2xl font-bold tabular-nums tracking-tight">{value}</p>
       {sub ? <p className="mt-1 text-xs text-muted">{sub}</p> : null}
     </div>
   );
@@ -38,7 +38,7 @@ export function PayoutsView() {
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
       <div className="mx-auto w-full max-w-[1100px] px-4 py-5 desk:px-6 desk:py-7">
         <p className="text-[11px] tracking-[0.14em] text-dim uppercase">Issued payouts</p>
-        <h2 className="font-display mt-2 text-2xl font-semibold tracking-tight desk:text-[1.85rem]">
+        <h2 className="page-title mt-2">
           Who actually paid
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
@@ -95,7 +95,7 @@ export function PayoutsView() {
           </>
         )}
 
-        <h3 className="font-display mt-8 text-lg font-semibold">Firms on this desk</h3>
+        <h3 className="font-display mt-8 text-xl font-bold tracking-tight">Firms on this desk</h3>
         <p className="mt-1 text-xs text-dim">
           Goat Funded Trader first. 30-day and all-time are Junction on-chain. FTMO / Apex / Topstep
           often pay by wire — quiet here does not mean they don’t pay. Match is linked, not copied.
@@ -165,7 +165,7 @@ export function PayoutsView() {
 
         {feed?.ok && feed.top30d.length ? (
           <>
-            <h3 className="font-display mt-8 text-lg font-semibold">Last 30 days · industry top</h3>
+            <h3 className="font-display mt-8 text-xl font-bold tracking-tight">Last 30 days · industry top</h3>
             <p className="mt-1 text-xs text-dim">Share of tracked dollars across all Junction firms, not only this desk.</p>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[28rem] border-collapse text-left text-sm">

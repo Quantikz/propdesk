@@ -15,7 +15,7 @@ export function EmptyState() {
   return (
     <div className="flex w-full flex-1 flex-col justify-start px-1 desk:justify-center">
       <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · 24/7 FAQ</p>
-      <h2 className="font-display mt-2 max-w-lg text-2xl font-semibold tracking-tight desk:text-[1.85rem]">
+      <h2 className="page-title mt-2 max-w-lg">
         Ask anything about {firm.name}
       </h2>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted">

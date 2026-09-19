@@ -33,7 +33,7 @@ export function Topbar({
             style={{ background: "var(--firm)" }}
             aria-hidden
           />
-          <span className="truncate font-display text-sm font-semibold desk:text-base">
+          <span className="truncate font-display text-base font-bold tracking-tight desk:text-lg">
             {payouts ? "Payouts" : comparing ? "Compare" : firm.short}
             <span className="ml-1.5 font-sans font-medium text-dim">24/7</span>
           </span>

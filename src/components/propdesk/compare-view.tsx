@@ -28,7 +28,7 @@ export function CompareView() {
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="mx-auto w-full max-w-[1100px] px-4 py-5 desk:px-6 desk:py-7">
           <p className="text-[11px] tracking-[0.14em] text-dim uppercase">Side by side</p>
-          <h2 className="font-display mt-2 text-2xl font-semibold tracking-tight desk:text-[1.85rem]">
+          <h2 className="page-title mt-2">
             Compare firms
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
@@ -77,7 +77,7 @@ export function CompareView() {
                     <th key={f.id} className="min-w-[10.5rem] bg-bg px-3 py-3 align-bottom">
                       <div className="flex items-center gap-2">
                         <span className="size-2 rounded-full" style={{ background: f.color }} />
-                        <span className="font-display text-base font-semibold">{f.short}</span>
+                        <span className="font-display text-lg font-bold tracking-tight">{f.short}</span>
                       </div>
                       <div className="mt-1 text-xs font-normal text-dim">{f.name}</div>
                     </th>

@@ -40,7 +40,7 @@ export function Sidebar({
       <div className="flex shrink-0 items-center gap-2.5 px-4 pt-4 pb-3">
         <Logo />
         <div className="min-w-0">
-          <h1 className="font-display text-base font-semibold tracking-tight">PropDesk</h1>
+          <h1 className="brand-name">PropDesk</h1>
           <p className="text-xs text-dim">24/7 · replies in seconds</p>
         </div>
       </div>
