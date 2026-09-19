@@ -1,8 +1,6 @@
-import type { ReactNode } from "react";
-import { Banknote, Columns2, Inbox, Plus, Trash2 } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Banknote, ChevronDown, Columns2, Inbox, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
@@ -33,6 +31,54 @@ function NavLink({
   );
 }
 
+function FirmPicker({ idPrefix }: { idPrefix: string }) {
+  const firmId = useDeskStore((s) => s.firmId);
+  const setFirm = useDeskStore((s) => s.setFirm);
+  const [open, setOpen] = useState(false);
+  const firms = firmList();
+  const current = firms.find((f) => f.id === firmId) ?? firms[0];
+  const listId = `${idPrefix}-firms`;
+
+  return (
+    <div className="mt-4 px-2">
+      <p className="px-3 pb-1 text-sm text-muted">Firm</p>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={listId}
+        className="flex h-12 w-full items-center justify-between gap-2 rounded-md px-3 text-left text-base font-medium text-fg hover:bg-hover"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="min-w-0 truncate">{current.name}</span>
+        <ChevronDown
+          className={cn("size-4 shrink-0 text-dim transition-transform duration-[var(--motion-quick)]", open && "rotate-180")}
+        />
+      </button>
+      {open ? (
+        <ul id={listId} className="mt-1">
+          {firms.map((f) => (
+            <li key={f.id}>
+              <button
+                type="button"
+                className={cn(
+                  "flex min-h-11 w-full items-center rounded-md px-3 text-left text-base",
+                  f.id === firmId ? "text-fg" : "text-muted hover:bg-hover hover:text-fg",
+                )}
+                onClick={() => {
+                  setFirm(f.id);
+                  setOpen(false);
+                }}
+              >
+                {f.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 export function Sidebar({
   onNavigate,
   idPrefix = "desk",
@@ -40,12 +86,10 @@ export function Sidebar({
   onNavigate?: () => void;
   idPrefix?: string;
 }) {
-  const firmId = useDeskStore((s) => s.firmId);
   const email = useDeskStore((s) => s.email);
   const accountId = useDeskStore((s) => s.accountId);
   const chats = useDeskStore((s) => s.chats);
   const activeId = useDeskStore((s) => s.activeId);
-  const setFirm = useDeskStore((s) => s.setFirm);
   const newChat = useDeskStore((s) => s.newChat);
   const openChat = useDeskStore((s) => s.openChat);
   const deleteChat = useDeskStore((s) => s.deleteChat);
@@ -69,22 +113,22 @@ export function Sidebar({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="px-3 pt-3">
-          <Button
-            variant="default"
-            className="h-12 min-h-12 w-full justify-start text-base"
+        <div className="px-2 pt-2">
+          <button
+            type="button"
+            className="flex h-12 w-full items-center gap-3 rounded-md px-3 text-base font-medium text-muted hover:bg-hover hover:text-fg"
             onClick={() => {
               newChat();
               void navigate({ to: "/" });
               onNavigate?.();
             }}
           >
-            <Plus />
+            <Plus className="size-5 shrink-0" />
             New ticket
-          </Button>
+          </button>
         </div>
 
-        <nav className="mt-2 flex flex-col gap-0.5 px-2">
+        <nav className="mt-1 flex flex-col gap-0.5 px-2">
           <NavLink to="/" active={onDesk} onNavigate={onNavigate}>
             <Inbox className="size-5 shrink-0" />
             Desk
@@ -99,66 +143,45 @@ export function Sidebar({
           </NavLink>
         </nav>
 
-        <div className="mt-4 px-3">
-          <Label
-            htmlFor={`${idPrefix}-firmSelect`}
-            className="mb-1.5 block text-sm font-medium normal-case tracking-normal text-muted"
-          >
-            Firm
-          </Label>
-          <select
-            id={`${idPrefix}-firmSelect`}
-            value={firmId}
-            onChange={(e) => setFirm(e.target.value)}
-            className="h-12 w-full min-w-0 rounded-md border-0 bg-hover px-3 text-base text-fg outline-none focus-visible:ring-2 focus-visible:ring-paper/30"
-          >
-            {firmList().map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FirmPicker idPrefix={idPrefix} />
 
         <div className="px-2 pt-4 pb-3">
-          <h2 className="px-2 pb-1 text-sm font-medium text-muted">Tickets</h2>
-          <div>
-            {chats.length === 0 ? (
-              <div className="px-2 py-2 text-sm text-dim">No tickets yet</div>
-            ) : (
-              chats.map((c) => (
-                <div
-                  key={c.id}
+          <h2 className="px-3 pb-1 text-sm font-medium text-muted">Tickets</h2>
+          {chats.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-dim">No tickets yet</div>
+          ) : (
+            chats.map((c) => (
+              <div
+                key={c.id}
+                className={cn(
+                  "group flex items-center gap-1 rounded-md",
+                  c.id === activeId && "bg-hover",
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    openChat(c.id);
+                    onNavigate?.();
+                  }}
                   className={cn(
-                    "group flex items-center gap-1 rounded-md",
-                    c.id === activeId && "bg-hover",
+                    "min-h-12 min-w-0 flex-1 truncate px-3 text-left text-base",
+                    c.id === activeId ? "text-fg" : "text-muted hover:text-fg",
                   )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      openChat(c.id);
-                      onNavigate?.();
-                    }}
-                    className={cn(
-                      "min-h-12 min-w-0 flex-1 truncate px-3.5 text-left text-base",
-                      c.id === activeId ? "text-fg" : "text-muted hover:text-fg",
-                    )}
-                  >
-                    {c.title}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Delete ${c.title}`}
-                    className="grid size-12 shrink-0 place-items-center text-dim hover:text-fg"
-                    onClick={() => deleteChat(c.id)}
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
+                  {c.title}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${c.title}`}
+                  className="grid size-12 shrink-0 place-items-center text-dim hover:text-fg"
+                  onClick={() => deleteChat(c.id)}
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
