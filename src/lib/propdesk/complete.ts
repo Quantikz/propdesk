@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getFirm } from "./engine";
+import { getFirm, orderFirmIds } from "./engine";
 import { compareTable, faqPack, firmRoster, firmsMentioned } from "./faq";
 import { KB } from "./knowledge";
 
@@ -21,6 +21,11 @@ function firmDomains(firmId: string): string[] {
     the5ers: ["help.the5ers.com"],
     topstep: ["help.topstep.com", "www.topstep.com"],
     apex: ["support.apextraderfunding.com"],
+    goat: ["goatfundedtrader.com", "www.goatfundedtrader.com"],
+    fundingpips: ["fundingpips.com", "www.fundingpips.com"],
+    e8: ["e8markets.com", "www.e8markets.com"],
+    instant: ["instantfunding.io", "www.instantfunding.io"],
+    acg: ["alphacapitalgroup.uk", "www.alphacapitalgroup.uk"],
   };
   return Array.from(new Set([host, ...(extras[firmId] ?? [])])).slice(0, 4);
 }
@@ -36,6 +41,15 @@ function lastUserText(messages: ChatTurn[]) {
   return "";
 }
 
+function siteLines(ids: string[]): string {
+  return orderFirmIds(ids)
+    .map((id) => {
+      const f = getFirm(id);
+      return `- ${f.name}: ${f.portal}`;
+    })
+    .join("\n");
+}
+
 function needsWebSearch(text: string) {
   const t = text.toLowerCase();
   return (
@@ -43,7 +57,9 @@ function needsWebSearch(text: string) {
     /highest payout|biggest payout|single payout|largest payout|payout proof|who paid|must pay/.test(t) ||
     /average (payout|processing)|processing time|how long.{0,20}payout|payout.{0,20}(sla|speed|time)/.test(t) ||
     /leaderboard|most paid|reliability|do they (actually )?pay/.test(t) ||
-    /\b(check|verify|confirm|live look|look up|search|current rule)\b/.test(t)
+    /\b(check|chexk|verify|confirm|look up|search|website|web site|firm site|official|live page|their page|their site)\b/.test(
+      t,
+    )
   );
 }
 
@@ -56,29 +72,38 @@ function systemPrompt(
 ) {
   const blob = messages.map((m) => m.content).join("\n");
   const mentioned = firmsMentioned(blob, firmId);
-  const packIds =
+  const packIds = orderFirmIds(
     mode === "compare"
-      ? Array.from(new Set([...firmIds, ...mentioned])).slice(0, 4)
-      : Array.from(new Set([firmId, ...mentioned])).slice(0, 4);
+      ? Array.from(new Set([...firmIds, ...mentioned]))
+      : Array.from(new Set([firmId, ...mentioned])),
+  ).slice(0, 4);
   const packs = packIds.map((id) => faqPack(id)).join("\n\n");
   const names = packIds.map((id) => getFirm(id).name).join(", ");
-  const table = mode === "compare" ? compareTable(firmIds.length ? firmIds : packIds) : "";
+  const table = mode === "compare" ? compareTable(packIds) : "";
   const who = mode === "compare" ? names : getFirm(firmId).name;
 
-  const liveBlock = live
-    ? `The FAQ pack does not answer this. Search the public web first — official firm pages, help centers, and recent payout-proof / processing-time reports. Then answer with what you found. Do not say you will look it up later. Do not say “the pack doesn’t have it” without searching. If there is no ranked last-month leaderboard, say that after the search and report published split, advertised processing time, and any recent payout-proof commentary. Name sources in plain words.`
-    : `Answer from the FAQ packs. Do not search.`;
+  return `You work PropDesk’s ${mode === "compare" ? "compare" : "FAQ"} desk for ${who}. Pre-support: you answer questions. You do not open tickets or email firms.
 
-  return `You work PropDesk’s ${mode === "compare" ? "compare" : "FAQ"} desk for ${who}. Pre-support only — no tickets, no emails to firms.
+You CAN and SHOULD open live firm websites. Checking the official pages is in scope. Never say searching or scraping is out of scope. Never say this desk does not check live sites.
 
-${liveBlock}
+How to know things:
+- Use the FAQ pack for standard rules when it already answers.
+- If the pack is silent, vague, or the trader asks to check the site / current / last-month / highest / average figures — search the official pages below and answer from what you find.
+- Official pages beat the pack when they disagree.
+- If a ranked last-month payout leaderboard is not published, say that after looking, then report published split and advertised processing time.
+- When you list firms, put Goat Funded Trader first if it is in the set. Do not invent facts for it.
 
-Voice: plain speech, short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. Do not invent fees, retries, dates, or a fake leaderboard. No trade signals.
+Official pages to open:
+${siteLines(packIds)}
 
-${mode === "compare" ? `Compare snapshot:\n${table}\n` : ""}FAQ packs (background only${live ? " — search beats these if they disagree" : ""}):
+Voice: plain speech, short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. No fake leaderboards. No trade signals.
+
+${live ? "Search now. Then answer. Do not say you will look later." : "Answer from the pack. You may still mention the official URL if they should confirm a number."}
+
+${mode === "compare" ? `Compare snapshot:\n${table}\n` : ""}FAQ packs (background; live pages win):
 ${packs}
 
-${mode === "compare" ? "" : `Other firms we cover:\n${firmRoster()}\n`}
+${mode === "compare" ? "" : `Other firms we cover (Goat Funded Trader first):\n${firmRoster()}\n`}
 ${KB.disclaimer}`;
 }
 
@@ -237,23 +262,31 @@ export const completeTicket = createServerFn({ method: "POST" })
     const apiKey = process.env.XAI_API_KEY || "";
     if (!apiKey) return { ok: false as const, error: "unavailable" };
     if (!data.messages.length) return { ok: false as const, error: "no messages" };
-    const ids = data.firmIds.length ? data.firmIds : [data.firmId];
-    const live = needsWebSearch(lastUserText(data.messages));
+    const ids = orderFirmIds(data.firmIds.length ? data.firmIds : [data.firmId]);
+    const q = lastUserText(data.messages);
+    const live = data.mode === "compare" || needsWebSearch(q);
+    const openWeb = needsWebSearch(q);
     const system = systemPrompt(data.mode, data.firmId, ids, data.messages, live);
     const domains = domainsFor(ids);
     let result: GrokOk | GrokErr;
     if (live) {
       try {
-        result = await callResponses(apiKey, system, data.messages, domains, true);
+        result = await callResponses(apiKey, system, data.messages, domains, openWeb);
       } catch {
         result = { ok: false, error: "search failed" };
       }
+      if (!result.ok && !openWeb) {
+        try {
+          result = await callResponses(apiKey, system, data.messages, domains, true);
+        } catch {
+          result = { ok: false, error: "search failed" };
+        }
+      }
       if (!result.ok) {
-        const fallback = systemPrompt(data.mode, data.firmId, ids, data.messages, false);
         result = await callChat(
           apiKey,
-          fallback +
-            "\nLive web lookup failed this turn. Say you could not reach live pages, then answer from the pack. Do not pretend you searched.",
+          systemPrompt(data.mode, data.firmId, ids, data.messages, false) +
+            "\nThe live pages did not load this turn. Answer from the pack. Do not say that checking websites is out of scope — it is in scope; this turn just failed.",
           data.messages,
         );
       }

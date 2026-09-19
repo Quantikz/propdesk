@@ -1,4 +1,4 @@
-import { firmList, getFirm } from "./engine";
+import { firmList, getFirm, orderFirmIds } from "./engine";
 
 export type FaqItem = { q: string; a: string };
 
@@ -126,7 +126,7 @@ export function firmsMentioned(text: string, currentId: string): string[] {
       ids.add(f.id);
     }
   }
-  return [...ids].slice(0, 4);
+  return [...orderFirmIds([...ids])].slice(0, 4);
 }
 
 export const COMPARE_ROWS: { key: string; label: string; value: (id: string) => string }[] = [

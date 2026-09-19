@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Chat, ChatMessage, PendingFile } from "./types";
 import { completeTicket } from "./complete";
-import { getFirm } from "./engine";
+import { getFirm, orderFirmIds } from "./engine";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -47,7 +47,7 @@ let toastTimer: ReturnType<typeof setTimeout> | null = null;
 export const useDeskStore = create<DeskState>()(
   persist(
     (set, get) => ({
-      firmId: "ftmo",
+      firmId: "goat",
       email: "",
       accountId: "",
       chats: [],
@@ -58,7 +58,7 @@ export const useDeskStore = create<DeskState>()(
       profileOpen: false,
       profileForce: false,
       toast: null,
-      compareIds: ["ftmo", "fundednext"],
+      compareIds: ["goat", "ftmo"],
       compareMessages: [],
       compareSending: false,
 
@@ -200,18 +200,18 @@ export const useDeskStore = create<DeskState>()(
       },
 
       setCompareIds: (ids) => {
-        const unique = Array.from(new Set(ids)).slice(0, 4);
+        const unique = orderFirmIds(ids).slice(0, 4);
         if (unique.length >= 2) set({ compareIds: unique });
       },
       toggleCompare: (id) => {
         const cur = get().compareIds;
         if (cur.includes(id)) {
           if (cur.length <= 2) return;
-          set({ compareIds: cur.filter((x) => x !== id) });
+          set({ compareIds: orderFirmIds(cur.filter((x) => x !== id)) });
           return;
         }
-        if (cur.length >= 4) set({ compareIds: [...cur.slice(1), id] });
-        else set({ compareIds: [...cur, id] });
+        if (cur.length >= 4) set({ compareIds: orderFirmIds([...cur.slice(1), id]) });
+        else set({ compareIds: orderFirmIds([...cur, id]) });
       },
       sendCompare: async (textFromSuggest) => {
         const text = (textFromSuggest || "").trim();
@@ -230,7 +230,7 @@ export const useDeskStore = create<DeskState>()(
           }));
           const out = await completeTicket({
             data: {
-              firmId: ids[0] ?? "ftmo",
+              firmId: ids[0] ?? "goat",
               firmIds: ids,
               mode: "compare",
               messages: history,
@@ -263,7 +263,7 @@ export const useDeskStore = create<DeskState>()(
       },
     }),
     {
-      name: "propdesk-v2",
+      name: "propdesk-v3",
       skipHydration: true,
       partialize: (s) => ({
         firmId: s.firmId,

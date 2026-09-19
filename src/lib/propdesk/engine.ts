@@ -1,12 +1,19 @@
 import { KB } from "./knowledge";
 import type { CaseDraft, ChipTone, FileRef, Firm } from "./types";
 
+export function orderFirmIds(ids: string[]): string[] {
+  const unique = Array.from(new Set(ids.filter(Boolean)));
+  const head = unique.filter((id) => id === "goat");
+  const rest = unique.filter((id) => id !== "goat");
+  return [...head, ...rest];
+}
+
 export function getFirm(id: string): Firm {
-  return KB.firms[id] ?? KB.firms.ftmo;
+  return KB.firms[id] ?? KB.firms.goat ?? KB.firms.ftmo;
 }
 
 export function firmList(): Firm[] {
-  return Object.values(KB.firms);
+  return orderFirmIds(Object.keys(KB.firms)).map((id) => KB.firms[id]);
 }
 
 function uid() {
