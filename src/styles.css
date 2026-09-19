@@ -6,12 +6,12 @@
   --font-display: "Source Serif 4", "Source Serif Pro", "Georgia", "Times New Roman", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --color-bg: #141210;
-  --color-sidebar: #100e0c;
-  --color-hover: #1e1b17;
+  --color-bg: #231f19;
+  --color-sidebar: #0a0908;
+  --color-hover: #2a261f;
   --color-input: #1a1714;
-  --color-elev: #1a1714;
-  --color-line: #322d27;
+  --color-elev: #1c1914;
+  --color-line: #3a342c;
   --color-fg: #f1ece3;
   --color-muted: #a39b8e;
   --color-dim: #746c62;
@@ -20,7 +20,7 @@
   --color-accent: #efe6d4;
   --color-accent-hover: #f6f0e4;
   --color-accent-fg: #161310;
-  --color-border: #2a261f;
+  --color-border: #3a342c;
   --color-ok: #7d9e78;
   --color-warn: #c4b07a;
   --color-bad: #c47a72;

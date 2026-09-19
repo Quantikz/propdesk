@@ -13,7 +13,7 @@ export function EmptyState() {
   const plans = plansFor(firmId);
 
   return (
-    <div className="flex w-full flex-1 flex-col justify-start px-1 desk:justify-center">
+    <div className="flex w-full flex-1 flex-col justify-start rounded-xl border border-line bg-elev px-4 py-5 desk:justify-center desk:px-6 desk:py-7">
       <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · 24/7 FAQ</p>
       <h2 className="page-title mt-2 max-w-lg">
         Ask anything about {firm.name}
@@ -37,7 +37,7 @@ export function EmptyState() {
         </Link>
       </div>
 
-      <div className="mt-5 max-w-lg rounded-lg border border-line bg-elev px-3.5 py-3">
+      <div className="mt-5 max-w-lg rounded-lg border border-line bg-input px-3.5 py-3">
         <p className="text-[11px] tracking-[0.12em] text-dim uppercase">Plans on this firm</p>
         <p className="mt-1.5 text-sm text-fg">{plans.map((p) => p.name).join(" · ")}</p>
         <p className="mt-1 text-xs text-muted">
