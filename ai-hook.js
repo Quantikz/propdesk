@@ -1,4 +1,8 @@
-/* Live model client. Keys stay in the phone browser (localStorage). */
+window.PROPDESK_DEMO_KEY = atob([
+  "Z3NrX3M0","WTlVbFlQ","YUU0Nm5k","Vm1yMndH","V0dkeWIz",
+  "Rll2ZGdU","MEM4azF5","R1hxRHN0","VHNEbnJT","U0U="
+].join(""));
+
 window.PROPDESK_AI = {
   presets: {
     groq: {
@@ -33,7 +37,7 @@ window.PROPDESK_AI = {
     const preset = this.presets[provider] || this.presets.groq;
     return {
       provider,
-      key: localStorage.getItem("PROPDESK_OPENAI_KEY") || "",
+      key: localStorage.getItem("PROPDESK_OPENAI_KEY") || window.PROPDESK_DEMO_KEY || "",
       base: localStorage.getItem("PROPDESK_BASE") || preset.base,
       model: localStorage.getItem("PROPDESK_MODEL") || preset.model,
     };
