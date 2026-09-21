@@ -43,6 +43,8 @@ export type WindowStat = {
   avg?: number;
   median?: number;
   leading?: string;
+  from?: string;
+  since?: string;
 };
 
 export type TopFirm = { firm: string; usd: number; count: number; share: number };
@@ -64,11 +66,13 @@ export type DeskFirmPayout = {
   tracked: boolean;
   allTime?: TrackRow;
   last30d?: TrackRow;
+  updatedAt?: string;
 };
 
 export type PayoutFeed = {
   ok: boolean;
   asOf?: string;
+  fetchedAt?: string;
   license?: string;
   allTime?: WindowStat;
   last30d?: WindowStat;
@@ -99,10 +103,11 @@ function windowOf(raw: unknown): WindowStat | undefined {
     avg: o.avg != null ? num(o.avg) : undefined,
     median: o.median != null ? num(o.median) : undefined,
     leading: typeof o.leading_firm === "string" ? o.leading_firm : undefined,
+    from: typeof o.from === "string" ? o.from : undefined,
+    since: typeof o.since === "string" ? o.since : undefined,
   };
 }
 
-/** Junction all-time / 30d HTML tables → slug keyed rows. */
 export function parseJunctionBoard(html: string): Record<string, TrackRow> {
   const body = html.match(/<tbody[\s\S]+?<\/tbody>/i)?.[0] ?? "";
   const out: Record<string, TrackRow> = {};
@@ -136,7 +141,21 @@ export function count(n: number) {
   return Math.round(n).toLocaleString("en-US");
 }
 
-function emptyOurs(): DeskFirmPayout[] {
+export function stamp(iso?: string | null) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
+export function dayStamp(iso?: string | null) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString([], { dateStyle: "medium" });
+}
+
+function emptyOurs(updatedAt?: string): DeskFirmPayout[] {
   return firmList().map((f) => ({
     id: f.id,
     name: f.name,
@@ -145,6 +164,7 @@ function emptyOurs(): DeskFirmPayout[] {
     pfm: PFM_FIRM[f.id] ?? PFM_PAYOUTS,
     pj: pjUrl(f.id),
     tracked: Boolean(PJ_SLUG[f.id]),
+    updatedAt,
   }));
 }
 
@@ -159,6 +179,7 @@ async function grab(url: string) {
 
 export const getPayoutFeed = createServerFn({ method: "POST" }).handler(async () => {
   if (cache && Date.now() - cache.at < TTL) return cache.feed;
+  const fetchedAt = new Date().toISOString();
   try {
     const [statsRes, allRes, d30Res] = await Promise.all([
       grab(PJ_JSON),
@@ -168,6 +189,7 @@ export const getPayoutFeed = createServerFn({ method: "POST" }).handler(async ()
     const raw = (await statsRes.json()) as Record<string, unknown>;
     const allMap = parseJunctionBoard(await allRes.text());
     const d30Map = parseJunctionBoard(await d30Res.text());
+    const asOf = typeof raw.generated_at === "string" ? raw.generated_at : fetchedAt;
     const top = Array.isArray(raw.top5_30d)
       ? (raw.top5_30d as Record<string, unknown>[]).map((row) => ({
           firm: String(row.firm ?? ""),
@@ -184,7 +206,7 @@ export const getPayoutFeed = createServerFn({ method: "POST" }).handler(async ()
             date: String((raw.largest_on_record as Record<string, unknown>).date ?? ""),
           }
         : undefined;
-    const ours = emptyOurs().map((row) => {
+    const ours = emptyOurs(asOf).map((row) => {
       const slug = PJ_SLUG[row.id];
       const allTime = slug ? allMap[slug] : undefined;
       const last30d = slug ? d30Map[slug] : undefined;
@@ -193,11 +215,13 @@ export const getPayoutFeed = createServerFn({ method: "POST" }).handler(async ()
         tracked: Boolean(allTime || last30d),
         allTime,
         last30d,
+        updatedAt: asOf,
       };
     });
     const feed: PayoutFeed = {
       ok: true,
-      asOf: typeof raw.generated_at === "string" ? raw.generated_at : undefined,
+      asOf,
+      fetchedAt,
       license: typeof raw.license_note === "string" ? raw.license_note : undefined,
       allTime: windowOf(raw.all_time),
       last30d: windowOf(raw.last_30d),
@@ -210,6 +234,12 @@ export const getPayoutFeed = createServerFn({ method: "POST" }).handler(async ()
     cache = { at: Date.now(), feed };
     return feed;
   } catch {
-    return { ok: false, top30d: [], ours: emptyOurs(), error: "junction unreachable" } satisfies PayoutFeed;
+    return {
+      ok: false,
+      fetchedAt,
+      top30d: [],
+      ours: emptyOurs(fetchedAt),
+      error: "junction unreachable",
+    } satisfies PayoutFeed;
   }
 });
