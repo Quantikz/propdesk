@@ -24,7 +24,7 @@ export function FirmLogo({
   const remote = host
     ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`
     : "";
-  const [src, setSrc] = useState(local);
+  const [src, setSrc] = useState(remote || local);
 
   if (!src) {
     return (
@@ -47,8 +47,13 @@ export function FirmLogo({
       alt=""
       width={size}
       height={size}
-      className={cn("shrink-0 rounded-sm object-contain", className)}
-      onError={() => setSrc((cur) => (cur === local && remote ? remote : ""))}
+      className={cn("shrink-0 rounded-sm bg-elev object-contain", className)}
+      onError={() =>
+        setSrc((cur) => {
+          if (cur === remote && local) return local;
+          return "";
+        })
+      }
     />
   );
 }
