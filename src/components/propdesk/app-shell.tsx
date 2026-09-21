@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
+import { HomeLanding } from "@/components/propdesk/home-landing";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
 import { ProfileDialog } from "@/components/propdesk/profile-dialog";
 import { Sidebar } from "@/components/propdesk/sidebar";
@@ -22,6 +23,7 @@ export function AppShell() {
   const [, setCatalogTick] = useState(0);
   const firm = getFirm(firmId);
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const home = path === "/";
   const comparing = path.startsWith("/compare");
   const payouts = path.startsWith("/payouts");
 
@@ -103,8 +105,10 @@ export function AppShell() {
       </aside>
 
       <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-l border-paper/25 bg-bg">
-        <Topbar comparing={comparing} payouts={payouts} />
-        {comparing ? (
+        <Topbar comparing={comparing} payouts={payouts} home={home} />
+        {home ? (
+          <HomeLanding />
+        ) : comparing ? (
           <CompareView />
         ) : payouts ? (
           <PayoutsView />

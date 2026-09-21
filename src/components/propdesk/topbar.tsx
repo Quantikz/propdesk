@@ -6,9 +6,11 @@ import { useDeskStore } from "@/lib/propdesk/store";
 export function Topbar({
   comparing = false,
   payouts = false,
+  home = false,
 }: {
   comparing?: boolean;
   payouts?: boolean;
+  home?: boolean;
 }) {
   const firmId = useDeskStore((s) => s.firmId);
   const setSidebarOpen = useDeskStore((s) => s.setSidebarOpen);
@@ -34,8 +36,7 @@ export function Topbar({
             aria-hidden
           />
           <span className="truncate font-display text-base font-bold tracking-tight desk:text-lg">
-            {payouts ? "Payouts" : comparing ? "Compare" : firm.short}
-            <span className="ml-1.5 font-sans font-medium text-dim">24/7</span>
+            {home ? "Home" : payouts ? "Payouts" : comparing ? "Compare" : firm.short}
           </span>
         </div>
       </div>

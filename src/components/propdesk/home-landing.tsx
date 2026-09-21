@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Logo } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 
@@ -8,29 +7,8 @@ export function HomeLanding() {
   const setFirm = useDeskStore((s) => s.setFirm);
 
   return (
-    <div className="h-dvh overflow-y-auto overscroll-contain bg-bg text-fg">
-      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-border bg-bg/90 px-4 py-3 backdrop-blur-sm desk:px-8">
-        <Link to="/" className="flex min-w-0 items-center gap-3 text-fg">
-          <Logo />
-          <span className="brand-name">PropDesk</span>
-        </Link>
-        <nav className="flex flex-wrap items-center gap-1 text-sm">
-          <Link to="/compare" className="rounded-md px-3 py-2 text-muted hover:bg-hover hover:text-fg">
-            Compare
-          </Link>
-          <Link to="/payouts" className="rounded-md px-3 py-2 text-muted hover:bg-hover hover:text-fg">
-            Payouts
-          </Link>
-          <Link
-            to="/desk"
-            className="rounded-md bg-paper px-3 py-2 font-medium text-ink hover:bg-accent-hover"
-          >
-            Open desk
-          </Link>
-        </nav>
-      </header>
-
-      <main className="mx-auto w-[92%] max-w-5xl py-10 desk:py-16">
+    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="mx-auto w-full max-w-5xl px-4 py-6 desk:px-6 desk:py-8">
         <p className="text-[11px] tracking-[0.14em] text-dim uppercase">Independent research desk</p>
         <h1 className="page-title mt-3 max-w-3xl">
           Know every rule before you buy a challenge.
@@ -54,7 +32,7 @@ export function HomeLanding() {
           </Link>
         </div>
 
-        <section className="mt-12 grid gap-3 sm:grid-cols-3">
+        <section className="mt-10 grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg border border-line bg-elev p-4">
             <h2 className="font-display text-xl font-bold tracking-tight">Desk</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -75,10 +53,10 @@ export function HomeLanding() {
           </div>
         </section>
 
-        <section className="mt-12">
+        <section className="mt-10">
           <h2 className="font-display text-2xl font-bold tracking-tight">Firms on the desk</h2>
           <p className="mt-2 text-sm text-muted">Tap one to open the desk on that book.</p>
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 desk:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {firms.map((f) => (
               <Link
                 key={f.id}
@@ -96,10 +74,10 @@ export function HomeLanding() {
           </div>
         </section>
 
-        <p className="mt-12 pb-10 text-xs leading-relaxed text-dim">
+        <p className="mt-10 pb-8 text-xs leading-relaxed text-dim">
           PropDesk is independent. Confirm numbers on the firm’s current terms before you pay.
         </p>
-      </main>
+      </div>
     </div>
   );
 }
