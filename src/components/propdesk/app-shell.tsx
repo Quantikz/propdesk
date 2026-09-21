@@ -4,7 +4,6 @@ import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
 import { HomeLanding } from "@/components/propdesk/home-landing";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
-import { ProfileDialog } from "@/components/propdesk/profile-dialog";
 import { Sidebar } from "@/components/propdesk/sidebar";
 import { Thread } from "@/components/propdesk/thread";
 import { Topbar } from "@/components/propdesk/topbar";
@@ -95,7 +94,7 @@ export function AppShell() {
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(20rem,90vw)] flex-col overflow-hidden border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.4)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(20rem,90vw)] flex-col overflow-hidden border-r border-border bg-sidebar shadow-[8px_0_24px_rgba(0,0,0,0.12)] transition-transform duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!sidebarOpen}
@@ -104,8 +103,8 @@ export function AppShell() {
         <Sidebar idPrefix="mobile" onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
-      <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col border-l border-paper/25 bg-bg">
-        <Topbar comparing={comparing} payouts={payouts} home={home} />
+      <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col bg-bg">
+        <Topbar />
         {home ? (
           <HomeLanding />
         ) : comparing ? (
@@ -121,11 +120,10 @@ export function AppShell() {
       </section>
 
       {toast ? (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-paper px-4 py-2 text-sm text-ink shadow-lg">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-paper px-4 py-2 font-display text-sm text-ink shadow-lg">
           {toast}
         </div>
       ) : null}
-      <ProfileDialog />
     </div>
   );
 }
