@@ -44,10 +44,37 @@
   --motion-fast: 250ms;
 }
 
+html[data-theme="light"] {
+  --color-bg: #f3eee3;
+  --color-sidebar: #e7dfcf;
+  --color-hover: #ddd4c2;
+  --color-input: #fffaf1;
+  --color-elev: #fffaf1;
+  --color-line: #cfc4b0;
+  --color-fg: #161310;
+  --color-muted: #5c554b;
+  --color-dim: #7a7266;
+  --color-paper: #161310;
+  --color-ink: #efe6d4;
+  --color-accent: #161310;
+  --color-accent-hover: #2a241c;
+  --color-accent-fg: #efe6d4;
+  --color-border: #cfc4b0;
+  --color-ok: #3f6b3c;
+  --color-warn: #8a6f2a;
+  --color-bad: #9a3f36;
+  --color-user-av: #161310;
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
   }
 
   html,
@@ -105,6 +132,16 @@
   font-size: 1.35rem;
   line-height: 1.15;
   letter-spacing: -0.04em;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 6px;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
 @keyframes pd-blink {
