@@ -2,25 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PropDesk — Ask Desk for prop traders</title>
-  <style>
-    html,body{margin:0;background:#121212;color:#ececec;font-family:Inter,Segoe UI,system-ui,sans-serif}
-    a{color:#ececec;text-decoration:none}
-    .site-nav{display:flex;justify-content:space-between;align-items:center;padding:14px 4%;border-bottom:1px solid #2a2a2a}
-    .site-cta{background:#10a37f;color:#06150f;padding:8px 12px;border-radius:999px;font-weight:650}
-    .hero{width:92%;max-width:1080px;margin:0 auto;padding:48px 0}
-    .pill-btn{display:inline-flex;padding:12px 18px;border-radius:999px;font-weight:650;margin-right:8px}
-    .pill-btn.primary{background:#10a37f;color:#06150f}
-    .stat,.card{background:#1b1b1b;border:1px solid #2f2f2f;border-radius:16px;padding:16px;margin:8px 0}
-  </style>
   <link rel="stylesheet" href="/site.css" />
-  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="site" id="site">
     <header class="site-nav">
-      <a class="site-brand" href="#/">PropDesk</a>
+      <a class="site-brand" href="#/"><div class="logo">P</div>PropDesk</a>
       <nav class="site-links">
         <a href="#/">Home</a>
         <a href="#/firms">Firms</a>
@@ -36,24 +25,45 @@
           <a class="pill-btn primary" href="#/desk">Open Ask Desk</a>
           <a class="pill-btn ghost" href="#/firms">Browse firms</a>
         </div>
+        <div class="stats">
+          <div class="stat"><b>10</b><span>prop firms on file</span></div>
+          <div class="stat"><b>FAQ first</b><span>drawdown, payouts, KYC, news</span></div>
+          <div class="stat"><b>Evidence</b><span>required before any escalation</span></div>
+          <div class="stat"><b>You on copy</b><span>firm email uses your address</span></div>
+        </div>
+      </div>
+      <div class="band">
+        <h2>What Ask Desk will and will not do</h2>
+        <div class="cards">
+          <div class="card"><h3>Resolve the rule</h3><p>Daily loss, trailing vs static, consistency parks, min days, news windows, EA bans, KYC blocks.</p></div>
+          <div class="card"><h3>Escalate with a file</h3><p>Approved payout past SLA, dashboard vs statement mismatch, outage-caused breach, fee with no account.</p></div>
+          <div class="card"><h3>Refuse empty fights</h3><p>We will not email a firm to relitigate a loss you took inside the rules.</p></div>
+        </div>
       </div>
     </section>
     <section class="page" id="page-firms" hidden>
-      <div class="hero"><h2>Firms on the desk</h2><div class="firm-grid" id="firmGrid"></div></div>
-    </section>
-    <section class="page" id="page-how" hidden>
-      <div class="hero">
-        <h2>How Ask Desk works</h2>
-        <p>1. Name the firm and plan. 2. Say what the dashboard shows. 3. Attach proof only for firm-side faults.</p>
-        <a class="pill-btn primary" href="#/desk">Go to Ask Desk</a>
+      <div class="firm-grid-wrap">
+        <h2>Firms on the desk</h2>
+        <p>Pick a firm after Ask Desk is open on this host. This page is the catalog.</p>
+        <div class="firm-grid" id="firmGrid"></div>
       </div>
     </section>
+    <section class="page" id="page-how" hidden>
+      <div class="band">
+        <h2>How Ask Desk works</h2>
+        <div class="steps">
+          <div class="step"><b>1</b><div><h3>Name the firm and the plan</h3><p>Rules are product-specific.</p></div></div>
+          <div class="step"><b>2</b><div><h3>Say what the dashboard shows</h3><p>Status, date, and number on screen.</p></div></div>
+          <div class="step"><b>3</b><div><h3>Attach proof only for firm-side faults</h3><p>Then we draft the email.</p></div></div>
+        </div>
+        <div class="hero-actions" style="margin-top:24px"><a class="pill-btn primary" href="#/desk">Go to Ask Desk</a></div>
+      </div>
+    </section>
+    <footer class="site-foot">PropDesk is not a prop firm and not official support.</footer>
   </div>
-  <div id="desk" hidden class="hero">
-    <p><a href="#/">← Home</a></p>
-    <h2>Ask Desk</h2>
-    <p>Open this page from Home after the next deploy if the full chat shell is not on this build yet.</p>
-    <p><a class="pill-btn primary" href="/">Reload</a></p>
+  <div class="app" id="desk" hidden>
+    <p style="padding:16px"><a class="desk-home" href="#/">← Home</a></p>
+    <p style="padding:0 16px">Ask Desk chat loads from the same app as localhost. Use Home if this panel is empty on this host.</p>
   </div>
   <script src="/site.js"></script>
 </body>
