@@ -5,8 +5,15 @@ import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { MessageBubble, TypingRow } from "@/components/propdesk/message-bubble";
 import { COMPARE_PROMPTS, COMPARE_ROWS } from "@/lib/propdesk/faq";
 import { firmList, getFirm } from "@/lib/propdesk/engine";
+import { firmValue } from "@/lib/propdesk/value";
 import { useDeskStore } from "@/lib/propdesk/store";
 import { cn } from "@/lib/utils";
+
+const VALUE_ROWS = [
+  { key: "fee", label: "Fee", value: (id: string) => firmValue(id).fee },
+  { key: "reset", label: "Reset", value: (id: string) => firmValue(id).reset },
+  { key: "time", label: "Time to funded", value: (id: string) => firmValue(id).timeToFunded },
+];
 
 export function CompareView() {
   const all = firmList();
@@ -17,6 +24,7 @@ export function CompareView() {
   const sendCompare = useDeskStore((s) => s.sendCompare);
   const cols = ids.map((id) => getFirm(id));
   const scroller = useRef<HTMLDivElement>(null);
+  const rows = [...VALUE_ROWS, ...COMPARE_ROWS];
 
   useEffect(() => {
     const el = scroller.current;
@@ -31,7 +39,7 @@ export function CompareView() {
           <p className="font-display text-[11px] tracking-[0.14em] text-dim uppercase">Before you buy</p>
           <h2 className="page-title mt-2">Compare firms</h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Put two to four books next to each other. Spend on the plan whose rules you can actually trade.
+            Fee, reset, and time-to-funded first. Then the rules that change the trade.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
@@ -75,7 +83,7 @@ export function CompareView() {
                 </tr>
               </thead>
               <tbody>
-                {COMPARE_ROWS.map((row) => (
+                {rows.map((row) => (
                   <tr key={row.key} className="border-t border-border">
                     <th className="sticky left-0 bg-bg py-3 pr-3 align-top text-xs font-medium tracking-wide text-dim uppercase">
                       {row.label}
@@ -90,7 +98,9 @@ export function CompareView() {
               </tbody>
             </table>
           </div>
-          <p className="mt-2 max-w-xl text-xs leading-relaxed text-dim">Snapshot only. Ask below if you want a live check.</p>
+          <p className="mt-2 max-w-xl text-xs leading-relaxed text-dim">
+            Packed snapshot. Say “check” below to quote the live page and date.
+          </p>
 
           {messages.length === 0 ? (
             <div className="mt-6 grid max-w-[780px] grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
