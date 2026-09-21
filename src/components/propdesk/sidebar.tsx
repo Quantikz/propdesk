@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react";
-import { Banknote, ChevronDown, Columns2, House, Inbox, Plus, Trash2 } from "lucide-react";
+import { type ReactNode } from "react";
+import { Banknote, Columns2, House, Inbox, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
@@ -22,65 +22,12 @@ function NavLink({
       to={to}
       onClick={onNavigate}
       className={cn(
-        "flex min-h-11 items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight",
+        "flex min-h-10 items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight",
         active ? "bg-paper text-ink" : "text-muted hover:bg-hover hover:text-fg",
       )}
     >
       {children}
     </Link>
-  );
-}
-
-function FirmPicker({ idPrefix }: { idPrefix: string }) {
-  const firmId = useDeskStore((s) => s.firmId);
-  const setFirm = useDeskStore((s) => s.setFirm);
-  const [open, setOpen] = useState(false);
-  const firms = firmList();
-  const current = firms.find((f) => f.id === firmId) ?? firms[0];
-  const listId = `${idPrefix}-firms`;
-
-  return (
-    <div className="shrink-0 px-2 pt-3">
-      <p className="px-3 pb-1 font-display text-xs tracking-wide text-dim uppercase">Firm</p>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={listId}
-        className="flex h-11 w-full items-center justify-between gap-2 rounded-md bg-hover/60 px-3 text-left font-display text-[15px] font-semibold tracking-tight text-fg"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="min-w-0 truncate">{current.name}</span>
-        <ChevronDown
-          className={cn("size-4 shrink-0 text-dim transition-transform duration-[var(--motion-quick)]", open && "rotate-180")}
-        />
-      </button>
-      {open ? (
-        <ul
-          id={listId}
-          className="mt-1 max-h-[min(40vh,15rem)] overflow-y-auto overscroll-contain rounded-md bg-hover/40 py-1"
-          onWheel={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
-        >
-          {firms.map((f) => (
-            <li key={f.id}>
-              <button
-                type="button"
-                className={cn(
-                  "flex min-h-10 w-full items-center rounded-md px-3 text-left font-display text-[15px]",
-                  f.id === firmId ? "text-fg" : "text-muted hover:bg-hover hover:text-fg",
-                )}
-                onClick={() => {
-                  setFirm(f.id);
-                  setOpen(false);
-                }}
-              >
-                {f.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
   );
 }
 
@@ -96,6 +43,9 @@ export function Sidebar({
   const newChat = useDeskStore((s) => s.newChat);
   const openChat = useDeskStore((s) => s.openChat);
   const deleteChat = useDeskStore((s) => s.deleteChat);
+  const firmId = useDeskStore((s) => s.firmId);
+  const setFirm = useDeskStore((s) => s.setFirm);
+  const firms = firmList();
 
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
@@ -106,7 +56,7 @@ export function Sidebar({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-sidebar">
-      <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3 px-4 pt-5 pb-2 text-fg">
+      <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3 px-4 pt-4 pb-3 text-fg">
         <Logo />
         <div className="min-w-0">
           <h1 className="brand-name">PropDesk</h1>
@@ -114,10 +64,10 @@ export function Sidebar({
         </div>
       </Link>
 
-      <div className="shrink-0 px-2 pt-2">
+      <nav className="flex shrink-0 flex-col gap-0.5 px-2" aria-label={idPrefix}>
         <button
           type="button"
-          className="flex h-11 w-full items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight text-muted hover:bg-hover hover:text-fg"
+          className="flex min-h-10 items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight text-muted hover:bg-hover hover:text-fg"
           onClick={() => {
             newChat();
             void navigate({ to: "/desk" });
@@ -127,9 +77,6 @@ export function Sidebar({
           <Plus className="size-5 shrink-0" />
           New ask
         </button>
-      </div>
-
-      <nav className="mt-1 flex shrink-0 flex-col gap-0.5 px-2">
         <NavLink to="/" active={onHome} onNavigate={onNavigate}>
           <House className="size-5 shrink-0" />
           Home
@@ -148,20 +95,34 @@ export function Sidebar({
         </NavLink>
       </nav>
 
-      <FirmPicker idPrefix={idPrefix} />
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pt-4 pb-4">
+        <p className="px-3 pb-1 font-display text-[11px] tracking-[0.14em] text-dim uppercase">Firms</p>
+        {firms.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            className={cn(
+              "flex min-h-10 w-full items-center gap-2 rounded-md px-3 text-left font-display text-[15px]",
+              f.id === firmId ? "bg-hover text-fg" : "text-muted hover:bg-hover hover:text-fg",
+            )}
+            onClick={() => {
+              setFirm(f.id);
+              void navigate({ to: "/desk" });
+              onNavigate?.();
+            }}
+          >
+            <span className="size-2 shrink-0 rounded-full" style={{ background: f.color }} />
+            <span className="truncate">{f.short}</span>
+          </button>
+        ))}
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pt-4 pb-3">
-          <h2 className="px-3 pb-1 font-display text-xs tracking-wide text-dim uppercase">Asks</h2>
-          {chats.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-dim">No asks yet</div>
-          ) : (
-            chats.map((c) => (
+        {chats.length > 0 ? (
+          <>
+            <p className="mt-4 px-3 pb-1 font-display text-[11px] tracking-[0.14em] text-dim uppercase">Asks</p>
+            {chats.map((c) => (
               <div
                 key={c.id}
-                className={cn(
-                  "group flex items-center gap-1 rounded-md",
-                  c.id === activeId && "bg-hover",
-                )}
+                className={cn("group flex items-center gap-1 rounded-md", c.id === activeId && "bg-hover")}
               >
                 <button
                   type="button"
@@ -171,7 +132,7 @@ export function Sidebar({
                     onNavigate?.();
                   }}
                   className={cn(
-                    "min-h-11 min-w-0 flex-1 truncate px-3 text-left font-display text-[15px]",
+                    "min-h-10 min-w-0 flex-1 truncate px-3 text-left font-display text-sm",
                     c.id === activeId ? "text-fg" : "text-muted hover:text-fg",
                   )}
                 >
@@ -180,14 +141,15 @@ export function Sidebar({
                 <button
                   type="button"
                   aria-label={`Delete ${c.title}`}
-                  className="grid size-11 shrink-0 place-items-center text-dim hover:text-fg"
+                  className="grid size-10 shrink-0 place-items-center text-dim hover:text-fg"
                   onClick={() => deleteChat(c.id)}
                 >
                   <Trash2 className="size-4" />
                 </button>
               </div>
-            ))
-          )}
+            ))}
+          </>
+        ) : null}
       </div>
     </div>
   );
