@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { getFirm } from "@/lib/propdesk/engine";
@@ -17,9 +18,9 @@ export function FirmSheet() {
   const value = firmValue(firm.id);
   const rulesAt = stamp(RULES_AS_OF);
 
-  if (params.firmId && params.firmId !== storeFirm) {
-    setFirm(firm.id);
-  }
+  useEffect(() => {
+    if (params.firmId && params.firmId !== storeFirm) setFirm(firm.id);
+  }, [params.firmId, storeFirm, firm.id, setFirm]);
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
