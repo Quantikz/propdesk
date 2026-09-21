@@ -27,13 +27,13 @@ export function CompareView() {
     <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="mx-auto w-full max-w-[1100px] px-4 py-5 desk:px-6 desk:py-7">
-          <p className="text-[11px] tracking-[0.14em] text-dim uppercase">Side by side</p>
+          <p className="text-[11px] tracking-[0.14em] text-dim uppercase">Before you buy</p>
           <h2 className="page-title mt-2">
             Compare firms
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Pick two to four, then ask below. The desk uses the packed FAQs and will
-            check the live site when you ask it to verify.
+            Put two to four books next to each other. Drawdown, payouts, news, consistency.
+            Spend on the plan whose rules you can actually trade.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
