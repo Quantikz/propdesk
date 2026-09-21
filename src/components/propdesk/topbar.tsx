@@ -1,5 +1,6 @@
 import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/propdesk/theme-toggle";
 import { getFirm } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 
@@ -40,9 +41,12 @@ export function Topbar({
           </span>
         </div>
       </div>
-      <Button variant="icon" size="icon" aria-label="Profile" onClick={() => openProfile(false)}>
-        <User />
-      </Button>
+      <div className="flex shrink-0 items-center gap-1">
+        <ThemeToggle />
+        <Button variant="icon" size="icon" aria-label="Profile" onClick={() => openProfile(false)}>
+          <User />
+        </Button>
+      </div>
     </header>
   );
 }
