@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ChevronRight } from "lucide-react";
 import { Composer } from "@/components/propdesk/composer";
+import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { MessageBubble, TypingRow } from "@/components/propdesk/message-bubble";
 import { COMPARE_PROMPTS, COMPARE_ROWS } from "@/lib/propdesk/faq";
 import { firmList, getFirm } from "@/lib/propdesk/engine";
@@ -27,13 +28,10 @@ export function CompareView() {
     <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="mx-auto w-full max-w-[1100px] px-4 py-5 desk:px-6 desk:py-7">
-          <p className="text-[11px] tracking-[0.14em] text-dim uppercase">Before you buy</p>
-          <h2 className="page-title mt-2">
-            Compare firms
-          </h2>
+          <p className="font-display text-[11px] tracking-[0.14em] text-dim uppercase">Before you buy</p>
+          <h2 className="page-title mt-2">Compare firms</h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-            Put two to four books next to each other. Drawdown, payouts, news, consistency.
-            Spend on the plan whose rules you can actually trade.
+            Put two to four books next to each other. Spend on the plan whose rules you can actually trade.
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
@@ -46,17 +44,11 @@ export function CompareView() {
                   aria-pressed={on}
                   onClick={() => toggleCompare(f.id)}
                   className={cn(
-                    "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors duration-[var(--motion-quick)]",
-                    on
-                      ? "border-fg bg-fg text-bg"
-                      : "border-line bg-elev text-muted hover:text-fg",
+                    "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 font-display text-sm font-semibold",
+                    on ? "border-fg bg-fg text-bg" : "border-line bg-elev text-muted hover:text-fg",
                   )}
                 >
-                  <span
-                    className="size-2 rounded-full"
-                    style={{ background: on ? "currentColor" : f.color }}
-                    aria-hidden
-                  />
+                  <FirmLogo firm={f} size={16} />
                   {f.short}
                 </button>
               );
@@ -70,13 +62,11 @@ export function CompareView() {
             <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
               <thead>
                 <tr>
-                  <th className="sticky left-0 z-10 w-28 bg-bg py-3 pr-3 font-medium text-dim">
-                    Rule
-                  </th>
+                  <th className="sticky left-0 z-10 w-28 bg-bg py-3 pr-3 font-medium text-dim">Rule</th>
                   {cols.map((f) => (
                     <th key={f.id} className="min-w-[10.5rem] bg-bg px-3 py-3 align-bottom">
                       <div className="flex items-center gap-2">
-                        <span className="size-2 rounded-full" style={{ background: f.color }} />
+                        <FirmLogo firm={f} size={18} />
                         <span className="font-display text-lg font-bold tracking-tight">{f.short}</span>
                       </div>
                       <div className="mt-1 text-xs font-normal text-dim">{f.name}</div>
@@ -100,9 +90,7 @@ export function CompareView() {
               </tbody>
             </table>
           </div>
-          <p className="mt-2 max-w-xl text-xs leading-relaxed text-dim">
-            Snapshot only. Ask below if you want a live check.
-          </p>
+          <p className="mt-2 max-w-xl text-xs leading-relaxed text-dim">Snapshot only. Ask below if you want a live check.</p>
 
           {messages.length === 0 ? (
             <div className="mt-6 grid max-w-[780px] grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
