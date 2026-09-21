@@ -20,6 +20,9 @@ export type FirstPayout = {
   request: string;
 };
 
+/** When this packed rulebook was last reviewed. */
+export const RULES_AS_OF = "2026-09-21T12:00:00Z";
+
 export const PLANS: Record<string, Plan[]> = {
   goat: [
     { kind: "1-step", name: "1-Step", target: "Single profit target on the plan card", daily: "Plan card", max: "Plan card", note: "Faster path, tighter risk than 2-Step on many SKUs." },
