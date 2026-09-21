@@ -14,13 +14,13 @@ export function EmptyState() {
 
   return (
     <div className="flex w-full flex-1 flex-col justify-start px-1 py-2 desk:justify-center desk:py-4">
-      <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · 24/7 FAQ</p>
+      <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · before you buy</p>
       <h2 className="page-title mt-2 max-w-lg">
-        Ask anything about {firm.name}
+        Know {firm.name} before you pay
       </h2>
       <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted">
-        Open around the clock. Replies in seconds. Rules, payouts, drawdown, which plan
-        fits you. This desk answers questions — tickets come later.
+        This desk is for research, not support tickets. Read the rules, pick the plan,
+        compare firms, and spend on the book that actually fits you.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <Link
