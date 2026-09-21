@@ -41,7 +41,8 @@ export function HomeLanding() {
           {firms.map((f) => (
             <Link
               key={f.id}
-              to="/desk"
+              to="/firm/$firmId"
+              params={{ firmId: f.id }}
               onClick={() => setFirm(f.id)}
               className="flex items-center gap-3 rounded-md border border-line bg-elev px-3 py-3 hover:bg-hover"
             >

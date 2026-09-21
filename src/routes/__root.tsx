@@ -6,6 +6,8 @@ import appCss from "../styles.css?url";
 
 const APP_NAME = "PropDesk";
 
+const THEME_BOOT = `(function(){try{var t=localStorage.getItem('pd-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}var r=document.documentElement;r.dataset.theme=t;r.style.colorScheme=t;}catch(e){}})();`;
+
 export const Route = createRootRoute({
   notFoundComponent: AppNotFound,
   head: () => ({
@@ -40,6 +42,7 @@ export const Route = createRootRoute({
   component: () => (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
         <HeadContent />
       </head>
       <body>
