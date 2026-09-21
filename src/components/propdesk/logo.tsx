@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 
-/** Bold P with a help-dot — reads as P and as ?. */
+/** Ticket-P: a bold P with a blotter stub. Reads as PropDesk. */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 64 64"
-      className={cn("shrink-0 text-paper", className)}
+      className={cn("shrink-0 text-fg", className)}
       aria-hidden
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -22,14 +22,14 @@ export function Logo({ className, size = "sm" }: { className?: string; size?: "s
   return (
     <div
       className={cn(
-        "grid shrink-0 place-items-center",
+        "grid shrink-0 place-items-center rounded-md bg-paper text-ink",
         size === "sm" && "size-11",
         size === "lg" && "size-14",
         className,
       )}
       aria-hidden
     >
-      <LogoMark className={size === "lg" ? "size-14" : "size-11"} />
+      <LogoMark className={cn("text-ink", size === "lg" ? "size-10" : "size-8")} />
     </div>
   );
 }
