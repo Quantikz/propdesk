@@ -45,25 +45,25 @@
 }
 
 html[data-theme="light"] {
-  --color-bg: #f3eee3;
-  --color-sidebar: #e7dfcf;
-  --color-hover: #ddd4c2;
-  --color-input: #fffaf1;
-  --color-elev: #fffaf1;
-  --color-line: #cfc4b0;
-  --color-fg: #161310;
-  --color-muted: #5c554b;
-  --color-dim: #7a7266;
-  --color-paper: #161310;
-  --color-ink: #efe6d4;
-  --color-accent: #161310;
-  --color-accent-hover: #2a241c;
-  --color-accent-fg: #efe6d4;
-  --color-border: #cfc4b0;
+  --color-bg: #fbfaf7;
+  --color-sidebar: #f3f1eb;
+  --color-hover: #ebe7de;
+  --color-input: #ffffff;
+  --color-elev: #ffffff;
+  --color-line: #e4dfd4;
+  --color-fg: #1a1714;
+  --color-muted: #5f5a53;
+  --color-dim: #8a847a;
+  --color-paper: #1a1714;
+  --color-ink: #fbfaf7;
+  --color-accent: #1a1714;
+  --color-accent-hover: #2c2823;
+  --color-accent-fg: #fbfaf7;
+  --color-border: #e4dfd4;
   --color-ok: #3f6b3c;
   --color-warn: #8a6f2a;
   --color-bad: #9a3f36;
-  --color-user-av: #161310;
+  --color-user-av: #1a1714;
 }
 
 @layer base {
@@ -101,7 +101,9 @@ html[data-theme="light"] {
 
   h1,
   h2,
-  h3 {
+  h3,
+  .brand-name,
+  .page-title {
     font-family: var(--font-display);
     font-optical-sizing: auto;
     font-weight: 700;
@@ -110,38 +112,24 @@ html[data-theme="light"] {
     text-wrap: balance;
   }
 
+  label,
+  th {
+    font-family: var(--font-display);
+  }
+
   p {
     text-wrap: pretty;
   }
 }
 
 .page-title {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
-  font-weight: 700;
   font-size: clamp(1.95rem, 1.15rem + 2.6vw, 2.9rem);
-  line-height: 1.1;
   letter-spacing: -0.04em;
-  text-wrap: balance;
 }
 
 .brand-name {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
-  font-weight: 700;
   font-size: 1.35rem;
-  line-height: 1.15;
   letter-spacing: -0.04em;
-}
-
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 6px;
-  background: var(--color-paper);
-  color: var(--color-ink);
 }
 
 @keyframes pd-blink {
