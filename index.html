@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>PropDesk — Ask Desk for prop traders</title>
+  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="mobile.css?v=8" />
+  <link rel="stylesheet" href="fix.css?v=8" />
+  <link rel="stylesheet" href="site.css?v=8" />
+</head>
+<body>
+  <div class="site" id="site">
+    <header class="site-nav">
+      <a class="site-brand" href="#/"><div class="logo">P</div>PropDesk</a>
+      <nav class="site-links">
+        <a href="#/" data-nav="home">Home</a>
+        <a href="#/firms" data-nav="firms">Firms</a>
+        <a href="#/how" data-nav="how">How it works</a>
+        <a class="site-cta" href="#/desk">Ask Desk</a>
+      </nav>
+    </header>
+    <section class="page" id="page-home">
+      <div class="hero">
+        <h1>Independent support for funded traders.</h1>
+        <p class="lead">Ask Desk answers from published firm rules first. If the firm is at fault and you have evidence, we compile a case and email their support with you on copy.</p>
+        <div class="hero-actions">
+          <a class="pill-btn primary" href="#/desk">Open Ask Desk</a>
+          <a class="pill-btn ghost" href="#/firms">Browse firms</a>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>10</b><span>prop firms on file</span></div>
+          <div class="stat"><b>FAQ first</b><span>drawdown, payouts, KYC, news</span></div>
+          <div class="stat"><b>Evidence</b><span>required before any escalation</span></div>
+          <div class="stat"><b>You on copy</b><span>firm email uses your address</span></div>
+        </div>
+      </div>
+      <div class="band">
+        <h2>What Ask Desk will and will not do</h2>
+        <div class="cards">
+          <div class="card"><h3>Resolve the rule</h3><p>Daily loss, trailing vs static, consistency parks, min days, news windows, EA bans, KYC blocks.</p></div>
+          <div class="card"><h3>Escalate with a file</h3><p>Approved payout past SLA, dashboard vs statement mismatch, outage-caused breach, fee with no account.</p></div>
+          <div class="card"><h3>Refuse empty fights</h3><p>We will not email a firm to relitigate a loss you took inside the rules.</p></div>
+        </div>
+      </div>
+    </section>
+    <section class="page" id="page-firms" hidden>
+      <div class="firm-grid-wrap">
+        <h2>Firms on the desk</h2>
+        <p>Pick a firm to open Ask Desk with that rule card loaded.</p>
+        <div class="firm-grid" id="firmGrid"></div>
+      </div>
+    </section>
+    <section class="page" id="page-how" hidden>
+      <div class="band">
+        <h2>How Ask Desk works</h2>
+        <div class="steps">
+          <div class="step"><b>1</b><div><h3>Name the firm and the plan</h3><p>Rules are product-specific. Challenge vs instant vs PA are different books.</p></div></div>
+          <div class="step"><b>2</b><div><h3>Say what the dashboard shows</h3><p>Status, date, and number on screen — not what you hoped would happen.</p></div></div>
+          <div class="step"><b>3</b><div><h3>Attach proof only for firm-side faults</h3><p>Then we draft the email to their support with you as reply-to.</p></div></div>
+        </div>
+        <div class="hero-actions" style="margin-top:24px"><a class="pill-btn primary" href="#/desk">Go to Ask Desk</a></div>
+      </div>
+    </section>
+    <footer class="site-foot">PropDesk is not a prop firm and not official support. Confirm details in the firm’s current terms.</footer>
+  </div>
+  <div class="app" id="desk" hidden>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="side-top">
+        <a class="desk-home" href="#/">← Home</a>
+        <button class="btn btn-new" id="newChatBtn" type="button">New ask</button>
+        <button class="btn icon-btn" id="menuBtn" type="button" aria-label="Menu">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+      <div class="brand"><div class="logo">P</div><div><h1>PropDesk</h1><p>Ask Desk</p></div></div>
+      <div class="firm-box"><label class="mini">Prop firm</label><select id="firmSelect"></select></div>
+      <div class="id-box">
+        <label class="mini">Your email (reply-to)</label>
+        <input class="field" id="userEmail" type="email" placeholder="you@email.com" autocomplete="email" />
+        <label class="mini">Account / login ID</label>
+        <input class="field" id="accountId" type="text" placeholder="e.g. FN-104928 or 5120347" />
+      </div>
+      <div class="history"><h3>Ask Desk</h3><div id="historyList"></div></div>
+      <div class="side-foot">
+        <div class="user-chip" id="userChip">
+          <div class="avatar" id="userAv">T</div>
+          <div><div id="userLabel">Trader</div><small id="userSub">Add email &amp; account ID</small></div>
+        </div>
+      </div>
+    </aside>
+    <section class="main">
+      <header class="topbar">
+        <div class="top-left">
+          <button class="btn icon-btn menu-mobile" type="button" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Open menu">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <button class="model-pill" type="button"><span class="dot" id="firmDot"></span><span id="modelName">FTMO specialist</span></button>
+        </div>
+        <div class="top-actions">
+          <button class="btn ghost" id="aiSettingsBtn" type="button" onclick="document.getElementById('aiOverlay').classList.add('show')">AI</button>
+          <button class="btn ghost" type="button" onclick="document.getElementById('userChip').click()">Profile</button>
+        </div>
+      </header>
+      <div class="thread" id="thread">
+        <div class="thread-inner" id="threadInner">
+          <div class="empty" id="emptyState">
+            <div class="logo">P</div>
+            <h2>How can I help with FTMO?</h2>
+            <p>Ask Desk answers from published rules first. Attach evidence only if the firm is at fault.</p>
+            <div class="suggest">
+              <button type="button" data-suggest="What is the daily drawdown on my account and does floating loss count?"><strong>Daily drawdown rules</strong><em>Does floating loss count?</em></button>
+              <button type="button" data-suggest="My payout has been approved for more than the published SLA and I still have not received funds. I have the approval screenshot."><strong>Payout past SLA</strong><em>Approved, still not paid</em></button>
+              <button type="button" data-suggest="They denied my payout citing consistency. Explain the rule and whether I should keep trading or escalate."><strong>Payout denied</strong><em>Consistency or min days?</em></button>
+              <button type="button" data-suggest="I was breached during a platform outage. I have logs and screenshots. This is the firm's fault."><strong>Platform outage breach</strong><em>Escalate with evidence</em></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="composer-wrap">
+        <div class="composer">
+          <div class="attach-row" id="attachRow"></div>
+          <div class="composer-row">
+            <button class="btn icon-btn" id="attachBtn" type="button" aria-label="Attach">
+              <svg viewBox="0 0 24 24"><path d="M21.4 11.6l-8.5 8.5a6 6 0 01-8.5-8.5l8.5-8.5a4 4 0 015.7 5.7l-8.6 8.5a2 2 0 01-2.8-2.8l7.8-7.8"/></svg>
+            </button>
+            <textarea id="composerInput" rows="1" placeholder="Describe the issue. Attach screenshots if the firm is at fault."></textarea>
+            <button class="btn send" id="sendBtn" type="button" disabled aria-label="Send">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <input id="attachInput" type="file" multiple accept="image/*,.pdf,.csv,.txt,.xlsx" hidden />
+  <div class="overlay" id="profileOverlay">
+    <div class="modal">
+      <h3>Trader profile</h3>
+      <p id="profNote">Used as reply-to on every escalation email.</p>
+      <div class="grid">
+        <div><label class="mini">Email</label><input class="field" id="profEmail" type="email" placeholder="you@email.com" /></div>
+        <div><label class="mini">Account / login ID</label><input class="field" id="profAccount" type="text" placeholder="Account ID" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelProfile" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveProfile" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+  <div class="overlay" id="aiOverlay">
+    <div class="modal">
+      <h3>Live AI</h3>
+      <p>Paste a Groq / OpenRouter / OpenAI key if you want to override the demo model.</p>
+      <div class="grid">
+        <div><label class="mini">Provider</label>
+          <select id="aiProvider" class="field">
+            <option value="groq">Groq</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="openai">OpenAI</option>
+          </select>
+        </div>
+        <div><label class="mini">API key</label><input class="field" id="aiKey" type="password" autocomplete="off" /></div>
+        <div><label class="mini">Model</label><input class="field" id="aiModel" type="text" placeholder="qwen/qwen3.8-27b" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelAI" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveAI" type="button">Save AI</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="knowledge.js?v=8"></script>
+  <script src="ai-hook.js?v=8"></script>
+  <script src="app.js?v=8"></script>
+  <script src="ui.js?v=8"></script>
+  <script src="site.js?v=8"></script>
+</body>
+</html>
