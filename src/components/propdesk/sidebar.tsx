@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Banknote, ChevronDown, Columns2, Inbox, Plus, Trash2 } from "lucide-react";
+import { Banknote, ChevronDown, Columns2, House, Inbox, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Logo } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
@@ -12,7 +12,7 @@ function NavLink({
   onNavigate,
   children,
 }: {
-  to: "/" | "/compare" | "/payouts";
+  to: "/" | "/desk" | "/compare" | "/payouts";
   active: boolean;
   onNavigate?: () => void;
   children: ReactNode;
@@ -103,19 +103,20 @@ export function Sidebar({
   const initial = (email || "T").trim()[0]?.toUpperCase() || "T";
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const onDesk = path === "/";
+  const onHome = path === "/";
+  const onDesk = path === "/desk" || path.startsWith("/desk/");
   const onCompare = path.startsWith("/compare");
   const onPayouts = path.startsWith("/payouts");
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-sidebar">
-      <div className="flex shrink-0 items-center gap-3 px-4 pt-5 pb-2">
+      <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3 px-4 pt-5 pb-2 text-fg">
         <Logo />
         <div className="min-w-0">
           <h1 className="brand-name">PropDesk</h1>
           <p className="mt-0.5 text-sm text-muted">Rules before you buy</p>
         </div>
-      </div>
+      </Link>
 
       <div className="shrink-0 px-2 pt-2">
         <button
@@ -123,7 +124,7 @@ export function Sidebar({
           className="flex h-12 w-full items-center gap-3 rounded-md px-3 text-base font-medium text-muted hover:bg-hover hover:text-fg"
           onClick={() => {
             newChat();
-            void navigate({ to: "/" });
+            void navigate({ to: "/desk" });
             onNavigate?.();
           }}
         >
@@ -133,7 +134,11 @@ export function Sidebar({
       </div>
 
       <nav className="mt-1 flex shrink-0 flex-col gap-0.5 px-2">
-        <NavLink to="/" active={onDesk} onNavigate={onNavigate}>
+        <NavLink to="/" active={onHome} onNavigate={onNavigate}>
+          <House className="size-5 shrink-0" />
+          Home
+        </NavLink>
+        <NavLink to="/desk" active={onDesk} onNavigate={onNavigate}>
           <Inbox className="size-5 shrink-0" />
           Desk
         </NavLink>
@@ -166,6 +171,7 @@ export function Sidebar({
                   type="button"
                   onClick={() => {
                     openChat(c.id);
+                    void navigate({ to: "/desk" });
                     onNavigate?.();
                   }}
                   className={cn(
