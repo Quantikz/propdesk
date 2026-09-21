@@ -75,7 +75,7 @@ function FirmPicker({ idPrefix, onNavigate }: { idPrefix: string; onNavigate?: (
                 onClick={() => {
                   setFirm(f.id);
                   setOpen(false);
-                  void navigate({ to: "/desk" });
+                  void navigate({ to: "/firm/$firmId", params: { firmId: f.id } });
                   onNavigate?.();
                 }}
               >
