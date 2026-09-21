@@ -22,7 +22,7 @@ function NavLink({
       to={to}
       onClick={onNavigate}
       className={cn(
-        "flex min-h-12 items-center gap-3 rounded-md px-3 text-base font-medium",
+        "flex min-h-11 items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight",
         active ? "bg-paper text-ink" : "text-muted hover:bg-hover hover:text-fg",
       )}
     >
@@ -41,12 +41,12 @@ function FirmPicker({ idPrefix }: { idPrefix: string }) {
 
   return (
     <div className="shrink-0 px-2 pt-3">
-      <p className="px-3 pb-1 text-sm text-muted">Firm</p>
+      <p className="px-3 pb-1 font-display text-xs tracking-wide text-dim uppercase">Firm</p>
       <button
         type="button"
         aria-expanded={open}
         aria-controls={listId}
-        className="flex h-12 w-full items-center justify-between gap-2 rounded-md bg-hover/60 px-3 text-left text-base font-medium text-fg"
+        className="flex h-11 w-full items-center justify-between gap-2 rounded-md bg-hover/60 px-3 text-left font-display text-[15px] font-semibold tracking-tight text-fg"
         onClick={() => setOpen((v) => !v)}
       >
         <span className="min-w-0 truncate">{current.name}</span>
@@ -66,7 +66,7 @@ function FirmPicker({ idPrefix }: { idPrefix: string }) {
               <button
                 type="button"
                 className={cn(
-                  "flex min-h-11 w-full items-center rounded-md px-3 text-left text-base",
+                  "flex min-h-10 w-full items-center rounded-md px-3 text-left font-display text-[15px]",
                   f.id === firmId ? "text-fg" : "text-muted hover:bg-hover hover:text-fg",
                 )}
                 onClick={() => {
@@ -91,16 +91,12 @@ export function Sidebar({
   onNavigate?: () => void;
   idPrefix?: string;
 }) {
-  const email = useDeskStore((s) => s.email);
-  const accountId = useDeskStore((s) => s.accountId);
   const chats = useDeskStore((s) => s.chats);
   const activeId = useDeskStore((s) => s.activeId);
   const newChat = useDeskStore((s) => s.newChat);
   const openChat = useDeskStore((s) => s.openChat);
   const deleteChat = useDeskStore((s) => s.deleteChat);
-  const openProfile = useDeskStore((s) => s.openProfile);
 
-  const initial = (email || "T").trim()[0]?.toUpperCase() || "T";
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const onHome = path === "/";
@@ -114,14 +110,14 @@ export function Sidebar({
         <Logo />
         <div className="min-w-0">
           <h1 className="brand-name">PropDesk</h1>
-          <p className="mt-0.5 text-sm text-muted">Rules before you buy</p>
+          <p className="mt-0.5 font-display text-sm text-muted">Rules before you buy</p>
         </div>
       </Link>
 
       <div className="shrink-0 px-2 pt-2">
         <button
           type="button"
-          className="flex h-12 w-full items-center gap-3 rounded-md px-3 text-base font-medium text-muted hover:bg-hover hover:text-fg"
+          className="flex h-11 w-full items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight text-muted hover:bg-hover hover:text-fg"
           onClick={() => {
             newChat();
             void navigate({ to: "/desk" });
@@ -155,7 +151,7 @@ export function Sidebar({
       <FirmPicker idPrefix={idPrefix} />
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pt-4 pb-3">
-          <h2 className="px-3 pb-1 text-sm font-medium text-muted">Asks</h2>
+          <h2 className="px-3 pb-1 font-display text-xs tracking-wide text-dim uppercase">Asks</h2>
           {chats.length === 0 ? (
             <div className="px-3 py-2 text-sm text-dim">No asks yet</div>
           ) : (
@@ -175,7 +171,7 @@ export function Sidebar({
                     onNavigate?.();
                   }}
                   className={cn(
-                    "min-h-12 min-w-0 flex-1 truncate px-3 text-left text-base",
+                    "min-h-11 min-w-0 flex-1 truncate px-3 text-left font-display text-[15px]",
                     c.id === activeId ? "text-fg" : "text-muted hover:text-fg",
                   )}
                 >
@@ -184,7 +180,7 @@ export function Sidebar({
                 <button
                   type="button"
                   aria-label={`Delete ${c.title}`}
-                  className="grid size-12 shrink-0 place-items-center text-dim hover:text-fg"
+                  className="grid size-11 shrink-0 place-items-center text-dim hover:text-fg"
                   onClick={() => deleteChat(c.id)}
                 >
                   <Trash2 className="size-4" />
@@ -192,24 +188,6 @@ export function Sidebar({
               </div>
             ))
           )}
-      </div>
-
-      <div className="shrink-0 p-3">
-        <button
-          type="button"
-          onClick={() => openProfile(false)}
-          className="flex min-h-12 w-full items-center gap-3 rounded-md px-2 text-left hover:bg-hover"
-        >
-          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-user-av text-base font-semibold">
-            {initial}
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-base font-medium">{email || "Trader"}</div>
-            <small className="block truncate text-sm text-dim">
-              {accountId ? `Acct ${accountId}` : "Email & account"}
-            </small>
-          </div>
-        </button>
       </div>
     </div>
   );
