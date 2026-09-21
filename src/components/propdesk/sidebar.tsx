@@ -113,7 +113,7 @@ export function Sidebar({
         <Logo />
         <div className="min-w-0">
           <h1 className="brand-name">PropDesk</h1>
-          <p className="mt-0.5 text-sm text-muted">24/7 · seconds</p>
+          <p className="mt-0.5 text-sm text-muted">Rules before you buy</p>
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export function Sidebar({
           }}
         >
           <Plus className="size-5 shrink-0" />
-          New ticket
+          New ask
         </button>
       </div>
 
@@ -150,9 +150,9 @@ export function Sidebar({
       <FirmPicker idPrefix={idPrefix} />
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pt-4 pb-3">
-          <h2 className="px-3 pb-1 text-sm font-medium text-muted">Tickets</h2>
+          <h2 className="px-3 pb-1 text-sm font-medium text-muted">Asks</h2>
           {chats.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-dim">No tickets yet</div>
+            <div className="px-3 py-2 text-sm text-dim">No asks yet</div>
           ) : (
             chats.map((c) => (
               <div
