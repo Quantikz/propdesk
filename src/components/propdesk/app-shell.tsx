@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
+import { FirmSheet } from "@/components/propdesk/firm-sheet";
 import { HomeLanding } from "@/components/propdesk/home-landing";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
 import { Sidebar } from "@/components/propdesk/sidebar";
@@ -25,6 +26,7 @@ export function AppShell() {
   const home = path === "/";
   const comparing = path.startsWith("/compare");
   const payouts = path.startsWith("/payouts");
+  const sheet = path.startsWith("/firm");
 
   useEffect(() => {
     void useDeskStore.persist.rehydrate();
@@ -111,6 +113,8 @@ export function AppShell() {
           <CompareView />
         ) : payouts ? (
           <PayoutsView />
+        ) : sheet ? (
+          <FirmSheet />
         ) : (
           <>
             <Thread />
