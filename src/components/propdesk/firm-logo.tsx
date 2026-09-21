@@ -20,12 +20,13 @@ export function FirmLogo({
   className?: string;
 }) {
   const host = hostOf(firm.portal);
-  const src = host
+  const local = `/firms/${firm.id}.svg`;
+  const remote = host
     ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`
     : "";
-  const [failed, setFailed] = useState(false);
+  const [src, setSrc] = useState(local);
 
-  if (!src || failed) {
+  if (!src) {
     return (
       <span
         className={cn(
@@ -46,8 +47,8 @@ export function FirmLogo({
       alt=""
       width={size}
       height={size}
-      className={cn("shrink-0 rounded-sm bg-elev object-contain", className)}
-      onError={() => setFailed(true)}
+      className={cn("shrink-0 rounded-sm object-contain", className)}
+      onError={() => setSrc((cur) => (cur === local && remote ? remote : ""))}
     />
   );
 }
