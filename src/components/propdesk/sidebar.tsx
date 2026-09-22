@@ -107,7 +107,6 @@ export function Sidebar({
   const onHome = path === "/";
   const onDesk = path === "/desk" || path.startsWith("/desk/") || path.startsWith("/ask");
   const onRules = path.startsWith("/rules");
-  const onFirms = path.startsWith("/firms");
   const onCompare = path.startsWith("/compare");
   const onPayouts = path.startsWith("/payouts");
 
@@ -149,10 +148,6 @@ export function Sidebar({
         <NavLink to="/rules" active={onRules} onNavigate={onNavigate}>
           <Inbox className="size-5 shrink-0" />
           Rules
-        </NavLink>
-        <NavLink to="/firms" active={onFirms} onNavigate={onNavigate}>
-          <House className="size-5 shrink-0" />
-          Firms
         </NavLink>
         <NavLink to="/payouts" active={onPayouts} onNavigate={onNavigate}>
           <Banknote className="size-5 shrink-0" />
