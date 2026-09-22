@@ -27,7 +27,7 @@ export function EmptyState() {
             type="button"
             disabled={sending}
             onClick={() => send(p.prompt)}
-            className="rounded-2xl border border-line bg-elev px-4 py-3 text-left text-sm hover:bg-hover disabled:opacity-50"
+            className="rounded-md border border-line bg-elev px-3 py-3 text-left font-display text-sm font-semibold hover:bg-hover disabled:opacity-50"
           >
             {p.title}
           </button>

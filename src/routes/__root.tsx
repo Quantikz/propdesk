@@ -21,10 +21,19 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Know every prop-firm rule before you buy. Compare books and spend on the plan that fits.",
+          "Understand prop-firm rules before you buy. Drawdown, payouts, news, consistency — explained with sources.",
       },
       { name: "theme-color", content: "#231f19" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "PropDesk" },
+      { name: "application-name", content: "PropDesk" },
+      { property: "og:title", content: "PropDesk — Understand the rules before you buy" },
+      {
+        property: "og:description",
+        content: "A research desk for prop-firm rules. No ranking. No best-firm pitch.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
