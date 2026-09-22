@@ -6,24 +6,17 @@ import appCss from "../styles.css?url";
 
 const APP_NAME = "PropDesk";
 
-const THEME_BOOT = `(function(){try{var t=localStorage.getItem('pd-theme');if(t!=='light'&&t!=='dark'){t='light'}var r=document.documentElement;r.dataset.theme=t;r.style.colorScheme=t;}catch(e){}})();`;
+const THEME_BOOT = `(function(){try{var t=localStorage.getItem('pd-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}var r=document.documentElement;r.dataset.theme=t;r.style.colorScheme=t;}catch(e){}})();`;
 
 export const Route = createRootRoute({
   notFoundComponent: AppNotFound,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      {
-        name: "viewport",
-        content: "width=device-width, initial-scale=1, viewport-fit=cover",
-      },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: APP_NAME },
-      {
-        name: "description",
-        content:
-          "Understand the rules before you buy. Sourced explanations of prop-firm rules.",
-      },
-      { name: "theme-color", content: "#f5f5f7" },
+      { name: "description", content: "Know every prop-firm rule before you buy. Compare books and spend on the plan that fits." },
+      { name: "theme-color", content: "#231f19" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
     ],
     links: [
@@ -35,7 +28,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap",
       },
     ],
   }),
