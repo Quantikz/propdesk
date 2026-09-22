@@ -37,6 +37,23 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
+    const page = home
+      ? "Understand the rules before you buy"
+      : comparing
+        ? "Compare firms"
+        : payouts
+          ? "Who actually paid"
+          : rules
+            ? "Explain this rule"
+            : firms
+              ? "Firms"
+              : sheet
+                ? firm.name
+                : "Ask PropDesk";
+    document.title = `${page} · PropDesk`;
+  }, [home, comparing, payouts, rules, firms, sheet, firm.name]);
+
+  useEffect(() => {
     void getCatalog()
       .then((cat) => {
         if (cat?.firms?.length) {
