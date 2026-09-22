@@ -13,7 +13,7 @@ function NavLink({
   onNavigate,
   children,
 }: {
-  to: "/" | "/desk" | "/compare" | "/payouts";
+  to: "/" | "/desk" | "/ask" | "/compare" | "/payouts" | "/rules" | "/firms";
   active: boolean;
   onNavigate?: () => void;
   children: ReactNode;
@@ -105,7 +105,9 @@ export function Sidebar({
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const onHome = path === "/";
-  const onDesk = path === "/desk" || path.startsWith("/desk/");
+  const onDesk = path === "/desk" || path.startsWith("/desk/") || path.startsWith("/ask");
+  const onRules = path.startsWith("/rules");
+  const onFirms = path.startsWith("/firms");
   const onCompare = path.startsWith("/compare");
   const onPayouts = path.startsWith("/payouts");
 
@@ -143,6 +145,14 @@ export function Sidebar({
         <NavLink to="/compare" active={onCompare} onNavigate={onNavigate}>
           <Columns2 className="size-5 shrink-0" />
           Compare
+        </NavLink>
+        <NavLink to="/rules" active={onRules} onNavigate={onNavigate}>
+          <Inbox className="size-5 shrink-0" />
+          Rules
+        </NavLink>
+        <NavLink to="/firms" active={onFirms} onNavigate={onNavigate}>
+          <House className="size-5 shrink-0" />
+          Firms
         </NavLink>
         <NavLink to="/payouts" active={onPayouts} onNavigate={onNavigate}>
           <Banknote className="size-5 shrink-0" />
