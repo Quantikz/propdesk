@@ -69,17 +69,17 @@ export function HomeLanding() {
           <label htmlFor="desk-search" className="font-display text-[11px] tracking-[0.14em] text-dim uppercase">
             What do you want to understand?
           </label>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <input
               id="desk-search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search a firm, rule, restriction, breach condition, or payout question."
+              placeholder="Firm, rule, restriction, breach, or payout."
               className="h-11 min-w-0 flex-1 rounded-md border border-line bg-elev px-3 text-sm text-fg placeholder:text-dim outline-none focus:border-fg"
             />
             <button
               type="submit"
-              className="inline-flex h-11 shrink-0 items-center rounded-md bg-paper px-4 font-display text-sm font-semibold text-ink"
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-md bg-paper px-4 font-display text-sm font-semibold text-ink"
             >
               Ask
             </button>
