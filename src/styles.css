@@ -120,6 +120,35 @@ html[data-theme="light"] {
   p {
     text-wrap: pretty;
   }
+
+  ::selection {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-paper);
+    outline-offset: 2px;
+  }
+
+  html[data-theme="light"] :focus-visible {
+    outline-color: var(--color-fg);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
 }
 
 .page-title {
