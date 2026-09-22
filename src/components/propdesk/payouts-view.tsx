@@ -29,14 +29,14 @@ export function PayoutsView() {
             ["Evidence", `Source and last verified ${rulesAt}. Official terms beat this desk.`],
             ["User reports", "Third-party boards are not official rules. Never shown as verified fact."],
           ].map(([k, v]) => (
-            <div key={k} className="rounded-2xl border border-line bg-elev px-4 py-4">
-              <p className="text-[15px] font-semibold tracking-tight">{k}</p>
+            <div key={k} className="rounded-md border border-line bg-elev px-3 py-3">
+              <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">{k}</p>
               <p className="mt-2 text-sm leading-relaxed text-muted">{v}</p>
             </div>
           ))}
         </div>
 
-        <h2 className="mt-10 text-xl font-semibold tracking-tight">Documented checklist by firm</h2>
+        <h2 className="mt-10 font-display text-xl font-bold tracking-tight">Documented checklist by firm</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead>
@@ -67,9 +67,9 @@ export function PayoutsView() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-dim">Rules packed {rulesAt}. Needs confirmation on the live card.</p>
+        <p className="mt-2 text-xs text-dim">Last verified {rulesAt}. Needs confirmation on the live card.</p>
 
-        <h2 className="mt-10 text-xl font-semibold tracking-tight">User reports</h2>
+        <h2 className="mt-10 font-display text-xl font-bold tracking-tight">User reports</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           Figures from{" "}
           <a className="underline underline-offset-2" href={PJ_STATS} target="_blank" rel="noreferrer">Payout Junction</a>
@@ -80,13 +80,13 @@ export function PayoutsView() {
         {boardAt ? <p className="mt-1 text-xs text-dim">Board stamp {boardAt}</p> : null}
         {feed?.ok ? (
           <div className="mt-4 grid grid-cols-2 gap-3 desk:grid-cols-4">
-            <div className="rounded-2xl border border-line bg-elev px-4 py-4">
+            <div className="rounded-md border border-line bg-elev px-3 py-3">
               <p className="text-xs text-dim">Last 24h</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">{money(feed.last24h?.usd ?? 0)}</p>
+              <p className="mt-1 font-display text-2xl font-bold tabular-nums">{money(feed.last24h?.usd ?? 0)}</p>
             </div>
-            <div className="rounded-2xl border border-line bg-elev px-4 py-4">
+            <div className="rounded-md border border-line bg-elev px-3 py-3">
               <p className="text-xs text-dim">Last 30 days</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">{money(feed.last30d?.usd ?? 0)}</p>
+              <p className="mt-1 font-display text-2xl font-bold tabular-nums">{money(feed.last30d?.usd ?? 0)}</p>
             </div>
           </div>
         ) : (
