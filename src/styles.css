@@ -2,41 +2,41 @@
 @import "tw-animate-css";
 
 @theme {
-  --font-sans: "Source Sans 3", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Source Serif 4", "Source Serif Pro", "Georgia", "Times New Roman", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --color-bg: #231f19;
-  --color-sidebar: #0a0908;
-  --color-hover: #2a261f;
-  --color-input: #1a1714;
-  --color-elev: #1c1914;
-  --color-line: #3a342c;
-  --color-fg: #f1ece3;
-  --color-muted: #a39b8e;
-  --color-dim: #746c62;
-  --color-paper: #efe6d4;
-  --color-ink: #161310;
-  --color-accent: #efe6d4;
-  --color-accent-hover: #f6f0e4;
-  --color-accent-fg: #161310;
-  --color-border: #3a342c;
-  --color-ok: #7d9e78;
-  --color-warn: #c4b07a;
-  --color-bad: #c47a72;
-  --color-user-av: #2a261f;
+  --color-bg: #f5f5f7;
+  --color-sidebar: #f5f5f7;
+  --color-hover: #ececee;
+  --color-input: #ffffff;
+  --color-elev: #ffffff;
+  --color-line: #e5e5ea;
+  --color-fg: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-dim: #86868b;
+  --color-paper: #1d1d1f;
+  --color-ink: #f5f5f7;
+  --color-accent: #1d1d1f;
+  --color-accent-hover: #424245;
+  --color-accent-fg: #f5f5f7;
+  --color-border: #e5e5ea;
+  --color-ok: #248a3d;
+  --color-warn: #b25e09;
+  --color-bad: #d70015;
+  --color-user-av: #1d1d1f;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
 
   --breakpoint-desk: 56.25rem;
 
-  --shadow-border: 0 0 0 1px color-mix(in srgb, var(--color-fg) 10%, transparent);
-  --shadow-border-hover: 0 0 0 1px color-mix(in srgb, var(--color-fg) 20%, transparent);
-  --shadow-composer: none;
+  --shadow-border: 0 0 0 1px color-mix(in srgb, var(--color-fg) 8%, transparent);
+  --shadow-border-hover: 0 0 0 1px color-mix(in srgb, var(--color-fg) 14%, transparent);
+  --shadow-composer: 0 8px 30px rgba(0, 0, 0, 0.06);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -44,37 +44,37 @@
   --motion-fast: 250ms;
 }
 
-html[data-theme="light"] {
-  --color-bg: #fbfaf7;
-  --color-sidebar: #f3f1eb;
-  --color-hover: #ebe7de;
-  --color-input: #ffffff;
-  --color-elev: #ffffff;
-  --color-line: #e4dfd4;
-  --color-fg: #1a1714;
-  --color-muted: #5f5a53;
-  --color-dim: #8a847a;
-  --color-paper: #1a1714;
-  --color-ink: #fbfaf7;
-  --color-accent: #1a1714;
-  --color-accent-hover: #2c2823;
-  --color-accent-fg: #fbfaf7;
-  --color-border: #e4dfd4;
-  --color-ok: #3f6b3c;
-  --color-warn: #8a6f2a;
-  --color-bad: #9a3f36;
-  --color-user-av: #1a1714;
+html[data-theme="dark"] {
+  --color-bg: #000000;
+  --color-sidebar: #000000;
+  --color-hover: #1c1c1e;
+  --color-input: #1c1c1e;
+  --color-elev: #1c1c1e;
+  --color-line: #2c2c2e;
+  --color-fg: #f5f5f7;
+  --color-muted: #a1a1a6;
+  --color-dim: #6e6e73;
+  --color-paper: #f5f5f7;
+  --color-ink: #1d1d1f;
+  --color-accent: #f5f5f7;
+  --color-accent-hover: #d2d2d7;
+  --color-accent-fg: #1d1d1f;
+  --color-border: #2c2c2e;
+  --color-ok: #30d158;
+  --color-warn: #ffd60a;
+  --color-bad: #ff453a;
+  --color-user-av: #f5f5f7;
 }
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
-  html[data-theme="light"] {
-    color-scheme: light;
+  html[data-theme="dark"] {
+    color-scheme: dark;
   }
 
   html,
@@ -89,7 +89,7 @@ html[data-theme="light"] {
     background: var(--color-bg);
     color: var(--color-fg);
     font-family: var(--font-sans);
-    font-size: 1.0125rem;
+    font-size: 1rem;
     line-height: 1.5;
     overflow: hidden;
   }
@@ -105,16 +105,10 @@ html[data-theme="light"] {
   .brand-name,
   .page-title {
     font-family: var(--font-display);
-    font-optical-sizing: auto;
-    font-weight: 700;
-    letter-spacing: -0.038em;
+    font-weight: 600;
+    letter-spacing: -0.03em;
     line-height: 1.12;
     text-wrap: balance;
-  }
-
-  label,
-  th {
-    font-family: var(--font-display);
   }
 
   p {
@@ -123,13 +117,15 @@ html[data-theme="light"] {
 }
 
 .page-title {
-  font-size: clamp(1.95rem, 1.15rem + 2.6vw, 2.9rem);
-  letter-spacing: -0.04em;
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.4rem);
+  letter-spacing: -0.045em;
+  font-weight: 600;
 }
 
 .brand-name {
-  font-size: 1.35rem;
-  letter-spacing: -0.04em;
+  font-size: 1.125rem;
+  letter-spacing: -0.03em;
+  font-weight: 600;
 }
 
 @keyframes pd-blink {
