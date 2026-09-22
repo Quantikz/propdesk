@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
+import { BrandLockup } from "@/components/propdesk/logo";
 import { DeskDisclaimer } from "@/components/propdesk/disclaimer";
 import { firmList } from "@/lib/propdesk/engine";
 import { libraryTopics, TOPICS } from "@/lib/propdesk/explain";
@@ -37,7 +38,8 @@ export function HomeLanding() {
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
       <div className="mx-auto w-full max-w-4xl px-4 py-6 desk:px-8 desk:py-8">
-        <p className="font-display text-[11px] tracking-[0.16em] text-dim uppercase">Independent research desk</p>
+        <BrandLockup size="lg" />
+        <p className="mt-6 font-display text-[11px] tracking-[0.16em] text-dim uppercase">Independent research desk</p>
         <h1 className="page-title mt-2 max-w-2xl">Understand the rules before you buy.</h1>
         <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted">
           Understand drawdown, payouts, news, consistency, and the restrictions that can affect your account.

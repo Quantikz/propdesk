@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Banknote, ChevronDown, Columns2, House, Inbox, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
-import { Logo } from "@/components/propdesk/logo";
+import { BrandLockup } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 import { cn } from "@/lib/utils";
@@ -112,12 +112,8 @@ export function Sidebar({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-sidebar">
-      <Link to="/" onClick={onNavigate} className="flex shrink-0 items-center gap-3 px-4 pt-4 pb-3 text-fg">
-        <Logo />
-        <div className="min-w-0">
-          <h1 className="brand-name">PropDesk</h1>
-          <p className="mt-0.5 font-display text-sm text-muted">Rules before you buy</p>
-        </div>
+      <Link to="/" onClick={onNavigate} className="flex shrink-0 px-4 pt-4 pb-3 text-fg">
+        <BrandLockup size="sm" />
       </Link>
 
       <nav className="flex shrink-0 flex-col gap-0.5 px-2">
