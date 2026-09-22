@@ -44,7 +44,9 @@ export function AppShell() {
           setCatalogTick((n) => n + 1);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        /* packed fallback in engine */
+      });
   }, []);
 
   useEffect(() => {
@@ -57,7 +59,9 @@ export function AppShell() {
 
   useEffect(() => {
     function onResize() {
-      if (window.matchMedia("(min-width: 900px)").matches) setSidebarOpen(false);
+      if (window.matchMedia("(min-width: 900px)").matches) {
+        setSidebarOpen(false);
+      }
     }
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -78,10 +82,14 @@ export function AppShell() {
   }, [sidebarOpen]);
 
   return (
-    <div className="relative flex h-dvh min-h-0 overflow-hidden bg-bg text-fg" style={{ "--firm": firm.color } as CSSProperties}>
+    <div
+      className="relative flex h-dvh min-h-0 overflow-hidden bg-bg text-fg"
+      style={{ "--firm": firm.color } as CSSProperties}
+    >
       <aside className="relative z-10 hidden h-full w-80 shrink-0 flex-col border-r border-border desk:flex">
         <Sidebar idPrefix="desk" />
       </aside>
+
       <div
         className={cn(
           "fixed inset-0 z-40 overflow-hidden overscroll-none bg-bg/60 backdrop-blur-sm transition-opacity duration-[var(--motion-fast)] ease-[var(--ease-smooth-out)] desk:hidden",
@@ -100,6 +108,7 @@ export function AppShell() {
       >
         <Sidebar idPrefix="mobile" onNavigate={() => setSidebarOpen(false)} />
       </aside>
+
       <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col bg-bg">
         <Topbar />
         {home ? (
@@ -121,6 +130,7 @@ export function AppShell() {
           </>
         )}
       </section>
+
       {toast ? (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-paper px-4 py-2 font-display text-sm text-ink shadow-lg">
           {toast}
