@@ -128,24 +128,26 @@ export function AppShell() {
 
       <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col bg-bg">
         <Topbar />
-        {home ? (
-          <HomeLanding />
-        ) : comparing ? (
-          <CompareView />
-        ) : payouts ? (
-          <PayoutsView />
-        ) : sheet ? (
-          <FirmSheet />
-        ) : firms ? (
-          <FirmsView />
-        ) : rules ? (
-          <RulesView />
-        ) : (
-          <>
-            <Thread />
-            <Composer />
-          </>
-        )}
+        <div key={path} className="page-enter flex min-h-0 min-w-0 flex-1 flex-col">
+          {home ? (
+            <HomeLanding />
+          ) : comparing ? (
+            <CompareView />
+          ) : payouts ? (
+            <PayoutsView />
+          ) : sheet ? (
+            <FirmSheet />
+          ) : firms ? (
+            <FirmsView />
+          ) : rules ? (
+            <RulesView />
+          ) : (
+            <>
+              <Thread />
+              <Composer />
+            </>
+          )}
+        </div>
       </section>
 
       {toast ? (

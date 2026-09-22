@@ -18,15 +18,20 @@ export function TrustPill({ trust }: { trust: RuleExplain["trust"] }) {
 
 export function RuleCard({ rule }: { rule: RuleExplain }) {
   return (
-    <details className="rounded-md border border-line bg-elev px-3 py-3">
+    <details className="rule-card rounded-md border border-line bg-elev px-3 py-3">
       <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
         <span className="min-w-0">
           <span className="block font-display text-sm font-semibold tracking-tight">{rule.title}</span>
           <span className="mt-1 block text-sm text-muted">{rule.short}</span>
         </span>
-        <TrustPill trust={rule.trust} />
+        <span className="flex shrink-0 items-center gap-2">
+          <TrustPill trust={rule.trust} />
+          <svg className="rule-chevron size-4 text-dim" viewBox="0 0 16 16" aria-hidden>
+            <path fill="currentColor" d="M3.2 5.3 8 10.1l4.8-4.8 1.1 1.1L8 12.3 2.1 6.4z" />
+          </svg>
+        </span>
       </summary>
-      <div className="mt-3 space-y-3 border-t border-line pt-3 text-sm leading-relaxed">
+      <div className="rule-body mt-3 space-y-3 border-t border-line pt-3 text-sm leading-relaxed">
         <p>
           <strong className="block font-display text-[11px] tracking-[0.12em] text-dim uppercase">Short answer</strong>
           {rule.short}
