@@ -1,61 +1,92 @@
-import { Link } from "@tanstack/react-router";
-import { FirmLogo } from "@/components/propdesk/firm-logo";
-import { firmList } from "@/lib/propdesk/engine";
+import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { libraryTopics, TOPICS } from "@/lib/propdesk/explain";
 import { useDeskStore } from "@/lib/propdesk/store";
 
 export function HomeLanding() {
-  const firms = firmList();
-  const setFirm = useDeskStore((s) => s.setFirm);
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  const send = useDeskStore((s) => s.send);
+
+  function goAsk(text: string) {
+    const next = text.trim();
+    if (!next) {
+      void navigate({ to: "/ask" });
+      return;
+    }
+    void navigate({ to: "/ask" });
+    window.setTimeout(() => send(next), 40);
+  }
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-      <div className="mx-auto w-full max-w-4xl px-4 py-6 desk:px-8 desk:py-8">
-        <p className="font-display text-[11px] tracking-[0.16em] text-dim uppercase">Independent research desk</p>
-        <h1 className="page-title mt-2 max-w-2xl">Know the rules before you buy.</h1>
-        <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted">
-          Read drawdown, payouts, news, and consistency. Compare books. Spend on the plan you can trade.
+      <div className="mx-auto w-full max-w-5xl px-4 pb-16 pt-8 desk:px-8 desk:pt-14">
+        <p className="text-[13px] font-medium tracking-[0.14em] text-dim uppercase">PropDesk</p>
+        <h1 className="page-title mt-3 max-w-3xl">Understand the rules before you buy.</h1>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
+          Understand drawdown, payouts, news, consistency, and the restrictions that can affect your account.
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap gap-2">
           <Link
-            to="/desk"
-            className="inline-flex h-10 items-center rounded-md bg-paper px-4 font-display text-sm font-semibold text-ink"
+            to="/ask"
+            className="inline-flex h-11 items-center rounded-full bg-paper px-5 text-sm font-medium text-ink"
           >
-            Open desk
+            Ask PropDesk
           </Link>
           <Link
-            to="/compare"
-            className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold"
+            to="/firms"
+            className="inline-flex h-11 items-center rounded-full border border-line bg-elev px-5 text-sm font-medium"
           >
-            Compare firms
-          </Link>
-          <Link
-            to="/payouts"
-            className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold"
-          >
-            Payouts
+            Explore firms
           </Link>
         </div>
 
-        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Firms</h2>
-        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {firms.map((f) => (
+        <form
+          className="mt-10 rounded-2xl border border-line bg-elev px-4 py-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            goAsk(q);
+          }}
+        >
+          <label htmlFor="pd-search" className="text-sm font-medium">
+            What do you want to understand?
+          </label>
+          <input
+            id="pd-search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search a firm, rule, restriction, breach condition, or payout question."
+            className="mt-2 h-12 w-full rounded-xl border-0 bg-bg px-3 text-base outline-none"
+          />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {TOPICS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className="rounded-full border border-line px-3 py-1.5 text-sm text-muted hover:text-fg"
+                onClick={() => goAsk(t.label)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </form>
+
+        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 desk:grid-cols-3">
+          {libraryTopics().map((tile) => (
             <Link
-              key={f.id}
-              to="/firm/$firmId"
-              params={{ firmId: f.id }}
-              onClick={() => setFirm(f.id)}
-              className="flex items-center gap-3 rounded-md border border-line bg-elev px-3 py-3 hover:bg-hover"
+              key={tile.id}
+              to={tile.href.split("?")[0] as "/ask" | "/payouts" | "/rules"}
+              className="rounded-2xl border border-line bg-elev px-4 py-5 hover:bg-hover"
             >
-              <FirmLogo firm={f} size={28} />
-              <span className="min-w-0">
-                <span className="block truncate font-display text-sm font-semibold tracking-tight">
-                  {f.name}
-                </span>
-                <span className="block truncate text-xs text-dim">{f.models[0]}</span>
-              </span>
+              <strong className="block text-[17px] font-semibold tracking-tight">{tile.title}</strong>
+              <span className="mt-2 block text-sm leading-relaxed text-muted">{tile.blurb}</span>
             </Link>
           ))}
         </div>
+        <p className="mt-10 max-w-2xl text-xs leading-relaxed text-dim">
+          PropDesk provides informational explanations and is not a substitute for a firm’s current official terms.
+        </p>
       </div>
     </div>
   );

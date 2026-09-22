@@ -1,7 +1,5 @@
-import { ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { SUGGESTS, getFirm } from "@/lib/propdesk/engine";
-import { firstPayout, plansFor } from "@/lib/propdesk/plans";
+import { getFirm } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
 
 export function EmptyState() {
@@ -9,77 +7,35 @@ export function EmptyState() {
   const send = useDeskStore((s) => s.send);
   const sending = useDeskStore((s) => s.sending);
   const firm = getFirm(firmId);
-  const fp = firstPayout(firmId);
-  const plans = plansFor(firmId);
+  const prompts = [
+    { title: "What can cause a breach?", prompt: `What can cause a breach on ${firm.name}? Explain the rule and the source.` },
+    { title: "What can deny a payout?", prompt: `What can deny a payout on ${firm.name}? Separate official rules from reports.` },
+    { title: "Does floating loss count?", prompt: `On ${firm.name}, can floating loss trigger daily drawdown? Explain this rule.` },
+  ];
 
   return (
-    <div className="flex w-full flex-1 flex-col justify-start px-1 py-2 desk:justify-center desk:py-4">
-      <p className="text-[11px] tracking-[0.14em] text-dim uppercase">{firm.short} · before you buy</p>
-      <h2 className="page-title mt-2 max-w-lg">
-        Know {firm.name} before you pay
-      </h2>
-      <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted">
-        This desk is for research, not support tickets. Read the rules, pick the plan,
-        compare firms, and spend on the book that actually fits you.
+    <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-1 py-6">
+      <p className="text-[13px] font-medium tracking-[0.14em] text-dim uppercase">Ask PropDesk</p>
+      <h2 className="page-title mt-2">Ask a plain-English question</h2>
+      <p className="mt-3 text-sm leading-relaxed text-muted">
+        You do not need to pick an account type first. If the firm matters, name it. Answers should cite a source.
       </p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          to="/compare"
-          className="inline-flex min-h-11 items-center rounded-md border border-line bg-elev px-3.5 text-sm font-medium hover:bg-hover"
-        >
-          Compare firms
-        </Link>
-        <Link
-          to="/payouts"
-          className="inline-flex min-h-11 items-center rounded-md border border-line bg-elev px-3.5 text-sm font-medium hover:bg-hover"
-        >
-          Payouts issued
-        </Link>
-      </div>
-
-      <div className="mt-5 max-w-lg">
-        <p className="text-[11px] tracking-[0.12em] text-dim uppercase">Plans on this firm</p>
-        <p className="mt-1.5 text-sm text-fg">{plans.map((p) => p.name).join(" · ")}</p>
-        <p className="mt-1 text-xs text-muted">
-          {plans[0]?.note} Don’t mix 1-step numbers with 2-step.
-        </p>
-        <p className="mt-3 text-[11px] tracking-[0.12em] text-dim uppercase">First payout</p>
-        <ul className="mt-1.5 space-y-1 text-sm text-muted">
-          <li>
-            <span className="text-fg">KYC.</span> {fp.kyc}
-          </li>
-          <li>
-            <span className="text-fg">Days.</span> {fp.minDays}
-          </li>
-          <li>
-            <span className="text-fg">Consistency.</span> {fp.consistency}
-          </li>
-          <li>
-            <span className="text-fg">News.</span> {fp.news}
-          </li>
-          <li>
-            <span className="text-fg">Request.</span> {fp.request}
-          </li>
-        </ul>
-      </div>
-
-      <div className="mt-5 grid w-full grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
-        {SUGGESTS.map((s) => (
+      <div className="mt-5 grid gap-2">
+        {prompts.map((p) => (
           <button
-            key={s.title}
+            key={p.title}
             type="button"
             disabled={sending}
-            onClick={() => send(s.prompt)}
-            className="flex min-h-12 items-center gap-3 bg-elev px-3.5 py-3 text-left hover:bg-hover disabled:opacity-50 desk:min-h-14 desk:px-4"
+            onClick={() => send(p.prompt)}
+            className="rounded-2xl border border-line bg-elev px-4 py-3 text-left text-sm hover:bg-hover disabled:opacity-50"
           >
-            <span className="min-w-0 flex-1">
-              <strong className="block text-sm font-medium">{s.title}</strong>
-              <em className="mt-0.5 block text-xs not-italic text-dim">{s.blurb}</em>
-            </span>
-            <ChevronRight className="size-4 shrink-0 text-dim" />
+            {p.title}
           </button>
         ))}
       </div>
+      <Link to="/firms" className="mt-4 text-sm text-muted underline underline-offset-2">
+        Or open a firm sheet
+      </Link>
     </div>
   );
 }
