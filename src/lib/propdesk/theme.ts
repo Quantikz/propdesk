@@ -3,10 +3,10 @@ export type Theme = "dark" | "light";
 const KEY = "pd-theme";
 
 export function readTheme(): Theme {
-  if (typeof window === "undefined") return "light";
+  if (typeof window === "undefined") return "dark";
   const saved = window.localStorage.getItem(KEY);
   if (saved === "light" || saved === "dark") return saved;
-  return "light";
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
 }
 
 export function applyTheme(theme: Theme) {
