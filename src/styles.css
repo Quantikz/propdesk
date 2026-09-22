@@ -185,6 +185,45 @@ html[data-theme="light"] {
   40% { opacity: 1; transform: translateY(-2px); }
 }
 
+@keyframes pd-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.page-enter {
+  animation: pd-enter var(--motion-fast) var(--ease-smooth-out);
+}
+
+button,
+a,
+[role="button"],
+summary {
+  transition:
+    transform var(--motion-quick) var(--ease-smooth-out),
+    background-color var(--motion-quick) var(--ease-smooth-out),
+    color var(--motion-quick) var(--ease-smooth-out),
+    border-color var(--motion-quick) var(--ease-smooth-out);
+}
+
+button:active:not(:disabled),
+a:active,
+[role="button"]:active,
+summary:active {
+  transform: scale(0.98);
+}
+
+.rule-card[open] .rule-chevron {
+  transform: rotate(180deg);
+}
+
+.rule-card .rule-chevron {
+  transition: transform var(--motion-fast) var(--ease-smooth-out);
+}
+
+.rule-card[open] .rule-body {
+  animation: pd-enter var(--motion-fast) var(--ease-smooth-out);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
