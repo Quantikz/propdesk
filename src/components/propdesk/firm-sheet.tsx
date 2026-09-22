@@ -48,8 +48,9 @@ export function FirmSheet() {
             <h1 className="font-display text-3xl font-bold tracking-tight">{firm.name}</h1>
           </div>
         </div>
-        <p className="mt-2 text-sm text-muted">{firm.notes}</p>
-        <p className="mt-1 text-xs text-dim">Rules packed {rulesAt}. Confirm checkout and the live terms.</p>
+        <p className="mt-2 text-sm text-muted">Understand the rules before you trade.</p>
+        <p className="mt-1 text-sm text-muted">{firm.notes}</p>
+        <p className="mt-1 text-xs text-dim">Last verified {rulesAt}. Confirm checkout and the live terms.</p>
         <div className="mt-4 flex gap-1 overflow-x-auto pb-1">
           {TABS.map((t) => (
             <button
@@ -69,6 +70,7 @@ export function FirmSheet() {
           <>
             <div className="mt-5 flex flex-wrap gap-2">
               <Link to="/desk" onClick={() => setFirm(firm.id)} className="inline-flex h-10 items-center rounded-md bg-paper px-4 font-display text-sm font-semibold text-ink">Ask this book</Link>
+              <button type="button" onClick={() => setTab("rules")} className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Explain this rule</button>
               <Link to="/compare" className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Compare</Link>
               <a href={value.terms} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Official terms</a>
             </div>

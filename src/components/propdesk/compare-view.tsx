@@ -49,7 +49,7 @@ export function CompareView() {
                   aria-pressed={on}
                   onClick={() => toggleCompare(f.id)}
                   className={cn(
-                    "inline-flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm",
+                    "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 font-display text-sm font-semibold",
                     on ? "border-fg bg-fg text-bg" : "border-line bg-elev text-muted",
                   )}
                 >

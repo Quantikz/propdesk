@@ -27,6 +27,7 @@ export function RulesView() {
         <h1 className="page-title mt-2">Explain this rule</h1>
         <p className="mt-2 text-sm text-muted">
           Short answer, official note, meaning, example, common mistake, source and last verified.
+          PropDesk provides informational explanations and is not a substitute for a firm&apos;s current official terms.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {FILTERS.map((f) => (
@@ -55,7 +56,7 @@ export function RulesView() {
           ))}
         </div>
         <div className="mt-4 space-y-2">
-          {rows.slice(0, 24).map((r) => (
+          {rows.slice(0, 48).map((r) => (
             <RuleCard key={r.id} rule={r} />
           ))}
         </div>
