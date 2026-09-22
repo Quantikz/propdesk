@@ -1,20 +1,27 @@
 # PropDesk
 
-Independent FAQ desk for prop-firm traders. Open 24/7. Replies in seconds. Compare firms side by side.
+Independent research desk for prop-firm rules. Understand drawdown, payouts, news, and consistency before you buy.
+
+Live: https://propdesk-beta.vercel.app/
+
+## What it is
+
+A rule-intelligence product, not a broker, support inbox, or trading terminal.
+
+- Ask a plain-English question
+- Open a firm sheet: Rules, Breaches, Payouts, Restrictions, FAQ
+- Compare documented differences only
+- Read issued-payout boards separately from official checklists
 
 Covers FTMO, FundedNext, The5ers, FundingPips, E8, Goat Funded Trader, Alpha Capital, Apex, Topstep, and Instant Funding.
 
-## What it does
-
-- Answers program questions from a packed FAQ per firm (drawdown, payouts, news, EAs, KYC, which plan fits).
-- Does **not** open tickets or email firms yet — that comes later.
-- Compare two to four firms on the rules that actually differ.
+PropDesk does not rank firms.
 
 ## Stack
 
-React 19, TanStack Start, Tailwind v4, Zustand. The desk looks up the firm’s site from the server. No keys in the browser. Visitors never paste a key.
+React 19, TanStack Start, Tailwind v4, Zustand. Firm sites are fetched on the server.
 
-## Run on a computer
+## Run
 
 ```bash
 git clone https://github.com/Quantikz/propdesk.git
@@ -23,30 +30,12 @@ npm install
 npm run dev
 ```
 
-Then open http://127.0.0.1:8080
+Open http://127.0.0.1:8080
 
-## Run on Termux (Android)
+## Deploy
 
-Paste this once:
-
-```bash
-pkg update -y && pkg install -y git
-cd $HOME
-curl -fsSL https://raw.githubusercontent.com/Quantikz/propdesk/main/termux-run.sh -o propdesk-run.sh
-chmod +x propdesk-run.sh
-bash propdesk-run.sh
-```
-
-If you already cloned the repo:
+Vercel from `main`. Production build:
 
 ```bash
-cd $HOME/propdesk
-git pull
-bash termux-run.sh
+npm run build
 ```
-
-Keep that session open. On this phone open **http://127.0.0.1:8080**. The script also prints a Wi-Fi address so a laptop on the same network can open it.
-
-## Knowledge
-
-Firm snapshots live in `src/lib/propdesk/knowledge.ts`. Live answers prefer the firm’s current website over that snapshot.

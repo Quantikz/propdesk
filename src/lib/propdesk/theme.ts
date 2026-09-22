@@ -15,6 +15,8 @@ export function applyTheme(theme: Theme) {
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
   window.localStorage.setItem(KEY, theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", theme === "light" ? "#fbfaf7" : "#231f19");
 }
 
 export function toggleTheme(current: Theme): Theme {
