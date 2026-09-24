@@ -19,12 +19,21 @@ export function packIdsFor(
   ).slice(0, 4);
 }
 
-function hostOf(url: string) {
+export function hostOf(url: string) {
   try {
     return new URL(url).hostname.replace(/^www\./, "").toLowerCase();
   } catch {
     return "";
   }
+}
+
+function hostAllowed(host: string, allowed: Set<string>) {
+  if (!host) return false;
+  if (allowed.has(host)) return true;
+  for (const a of allowed) {
+    if (a && (host === a || host.endsWith(`.${a}`))) return true;
+  }
+  return false;
 }
 
 export function allowedHosts(cat: CatalogPayload, ids: string[], payoutAsk: boolean) {
@@ -56,7 +65,7 @@ export function filterSources(raw: Source[], allowed: Set<string>, official: Sou
   for (const s of official) out.set(s.url, s);
   for (const s of raw) {
     const h = hostOf(s.url);
-    if (!h || !allowed.has(h)) continue;
+    if (!hostAllowed(h, allowed)) continue;
     if (!out.has(s.url)) out.set(s.url, { url: s.url, title: s.title || h });
   }
   return [...out.values()].slice(0, 6);
