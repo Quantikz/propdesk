@@ -49,7 +49,7 @@ export function AppShell() {
               ? "Firms"
               : sheet
                 ? firm.name
-                : "Ask PropDesk";
+                : "Desk";
     document.title = `${page} · PropDesk`;
   }, [home, comparing, payouts, rules, firms, sheet, firm.name]);
 
