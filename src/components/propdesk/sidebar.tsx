@@ -127,7 +127,7 @@ export function Sidebar({
           }}
         >
           <Plus className="size-5 shrink-0" />
-          New ask
+          New chat
         </button>
         <NavLink to="/" active={onHome} onNavigate={onNavigate}>
           <House className="size-5 shrink-0" />
@@ -154,7 +154,7 @@ export function Sidebar({
       <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pt-4 pb-3">
-        <h2 className="px-3 pb-1 font-display text-[11px] tracking-[0.14em] text-dim uppercase">Asks</h2>
+        <h2 className="px-3 pb-1 font-display text-[11px] tracking-[0.14em] text-dim uppercase">Chats</h2>
         {chats.length === 0 ? (
           <p className="px-3 py-2 text-sm text-dim">Your questions land here.</p>
         ) : (
