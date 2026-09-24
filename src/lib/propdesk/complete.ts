@@ -1,12 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
-import { orderFirmIds } from "./engine";
-import { firmsMentioned } from "./faq";
 import { KB } from "./knowledge";
 import type { CatalogPayload } from "./catalog-cache";
+import {
+  allowedHosts,
+  filterSources,
+  officialSources,
+  packIdsFor,
+  type ChatTurn,
+  type DeskMode,
+  type Source,
+} from "./sources";
 
-export type ChatTurn = { role: "user" | "assistant"; content: string };
-export type Source = { url: string; title?: string };
-export type DeskMode = "desk" | "compare";
+export type { ChatTurn, DeskMode, Source };
 
 const GROQ_CHAT = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_UA = "PropDesk/1.0 (+https://propdesk-beta.vercel.app)";
@@ -57,13 +62,7 @@ function systemPrompt(
   messages: ChatTurn[],
   live: boolean,
 ) {
-  const blob = messages.map((m) => m.content).join("\n");
-  const mentioned = firmsMentioned(blob, firmId);
-  const packIds = orderFirmIds(
-    mode === "compare"
-      ? Array.from(new Set([...firmIds, ...mentioned]))
-      : Array.from(new Set([firmId, ...mentioned])),
-  ).slice(0, 4);
+  const packIds = packIdsFor(mode, firmId, firmIds, messages);
   const packs = packIds.map((id) => pack.faqPackFromCatalog(cat, id)).join("\n\n");
   const names = packIds.map((id) => pack.firmFromCatalog(cat, id).name).join(", ");
   const table = mode === "compare" ? pack.compareFromCatalog(cat, packIds) : "";
@@ -86,14 +85,12 @@ How to know things:
 - If a ranked last-month payout leaderboard is not published, say that after looking, then report published split and advertised processing time.
 - When you list firms, put Goat Funded Trader first if it is in the set. Do not invent facts for it.
 
-Official pages to open:
+Official pages to open (only these firms — do not cite another firm’s site):
 ${sites}
-Payout trackers (use for last-month / count / largest / processing time — quote the source):
-- https://payoutjunction.com/statistics (on-chain JSON they license for quoting)
+Payout trackers (only if the question is about payouts):
+- https://payoutjunction.com/statistics
 - https://payoutjunction.com/30d
 - https://propfirmmatch.com/payouts
-- https://propfirmmatch.com/payouts-leaderboard
-- Per-firm Junction pages for Goat Funded Trader, FundedNext, The5ers, FundingPips, E8, ACG, Instant Funding
 
 Never mix 1-step, 2-step, instant, and futures SKUs. Ask which plan they bought if it changes the answer.
 
@@ -449,11 +446,19 @@ export const completeTicket = createServerFn({ method: "POST" })
     const pack = await import("./catalog.server");
     const cat = await pack.cachedCatalog();
 
-    const ids = orderFirmIds(data.firmIds.length ? data.firmIds : [data.firmId]);
+    const ids = packIdsFor(
+      data.mode,
+      data.firmId,
+      data.firmIds.length ? data.firmIds : [data.firmId],
+      data.messages,
+    );
     const q = lastUserText(data.messages);
     const live = needsWebSearch(q);
-    const openWeb = needsWebSearch(q);
+    const payoutAsk = /payout|paid|withdraw|profit split/i.test(q);
+    const openWeb = data.mode === "compare";
     const system = systemPrompt(cat, pack, data.mode, data.firmId, ids, data.messages, live);
+    const allowed = allowedHosts(cat, ids, payoutAsk);
+    const official = officialSources(cat, ids);
 
     let result: GrokOk | GrokErr = { ok: false, error: "unavailable" };
 
@@ -483,6 +488,10 @@ export const completeTicket = createServerFn({ method: "POST" })
     }
 
     return result.ok
-      ? { ok: true as const, text: stripProcessTalk(result.text) || result.text, sources: result.sources }
+      ? {
+          ok: true as const,
+          text: stripProcessTalk(result.text) || result.text,
+          sources: filterSources(result.sources ?? [], allowed, official),
+        }
       : { ok: false as const, error: "unavailable" };
   });
