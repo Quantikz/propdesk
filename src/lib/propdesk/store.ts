@@ -86,9 +86,14 @@ export const useDeskStore = create<DeskState>()(
       },
 
       newChat: () => {
+        const empty = get().chats.find((c) => c.messages.length === 0);
+        if (empty) {
+          set({ activeId: empty.id, sidebarOpen: false });
+          return;
+        }
         const chat: Chat = {
           id: uid(),
-          title: "New ticket",
+          title: "New chat",
           firmId: get().firmId,
           createdAt: Date.now(),
           messages: [],
@@ -124,7 +129,7 @@ export const useDeskStore = create<DeskState>()(
         if (!activeId || !chats.find((c) => c.id === activeId)) {
           const chat: Chat = {
             id: uid(),
-            title: "New ticket",
+            title: "New chat",
             firmId: get().firmId,
             createdAt: Date.now(),
             messages: [],
@@ -146,7 +151,7 @@ export const useDeskStore = create<DeskState>()(
           return {
             ...c,
             firmId: get().firmId,
-            title: c.title === "New ticket" ? text.slice(0, 42) : c.title,
+            title: c.title === "New ticket" || c.title === "New chat" ? text.slice(0, 42) : c.title,
             messages: [...c.messages, userMsg],
           };
         });

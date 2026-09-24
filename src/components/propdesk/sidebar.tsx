@@ -117,18 +117,6 @@ export function Sidebar({
       </Link>
 
       <nav className="flex shrink-0 flex-col gap-0.5 px-2">
-        <button
-          type="button"
-          className="flex min-h-10 items-center gap-3 rounded-md px-3 font-display text-[15px] font-semibold tracking-tight text-muted hover:bg-hover hover:text-fg"
-          onClick={() => {
-            newChat();
-            void navigate({ to: "/desk" });
-            onNavigate?.();
-          }}
-        >
-          <Plus className="size-5 shrink-0" />
-          New chat
-        </button>
         <NavLink to="/" active={onHome} onNavigate={onNavigate}>
           <House className="size-5 shrink-0" />
           Home
@@ -154,7 +142,21 @@ export function Sidebar({
       <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pt-4 pb-3">
-        <h2 className="px-3 pb-1 font-display text-[11px] tracking-[0.14em] text-dim uppercase">Chats</h2>
+        <div className="flex items-center justify-between gap-2 px-3 pb-1">
+          <h2 className="font-display text-[11px] tracking-[0.14em] text-dim uppercase">Chats</h2>
+          <button
+            type="button"
+            aria-label="New chat"
+            className="grid size-7 place-items-center rounded-md text-dim hover:bg-hover hover:text-fg"
+            onClick={() => {
+              newChat();
+              void navigate({ to: "/desk" });
+              onNavigate?.();
+            }}
+          >
+            <Plus className="size-4" />
+          </button>
+        </div>
         {chats.length === 0 ? (
           <p className="px-3 py-2 text-sm text-dim">Your questions land here.</p>
         ) : (
