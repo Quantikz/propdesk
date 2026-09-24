@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/propdesk/app-shell";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/ask")({ component: Page });
-
-function Page() {
-  return <AppShell />;
-}
+export const Route = createFileRoute("/ask")({
+  beforeLoad: () => {
+    throw redirect({ to: "/desk" });
+  },
+});

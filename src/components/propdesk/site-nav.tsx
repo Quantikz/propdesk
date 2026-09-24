@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/propdesk/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { to: "/ask" as const, label: "Ask" },
+  { to: "/desk" as const, label: "Desk" },
   { to: "/firms" as const, label: "Firms" },
   { to: "/compare" as const, label: "Compare" },
   { to: "/rules" as const, label: "Rules" },
@@ -44,7 +44,7 @@ export function BottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const items = [
     { to: "/" as const, label: "Home", icon: House, on: path === "/" },
-    { to: "/ask" as const, label: "Ask", icon: Search, on: path.startsWith("/ask") || path.startsWith("/desk") },
+    { to: "/desk" as const, label: "Desk", icon: Search, on: path.startsWith("/ask") || path.startsWith("/desk") },
     { to: "/compare" as const, label: "Compare", icon: Columns2, on: path.startsWith("/compare") },
     { to: "/firms" as const, label: "More", icon: MoreHorizontal, on: path.startsWith("/firms") || path.startsWith("/rules") || path.startsWith("/payouts") || path.startsWith("/firm") },
   ];
