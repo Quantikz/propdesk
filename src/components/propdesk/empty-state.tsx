@@ -15,7 +15,7 @@ export function EmptyState() {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-1 py-6">
-      <p className="text-[13px] font-medium tracking-[0.14em] text-dim uppercase">Ask PropDesk</p>
+      <p className="text-[13px] font-medium tracking-[0.14em] text-dim uppercase">Desk</p>
       <h2 className="page-title mt-2">Ask a plain-English question</h2>
       <p className="mt-3 text-sm leading-relaxed text-muted">
         You do not need to pick an account type first. If the firm matters, name it. Answers should cite a source.

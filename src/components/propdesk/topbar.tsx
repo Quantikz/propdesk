@@ -5,7 +5,7 @@ import { useDeskStore } from "@/lib/propdesk/store";
 
 function pageLabel(path: string) {
   if (path === "/") return "Home";
-  if (path.startsWith("/desk") || path.startsWith("/ask")) return "Ask";
+  if (path.startsWith("/desk") || path.startsWith("/ask")) return "Desk";
   if (path.startsWith("/compare")) return "Compare";
   if (path.startsWith("/payouts")) return "Payouts";
   if (path.startsWith("/rules")) return "Rules";
