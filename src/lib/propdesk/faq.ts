@@ -120,17 +120,25 @@ export function firmRoster(): string {
     .join("\n");
 }
 
+const ALIASES: Record<string, string[]> = {
+  goat: ["gft", "goat funded", "goat funded trader", "goatfundedtrader", "goatfunded"],
+  instant: ["instantfunding.io"],
+  fundednext: ["funded next"],
+  the5ers: ["5ers", "the 5ers"],
+  acg: ["alpha capital"],
+};
+
 export function firmsMentioned(text: string, currentId: string): string[] {
   const ids = new Set<string>([currentId]);
   const blob = text.toLowerCase();
   for (const f of firmList()) {
-    if (
-      blob.includes(f.name.toLowerCase()) ||
-      blob.includes(f.short.toLowerCase()) ||
-      blob.includes(f.id.toLowerCase())
-    ) {
-      ids.add(f.id);
-    }
+    const needles = [f.name.toLowerCase(), f.short.toLowerCase(), ...(ALIASES[f.id] ?? [])];
+    if (needles.some((n) => n.length >= 3 && blob.includes(n))) ids.add(f.id);
+  }
+  // GFT Instant / Hero SKUs are Goat products, not Instant Funding.
+  if (ids.has("goat") && ids.has("instant")) {
+    const namedInstantFirm = /\binstant funding\b/.test(blob) || /\binstantfunding(\.io)?\b/.test(blob);
+    if (!namedInstantFirm) ids.delete("instant");
   }
   return [...orderFirmIds([...ids])].slice(0, 4);
 }
