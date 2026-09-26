@@ -11,6 +11,7 @@ function pageLabel(path: string) {
   if (path.startsWith("/rules")) return "Rules";
   if (path.startsWith("/firms")) return "Firms";
   if (path.startsWith("/firm")) return "Firm";
+  if (path.startsWith("/staff")) return "Staff";
   return "PropDesk";
 }
 
