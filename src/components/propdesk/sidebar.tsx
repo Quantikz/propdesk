@@ -1,12 +1,10 @@
 import { useState, type ReactNode } from "react";
-import { Banknote, ChevronDown, Columns2, House, Inbox, Plus, Shield, Trash2 } from "lucide-react";
+import { Banknote, ChevronDown, Columns2, House, Inbox, Plus, Trash2 } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { BrandLockup } from "@/components/propdesk/logo";
 import { firmList } from "@/lib/propdesk/engine";
 import { useDeskStore } from "@/lib/propdesk/store";
-import { useStaffStore } from "@/lib/propdesk/staff-store";
-import { channelsFor, roleLabel } from "@/lib/propdesk/staff";
 import { cn } from "@/lib/utils";
 
 function NavLink({
@@ -15,7 +13,7 @@ function NavLink({
   onNavigate,
   children,
 }: {
-  to: "/" | "/desk" | "/ask" | "/compare" | "/payouts" | "/rules" | "/firms" | "/staff";
+  to: "/" | "/desk" | "/ask" | "/compare" | "/payouts" | "/rules" | "/firms";
   active: boolean;
   onNavigate?: () => void;
   children: ReactNode;
@@ -111,10 +109,6 @@ export function Sidebar({
   const onRules = path.startsWith("/rules");
   const onCompare = path.startsWith("/compare");
   const onPayouts = path.startsWith("/payouts");
-  const onStaff = path.startsWith("/staff");
-  const staff = useStaffStore((s) => s.session);
-  const staffChannel = useStaffStore((s) => s.channel);
-  const setStaffChannel = useStaffStore((s) => s.setChannel);
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-sidebar">
@@ -193,45 +187,6 @@ export function Sidebar({
             </div>
           ))
         )}
-
-        <div className="mt-6 border-t border-border pt-4">
-          <div className="flex items-center justify-between gap-2 px-3.5 pb-1.5">
-            <h2 className="font-display text-[12px] tracking-[0.14em] text-dim uppercase">Staff</h2>
-            {staff ? (
-              <span className="rounded-full bg-hover px-2 py-0.5 text-[11px] text-muted">{roleLabel(staff.role)}</span>
-            ) : null}
-          </div>
-          {staff ? (
-            <div className="flex flex-col gap-1">
-              {channelsFor(staff.role).map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={cn(
-                    "flex min-h-12 items-center gap-3.5 rounded-lg px-3.5 text-left font-display text-[16px] font-semibold",
-                    onStaff && staffChannel === id ? "bg-paper text-ink" : "text-muted hover:bg-hover hover:text-fg",
-                  )}
-                  onClick={() => {
-                    setStaffChannel(id);
-                    void navigate({ to: "/staff" });
-                    onNavigate?.();
-                  }}
-                >
-                  <Shield className="size-5 shrink-0" />
-                  {id === "support" ? "Support" : "Mods"}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <Link
-              to="/staff"
-              onClick={onNavigate}
-              className="px-3.5 py-2 text-[12px] text-dim hover:text-muted"
-            >
-              Staff sign-in
-            </Link>
-          )}
-        </div>
       </div>
     </div>
   );

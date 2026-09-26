@@ -7,7 +7,6 @@ import { FirmsView } from "@/components/propdesk/firms-view";
 import { HomeLanding } from "@/components/propdesk/home-landing";
 import { RulesView } from "@/components/propdesk/rules-view";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
-import { StaffView } from "@/components/propdesk/staff-view";
 import { Sidebar } from "@/components/propdesk/sidebar";
 import { Thread } from "@/components/propdesk/thread";
 import { Topbar } from "@/components/propdesk/topbar";
@@ -32,7 +31,6 @@ export function AppShell() {
   const sheet = path.startsWith("/firm");
   const firms = path.startsWith("/firms");
   const rules = path.startsWith("/rules");
-  const staff = path.startsWith("/staff");
 
   useEffect(() => {
     void useDeskStore.persist.rehydrate();
@@ -51,11 +49,9 @@ export function AppShell() {
               ? "Firms"
               : sheet
                 ? firm.name
-                : staff
-                  ? "Staff zone"
-                  : "Desk";
+                : "Desk";
     document.title = `${page} · PropDesk`;
-  }, [home, comparing, payouts, rules, firms, sheet, staff, firm.name]);
+  }, [home, comparing, payouts, rules, firms, sheet, firm.name]);
 
   useEffect(() => {
     void getCatalog()
@@ -145,8 +141,6 @@ export function AppShell() {
             <FirmsView />
           ) : rules ? (
             <RulesView />
-          ) : staff ? (
-            <StaffView />
           ) : (
             <>
               <Thread />
