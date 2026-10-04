@@ -44,7 +44,7 @@ export function AppShell() {
         : payouts
           ? "Who actually paid"
           : rules
-            ? "Explain this rule"
+            ? "Rule comparison"
             : firms
               ? "Firms"
               : sheet

@@ -148,6 +148,104 @@ export function stamp(iso?: string | null) {
   return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
+export type FirmPayoutDetail = {
+  ok: boolean;
+  id: string;
+  source: string;
+  allTime?: string;
+  last30?: string;
+  count?: string;
+  average?: string;
+  median?: string;
+  largest?: string;
+  lastPayout?: string;
+  avg30?: string;
+  perDay?: string;
+  daysPerWeek?: string;
+  rank?: string;
+  share?: string;
+  busiest?: string;
+  since?: string;
+  recent: { when: string; amount: string }[];
+  error?: string;
+};
+
+const detailCache = new Map<string, { at: number; detail: FirmPayoutDetail }>();
+
+export function parseFirmPayoutPage(html: string, id: string, source: string): FirmPayoutDetail {
+  const pairs = new Map<string, string>();
+  for (const m of html.matchAll(/class="sk">([^<]+)<\/div>\s*<div class="sv">([^<]+)/g)) {
+    pairs.set(m[1].replace(/\s+/g, " ").trim(), m[2].replace(/&middot;/g, "·").trim());
+  }
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&middot;/g, "·")
+    .replace(/\s+/g, " ");
+  const allTime = text.match(/paid\s+\$([\d,]+)\s+all-time/i)?.[1];
+  const last30 = text.match(/including\s+\$([\d,]+)\s+in the last 30/i)?.[1];
+  const largest = text.match(/Largest Single Payout\s+\$([\d,]+)\s+([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})/)?.[0];
+  const recent: { when: string; amount: string }[] = [];
+  const list = html.split("Latest Payouts")[1] ?? "";
+  for (const row of list.matchAll(/data-rel="durlong">([^<]+)<\/span>[\s\S]{0,180}?\$([\d,]+)/g)) {
+    recent.push({ when: row[1].trim(), amount: `$${row[2]}` });
+    if (recent.length >= 8) break;
+  }
+  return {
+    ok: pairs.size > 0 || Boolean(allTime),
+    id,
+    source,
+    allTime: allTime ? `$${allTime}` : undefined,
+    last30: last30 ? `$${last30}` : undefined,
+    count: pairs.get("No. of payouts"),
+    average: pairs.get("Average payout"),
+    median: pairs.get("Median payout"),
+    largest: largest?.replace("Largest Single Payout ", "") ?? undefined,
+    lastPayout: text.match(/Time Since Last Payout\s+([A-Z][a-z]{2}\s+\d{1,2},\s+[\d:]+\s+UTC)/)?.[1],
+    avg30: pairs.get("30d average"),
+    perDay: pairs.get("Payouts / day (30d)"),
+    daysPerWeek: pairs.get("Payout days / week (30d)"),
+    rank: pairs.get("Rank by 30d volume"),
+    share: pairs.get("Share of 30d volume"),
+    busiest: pairs.get("Busiest day ever"),
+    since: pairs.get("Verified since"),
+    recent,
+  };
+}
+
+export const getFirmPayoutDetail = createServerFn({ method: "POST" })
+  .validator((input: { firmId?: string }) => ({ firmId: String(input.firmId || "") }))
+  .handler(async ({ data }) => {
+    const slug = PJ_SLUG[data.firmId];
+    const source = slug ? `https://payoutjunction.com/firms/${slug}` : PJ_ALL;
+    if (!slug) {
+      return {
+        ok: false,
+        id: data.firmId,
+        source,
+        recent: [],
+        error: "This firm is not on the on-chain board. Wires will not show here.",
+      } satisfies FirmPayoutDetail;
+    }
+    const hit = detailCache.get(slug);
+    if (hit && Date.now() - hit.at < TTL) return hit.detail;
+    try {
+      const res = await grab(source);
+      const detail = parseFirmPayoutPage(await res.text(), data.firmId, source);
+      detailCache.set(slug, { at: Date.now(), detail });
+      return detail;
+    } catch {
+      return {
+        ok: false,
+        id: data.firmId,
+        source,
+        recent: [],
+        error: "Firm board did not load. Open the source page.",
+      } satisfies FirmPayoutDetail;
+    }
+  });
+
 export function dayStamp(iso?: string | null) {
   if (!iso) return null;
   const d = new Date(iso);
