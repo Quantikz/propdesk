@@ -22,7 +22,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   return (
     <article className={cn("flex py-2", isUser ? "justify-end" : "justify-start")}>
-      <div className={cn("min-w-0", isUser ? "max-w-[min(100%,22rem)]" : "max-w-[min(100%,28rem)]")}>
+      <div className={cn("min-w-0", isUser ? "max-w-[min(100%,22rem)]" : "max-w-[min(100%,40rem)]")}>
         <div
           className={cn(
             "px-3.5 py-2.5 text-[15px] leading-relaxed",

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { KB } from "./knowledge";
+import { formatRuleList, matchRules } from "./match-faq";
 import type { CatalogPayload } from "./catalog-cache";
 import {
   allowedHosts,
@@ -95,6 +96,8 @@ Payout trackers (only if the question is about payouts):
 Never mix 1-step, 2-step, instant, and futures SKUs. Ask which plan they bought if it changes the answer.
 
 Voice: you are the desk. Answer in one pass. Never describe process. Never say you are checking, searching, looking, verifying, or that the pack is vague. Never say “I need to check” or “let me verify.” If a live page was used, just state the rule — do not announce it. No “typically / usually / often” when the pack has a number. If SKUs differ, name each SKU and its number. Short paragraphs. No markdown tables, no ### headings, no | pipes. Bold is fine. No fake leaderboards. No trade signals.
+
+A specific question can touch several FAQ lines (payouts also pull consistency, KYC, min days, and the first-payout checklist; drawdown pulls daily, max, and each plan card). Answer from every matching rule, not the single closest line. Do not drop a related gate because it overlaps. A full rule list is attached after your answer — do not reprint that list. Say what applies, what differs by SKU, and what the pack does not publish.
 
 ${live ? "Use official pages if the pack is silent, then answer. Do not mention the search." : "Answer from the pack. Name the official URL only if they should confirm a number."}
 
@@ -490,8 +493,24 @@ export const completeTicket = createServerFn({ method: "POST" })
     return result.ok
       ? {
           ok: true as const,
-          text: stripProcessTalk(result.text) || result.text,
+          text: withMatchedRules(stripProcessTalk(result.text) || result.text, cat, ids, q),
           sources: filterSources(result.sources ?? [], allowed, official),
         }
       : { ok: false as const, error: "unavailable" };
   });
+
+function withMatchedRules(text: string, cat: CatalogPayload, ids: string[], question: string) {
+  const firms = ids
+    .map((id) => cat.firms.find((row) => row.id === id) ?? cat.firms[0])
+    .filter((firm): firm is NonNullable<typeof firm> => Boolean(firm));
+  const hits = matchRules({
+    question,
+    firms,
+    faqs: cat.faqs,
+    plans: cat.plans,
+    first: cat.first,
+  });
+  const listed = formatRuleList(hits);
+  if (!listed || text.includes("Rules on file for this question")) return text;
+  return `${text}\n\n${listed}`;
+}
