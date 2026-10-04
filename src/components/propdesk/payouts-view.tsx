@@ -32,7 +32,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 function GlassStat({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="rounded-lg border border-white/15 bg-white/5 px-3 py-2">
+    <div className="rounded-lg px-3 py-2 pd-glass-tile">
       <p className="font-display text-[10px] tracking-[0.14em] text-dim uppercase">{label}</p>
       <p className="mt-1 text-sm font-medium tabular-nums">{value || "—"}</p>
     </div>
@@ -62,8 +62,8 @@ function FocusCard({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`${firm.name} payouts`}>
-      <button type="button" className="absolute inset-0 bg-black/45 backdrop-blur-2xl" aria-label="Close payout card" onClick={onClose} />
-      <article className="relative aspect-square w-[min(100%,34rem)] overflow-y-auto overscroll-contain rounded-3xl border border-white/20 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+      <button type="button" className="pd-scrim absolute inset-0 backdrop-blur-2xl" aria-label="Close payout card" onClick={onClose} />
+      <article className="pd-glass-card relative aspect-square w-[min(100%,34rem)] overflow-y-auto overscroll-contain rounded-3xl p-5 backdrop-blur-2xl">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
             <FirmLogo firm={firm} size={28} />
@@ -72,7 +72,7 @@ function FocusCard({
               <p className="text-xs text-dim">On-chain book · tap outside to close</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="grid size-9 place-items-center rounded-full border border-white/20 text-muted" aria-label="Close">
+          <button type="button" onClick={onClose} className="pd-glass-tile grid size-9 place-items-center rounded-full text-muted" aria-label="Close">
             <X className="size-4" />
           </button>
         </div>
@@ -98,7 +98,7 @@ function FocusCard({
               <GlassStat label="Share of 30d" value={detail.share} />
             </div>
             {detail.recent.length ? (
-              <ul className="mt-3 divide-y divide-white/10 text-sm">
+              <ul className="pd-glass-line mt-3 divide-y text-sm">
                 {detail.recent.slice(0, 5).map((item) => (
                   <li key={`${item.when}-${item.amount}`} className="flex justify-between gap-3 py-1.5">
                     <span className="text-muted">{item.when}</span>
@@ -113,10 +113,10 @@ function FocusCard({
           {fp.kyc} {fp.minDays}
         </p>
         <div className="mt-2 flex gap-3 text-xs">
-          <a href={row.pj} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-muted hover:text-fg">
+          <a href={row.pj} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted hover:text-fg">
             Junction <ExternalLink className="size-3" />
           </a>
-          <a href={row.pfm} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-muted hover:text-fg">
+          <a href={row.pfm} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted hover:text-fg">
             Match <ExternalLink className="size-3" />
           </a>
         </div>
@@ -137,11 +137,23 @@ export function PayoutsView() {
 
   useEffect(() => {
     if (!openId) return;
+    let live = true;
     setDetail(null);
     setLoading(true);
     void getFirmPayoutDetail({ data: { firmId: openId } })
-      .then(setDetail)
-      .finally(() => setLoading(false));
+      .then((next) => {
+        if (live) setDetail(next);
+      })
+      .finally(() => {
+        if (live) setLoading(false);
+      });
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      live = false;
+      html.style.overflow = prev;
+    };
   }, [openId]);
 
   const boardAt = stamp(feed?.asOf) ?? stamp(feed?.fetchedAt);

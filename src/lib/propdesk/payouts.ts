@@ -219,7 +219,7 @@ export const getFirmPayoutDetail = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const slug = PJ_SLUG[data.firmId];
     const source = slug ? `https://payoutjunction.com/firms/${slug}` : PJ_ALL;
-    if (!slug) {
+    if (!slug || !/^[a-z0-9]+$/.test(data.firmId)) {
       return {
         ok: false,
         id: data.firmId,
