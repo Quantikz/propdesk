@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { RuleCard } from "@/components/propdesk/rule-card";
-import { getFirm } from "@/lib/propdesk/engine";
+import { getFirm, hasFirm } from "@/lib/propdesk/engine";
 import { explainFirm, type RuleTopic } from "@/lib/propdesk/explain";
 import { faqItems } from "@/lib/propdesk/faq";
 import { RULES_AS_OF, firstPayout, plansFor } from "@/lib/propdesk/plans";
@@ -35,8 +35,8 @@ export function FirmSheet() {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("sheet");
 
   useEffect(() => {
-    if (params.firmId && params.firmId !== storeFirm) setFirm(firm.id);
-  }, [params.firmId, storeFirm, firm.id, setFirm]);
+    if (params.firmId && hasFirm(params.firmId) && params.firmId !== storeFirm) setFirm(params.firmId);
+  }, [params.firmId, storeFirm, setFirm]);
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">

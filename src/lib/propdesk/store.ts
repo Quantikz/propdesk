@@ -124,6 +124,7 @@ export const useDeskStore = create<DeskState>()(
       send: async (textFromSuggest) => {
         const text = (textFromSuggest || "").trim();
         if (!text || get().sending) return;
+        set({ sending: true });
 
         let { activeId, chats } = get();
         if (!activeId || !chats.find((c) => c.id === activeId)) {
@@ -156,7 +157,7 @@ export const useDeskStore = create<DeskState>()(
           };
         });
 
-        set({ chats, activeId: chatId, pendingFiles: [], sending: true, sidebarOpen: false });
+        set({ chats, activeId: chatId, pendingFiles: [], sidebarOpen: false });
 
         try {
           const firm = getFirm(get().firmId);
@@ -198,7 +199,24 @@ export const useDeskStore = create<DeskState>()(
           });
         } catch (err) {
           console.error(err);
-          get().showToast("Could not send. Try again.");
+          set({
+            chats: get().chats.map((c) =>
+              c.id === chatId
+                ? {
+                    ...c,
+                    messages: [
+                      ...c.messages,
+                      {
+                        role: "assistant" as const,
+                        content: "I missed that — send it once more.",
+                        chips: [{ text: "Retry", tone: "warn" as const }],
+                        ts: Date.now(),
+                      },
+                    ],
+                  }
+                : c,
+            ),
+          });
         } finally {
           set({ sending: false });
         }
@@ -221,11 +239,11 @@ export const useDeskStore = create<DeskState>()(
       sendCompare: async (textFromSuggest) => {
         const text = (textFromSuggest || "").trim();
         if (!text || get().compareSending) return;
+        set({ compareSending: true });
         const userMsg: ChatMessage = { role: "user", content: text, ts: Date.now() };
         const ids = get().compareIds;
         set({
           compareMessages: [...get().compareMessages, userMsg],
-          compareSending: true,
           sidebarOpen: false,
         });
         try {
@@ -261,7 +279,17 @@ export const useDeskStore = create<DeskState>()(
           set({ compareMessages: [...get().compareMessages, assistant] });
         } catch (err) {
           console.error(err);
-          get().showToast("Could not send. Try again.");
+          set({
+            compareMessages: [
+              ...get().compareMessages,
+              {
+                role: "assistant",
+                content: "I missed that — send it once more.",
+                chips: [{ text: "Retry", tone: "warn" }],
+                ts: Date.now(),
+              },
+            ],
+          });
         } finally {
           set({ compareSending: false });
         }

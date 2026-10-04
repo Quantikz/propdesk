@@ -172,10 +172,19 @@ export type FirmPayoutDetail = {
 
 const detailCache = new Map<string, { at: number; detail: FirmPayoutDetail }>();
 
+function decode(s: string) {
+  return s
+    .replace(/&middot;/g, "·")
+    .replace(/&/g, "&")
+    .replace(/&#8383;/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function parseFirmPayoutPage(html: string, id: string, source: string): FirmPayoutDetail {
   const pairs = new Map<string, string>();
   for (const m of html.matchAll(/class="sk">([^<]+)<\/div>\s*<div class="sv">([^<]+)/g)) {
-    pairs.set(m[1].replace(/\s+/g, " ").trim(), m[2].replace(/&middot;/g, "·").trim());
+    pairs.set(decode(m[1]), decode(m[2]));
   }
   const text = html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")

@@ -17,7 +17,9 @@ function firmMap(): Record<string, Firm> {
   return KB.firms;
 }
 
-export function getFirm(id: string): Firm {
+export function hasFirm(id: string) {
+  return Boolean(firmMap()[id] ?? KB.firms[id]);
+}
   const map = firmMap();
   return map[id] ?? map.goat ?? KB.firms.goat ?? KB.firms.ftmo;
 }
