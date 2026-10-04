@@ -48,6 +48,7 @@ export const getLiveRuleStamp = createServerFn({ method: "POST" })
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) throw new Error(String(res.status));
+      const previous = hit?.stamp.lines.join(" ") ?? "";
       const stamp: LiveRuleStamp = {
         id: data.firmId,
         checkedAt: new Date().toISOString(),
@@ -55,6 +56,10 @@ export const getLiveRuleStamp = createServerFn({ method: "POST" })
         lines: linesFrom(await res.text()),
         ok: true,
       };
+      if (previous && previous !== stamp.lines.join(" ")) {
+        const { noteRuleChange } = await import("./admin.server");
+        await noteRuleChange(data.firmId, previous, stamp.lines.join(" "));
+      }
       cache.set(data.firmId, { at: Date.now(), stamp });
       return stamp;
     } catch {

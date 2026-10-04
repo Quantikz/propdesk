@@ -29,6 +29,12 @@ export function RulesView() {
           Short answer, official note, meaning, example, common mistake, source and last verified.
           PropDesk provides informational explanations and is not a substitute for a firm&apos;s current official terms.
         </p>
+        <div className="mt-4 rounded-md border border-line bg-elev px-3 py-3">
+          <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">Denial reasons</p>
+          <p className="mt-1 text-sm text-muted">
+            IP, CID, copy trading, news, lot size, consistency, missing stop, and a funded rule that was not on the challenge. Ask the desk which of these the firm actually publishes.
+          </p>
+        </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {FILTERS.map((f) => (
             <button

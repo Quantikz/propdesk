@@ -141,6 +141,21 @@ export function FirmSheet() {
                 </div>
               ))}
             </div>
+            <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Challenge and funded</h2>
+            <p className="mt-1 text-xs text-dim">These books are not the same. A pass does not keep the challenge rules.</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="rounded-md border border-line bg-elev px-3 py-3">
+                <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">Challenge</p>
+                <p className="mt-1 text-sm text-muted">{plans.map((p) => `${p.name}: target ${p.target}, daily ${p.daily}, max ${p.max}`).join(" ") || "See the official page."}</p>
+              </div>
+              <div className="rounded-md border border-line bg-elev px-3 py-3">
+                <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">Funded</p>
+                <p className="mt-1 text-sm text-muted">{fp.consistency} {fp.news} {fp.minDays}</p>
+              </div>
+            </div>
+            {live?.lines.length ? (
+              <p className="mt-2 text-xs text-dim">Last official check {stamp(live.checkedAt)}. A changed line is logged on the admin desk.</p>
+            ) : null}
             <h2 className="mt-8 font-display text-xl font-bold tracking-tight">First payout</h2>
             <ul className="mt-3 space-y-2 text-sm text-muted">
               <li><span className="text-fg">KYC.</span> {fp.kyc}</li>

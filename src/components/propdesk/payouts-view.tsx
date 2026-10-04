@@ -20,6 +20,39 @@ import {
   type PayoutFeed,
 } from "@/lib/propdesk/payouts";
 
+function PayoutMath() {
+  const [profit, setProfit] = useState("1000");
+  const [split, setSplit] = useState("80");
+  const [fee, setFee] = useState("0");
+  const [best, setBest] = useState("300");
+  const [cap, setCap] = useState("40");
+  const p = Number(profit) || 0;
+  const share = p * ((Number(split) || 0) / 100);
+  const paid = Math.max(0, share - (Number(fee) || 0));
+  const bestShare = p > 0 ? ((Number(best) || 0) / p) * 100 : 0;
+  const over = bestShare > (Number(cap) || 0);
+  return (
+    <div className="mt-6 rounded-md border border-line bg-elev px-3 py-3">
+      <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">One cycle</p>
+      <p className="mt-1 text-xs text-dim">Split, fee, and a best-day consistency check. Not a ranking.</p>
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {[
+          ["Profit", profit, setProfit],
+          ["Split %", split, setSplit],
+          ["Fee", fee, setFee],
+          ["Best day", best, setBest],
+          ["Cap %", cap, setCap],
+        ].map(([label, value, set]) => (
+          <label key={String(label)} className="text-xs text-dim">
+            {label}
+            <input value={String(value)} onChange={(e) => (set as (v: string) => void)(e.target.value)} className="mt-1 w-full rounded-md border border-line bg-bg px-2 py-1 text-sm text-fg" />
+          </label>
+        ))}
+      </div>
+      <p className="mt-3 text-sm">You keep {money(paid)} after the fee. Best day is {bestShare.toFixed(0)}% of the cycle{over ? " — over the cap." : "."}</p>
+    </div>
+  );
+}
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-md border border-line bg-elev px-3.5 py-3">
@@ -215,6 +248,8 @@ export function PayoutsView() {
             />
           </div>
         )}
+
+        <PayoutMath />
 
         <h3 className="font-display mt-8 text-xl font-bold tracking-tight">Firms on this desk</h3>
         <p className="mt-1 text-xs text-dim">
