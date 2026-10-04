@@ -105,6 +105,124 @@ export const adminFirms = createServerFn({ method: "POST" })
     return { ok: true as const, firms: rows };
   });
 
+export type FirmEdit = {
+  id: string;
+  name: string;
+  short: string;
+  color: string;
+  supportEmail: string;
+  portal: string;
+  models: string;
+  platforms: string;
+  profitSplit: string;
+  payoutCycle: string;
+  payoutSlaDays: string;
+  maxAccount: string;
+  drawdown: string;
+  consistency: string;
+  news: string;
+  ea: string;
+  kyc: string;
+  notes: string;
+  challenge: string;
+  funded: string;
+  denials: string;
+};
+
+export const adminFirm = createServerFn({ method: "POST" })
+  .validator((input: { key?: string; id?: string }) => ({
+    key: String(input.key || ""),
+    id: String(input.id || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
+  }))
+  .handler(async ({ data }) => {
+    if (!keyOk(data.key)) return { ok: false as const, error: "key" };
+    const { getSql } = await import("@/lib/db");
+    const sql = await getSql();
+    const rows = await sql<Record<string, string>>`select * from firms where id = ${data.id}`;
+    const r = rows[0];
+    if (!r) return { ok: false as const, error: "missing" };
+    const models = (() => {
+      try {
+        return (JSON.parse(r.models) as string[]).join(", ");
+      } catch {
+        return r.models;
+      }
+    })();
+    const platforms = (() => {
+      try {
+        return (JSON.parse(r.platforms) as string[]).join(", ");
+      } catch {
+        return r.platforms;
+      }
+    })();
+    return {
+      ok: true as const,
+      firm: {
+        id: r.id,
+        name: r.name,
+        short: r.short,
+        color: r.color,
+        supportEmail: r.support_email,
+        portal: r.portal,
+        models,
+        platforms,
+        profitSplit: r.profit_split,
+        payoutCycle: r.payout_cycle,
+        payoutSlaDays: String(r.payout_sla_days ?? "3"),
+        maxAccount: r.max_account,
+        drawdown: r.drawdown,
+        consistency: r.consistency,
+        news: r.news,
+        ea: r.ea,
+        kyc: r.kyc,
+        notes: r.notes,
+        challenge: r.challenge_rules || "",
+        funded: r.funded_rules || "",
+        denials: r.denials || "",
+      } satisfies FirmEdit,
+    };
+  });
+
+export const adminSave = createServerFn({ method: "POST" })
+  .validator((input: { key?: string; firm?: FirmEdit }) => ({
+    key: String(input.key || ""),
+    firm: input.firm,
+  }))
+  .handler(async ({ data }) => {
+    if (!keyOk(data.key) || !data.firm) return { ok: false as const, error: "key" };
+    const f = data.firm;
+    const id = f.id.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const models = JSON.stringify(f.models.split(",").map((s) => s.trim()).filter(Boolean));
+    const platforms = JSON.stringify(f.platforms.split(",").map((s) => s.trim()).filter(Boolean));
+    const { getSql } = await import("@/lib/db");
+    const sql = await getSql();
+    await sql`
+      update firms set
+        name = ${f.name.slice(0, 80)},
+        short = ${f.short.slice(0, 24)},
+        color = ${f.color.slice(0, 16)},
+        support_email = ${f.supportEmail.slice(0, 120)},
+        portal = ${f.portal.slice(0, 200)},
+        models = ${models},
+        platforms = ${platforms},
+        profit_split = ${f.profitSplit.slice(0, 200)},
+        payout_cycle = ${f.payoutCycle.slice(0, 200)},
+        payout_sla_days = ${Number(f.payoutSlaDays) || 3},
+        max_account = ${f.maxAccount.slice(0, 80)},
+        drawdown = ${f.drawdown.slice(0, 400)},
+        consistency = ${f.consistency.slice(0, 400)},
+        news = ${f.news.slice(0, 400)},
+        ea = ${f.ea.slice(0, 400)},
+        kyc = ${f.kyc.slice(0, 400)},
+        notes = ${f.notes.slice(0, 800)},
+        challenge_rules = ${f.challenge.slice(0, 800)},
+        funded_rules = ${f.funded.slice(0, 800)},
+        denials = ${f.denials.slice(0, 800)}
+      where id = ${id}
+    `;
+    return { ok: true as const };
+  });
+
 export const adminRemove = createServerFn({ method: "POST" })
   .validator((input: { key?: string; id?: string }) => ({
     key: String(input.key || ""),
