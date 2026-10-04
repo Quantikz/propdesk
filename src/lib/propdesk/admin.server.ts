@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getSql } from "@/lib/db";
 
 export type DeskExtra = {
   id: string;
@@ -98,6 +97,7 @@ export const adminFirms = createServerFn({ method: "POST" })
   .validator((input: { key?: string }) => ({ key: String(input.key || "") }))
   .handler(async ({ data }) => {
     if (!keyOk(data.key)) return { ok: false as const, error: "key" };
+    const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     const rows = await sql<{ id: string; name: string; portal: string }>`
       select id, name, portal from firms order by sort_rank asc, name asc
@@ -113,6 +113,7 @@ export const adminRemove = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     if (!keyOk(data.key)) return { ok: false as const, error: "key" };
     if (!data.id) return { ok: false as const, error: "id" };
+    const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     await sql`delete from firms where id = ${data.id}`;
     return { ok: true as const };
@@ -131,6 +132,7 @@ export const adminAdd = createServerFn({ method: "POST" })
     const found = await research(data.name, data.portal);
     const list = (v: unknown, fallback: string) => (Array.isArray(v) ? v.map(String) : [fallback]);
     const text = (v: unknown, fallback: string) => (typeof v === "string" && v.trim() ? v.trim() : fallback);
+    const { getSql } = await import("@/lib/db");
     const sql = await getSql();
     await sql`
       insert into firms (
@@ -173,6 +175,7 @@ export const adminAdd = createServerFn({ method: "POST" })
   });
 
 export const firmExtras = createServerFn({ method: "GET" }).handler(async () => {
+  const { getSql } = await import("@/lib/db");
   const sql = await getSql();
   const rows = await sql<{ id: string; challenge_rules: string; funded_rules: string; denials: string }>`
     select id, challenge_rules, funded_rules, denials from firms
@@ -195,12 +198,3 @@ export const firmExtras = createServerFn({ method: "GET" }).handler(async () => 
     })) satisfies RuleChange[],
   };
 });
-
-export async function noteRuleChange(firmId: string, before: string, after: string) {
-  if (!before || before === after) return;
-  const sql = await getSql();
-  await sql`
-    insert into rule_changes (firm_id, before, after)
-    values (${firmId}, ${before.slice(0, 500)}, ${after.slice(0, 500)})
-  `;
-}
