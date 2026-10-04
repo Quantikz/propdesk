@@ -20,6 +20,8 @@ function firmMap(): Record<string, Firm> {
 export function hasFirm(id: string) {
   return Boolean(firmMap()[id] ?? KB.firms[id]);
 }
+
+export function getFirm(id: string): Firm {
   const map = firmMap();
   return map[id] ?? map.goat ?? KB.firms.goat ?? KB.firms.ftmo;
 }
