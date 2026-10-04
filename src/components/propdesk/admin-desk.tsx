@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminAdd, adminFirms, adminRemove, adminSession } from "@/lib/propdesk/admin.server";
+import { adminAdd, adminFirms, adminRemove, adminSession } from "@/lib/propdesk/admin";
 
 export function AdminDesk() {
   const [key, setKey] = useState("");

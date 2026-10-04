@@ -56,18 +56,6 @@ export const getLiveRuleStamp = createServerFn({ method: "POST" })
         lines: linesFrom(await res.text()),
         ok: true,
       };
-      if (previous && previous !== stamp.lines.join(" ")) {
-        try {
-          const { getSql } = await import("@/lib/db");
-          const sql = await getSql();
-          await sql`
-            insert into rule_changes (firm_id, before, after)
-            values (${data.firmId}, ${previous.slice(0, 500)}, ${stamp.lines.join(" ").slice(0, 500)})
-          `;
-        } catch {
-          /* log is optional */
-        }
-      }
       cache.set(data.firmId, { at: Date.now(), stamp });
       return stamp;
     } catch {
