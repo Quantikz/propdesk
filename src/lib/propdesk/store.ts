@@ -8,6 +8,20 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+function deskSession() {
+  if (typeof window === "undefined") return "server";
+  const key = "pd-session";
+  const existing = window.localStorage.getItem(key);
+  if (existing) return existing;
+  const next = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  window.localStorage.setItem(key, next);
+  return next;
+}
+
+function missed(out: { ok: boolean; error?: string }) {
+  return out.ok ? "" : out.error === "capped" ? "This session is capped for a few minutes. Ask again shortly." : "I missed that — send it once more.";
+}
+
 type DeskState = {
   firmId: string;
   email: string;
@@ -171,6 +185,7 @@ export const useDeskStore = create<DeskState>()(
               firmId: firm.id,
               firmIds: [firm.id],
               mode: "desk",
+              sessionId: deskSession(),
               messages: history,
             },
           });
@@ -187,7 +202,7 @@ export const useDeskStore = create<DeskState>()(
               }
             : {
                 role: "assistant",
-                content: "I missed that — send it once more.",
+                content: missed(out),
                 chips: [{ text: firm.short, tone: "warn" }],
                 ts: Date.now(),
               };
@@ -256,6 +271,7 @@ export const useDeskStore = create<DeskState>()(
               firmId: ids[0] ?? "goat",
               firmIds: ids,
               mode: "compare",
+              sessionId: deskSession(),
               messages: history,
             },
           });
@@ -272,7 +288,7 @@ export const useDeskStore = create<DeskState>()(
               }
             : {
                 role: "assistant",
-                content: "I missed that — send it once more.",
+                content: missed(out),
                 chips: [{ text: label, tone: "warn" }],
                 ts: Date.now(),
               };

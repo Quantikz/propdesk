@@ -9,6 +9,7 @@ import { RULES_AS_OF, firstPayout, plansFor } from "@/lib/propdesk/plans";
 import { stamp } from "@/lib/propdesk/payouts";
 import { useDeskStore } from "@/lib/propdesk/store";
 import { firmValue } from "@/lib/propdesk/value";
+import { getLiveRuleStamp, type LiveRuleStamp } from "@/lib/propdesk/live-rules";
 import { cn } from "@/lib/utils";
 
 const TABS: { id: RuleTopic | "faq" | "sheet"; label: string }[] = [
@@ -33,6 +34,18 @@ export function FirmSheet() {
   const explained = explainFirm(firm.id);
   const faqs = faqItems(firm.id);
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("sheet");
+  const [live, setLive] = useState<LiveRuleStamp | null>(null);
+
+  useEffect(() => {
+    let on = true;
+    setLive(null);
+    void getLiveRuleStamp({ data: { firmId: firm.id } }).then((stamp) => {
+      if (on) setLive(stamp);
+    });
+    return () => {
+      on = false;
+    };
+  }, [firm.id]);
 
   useEffect(() => {
     if (params.firmId && hasFirm(params.firmId) && params.firmId !== storeFirm) setFirm(params.firmId);
@@ -92,11 +105,38 @@ export function FirmSheet() {
               ))}
             </dl>
             <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Plans</h2>
+            <p className="mt-1 text-xs text-dim">
+              Desk notes stay labeled. Live lines are pulled from the official page and stamped.
+              PropDesk does not rank firms.
+            </p>
+            {live ? (
+              <div className="mt-3 rounded-md border border-line bg-elev px-3 py-3">
+                <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">
+                  Official page · {stamp(live.checkedAt)}
+                </p>
+                {live.lines.length ? (
+                  <ul className="mt-2 space-y-1 text-sm text-muted">
+                    {live.lines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-sm text-muted">
+                    No target, daily, or day-count line parsed on this fetch. Desk notes below are not live numbers.
+                  </p>
+                )}
+                <a href={live.source} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-xs text-muted underline-offset-2 hover:underline">
+                  Source
+                </a>
+              </div>
+            ) : (
+              <p className="mt-3 text-xs text-dim">Checking the official page…</p>
+            )}
             <div className="mt-3 grid gap-2">
               {plans.map((p) => (
                 <div key={p.name} className="rounded-md border border-line bg-elev px-3 py-3">
                   <p className="font-display font-semibold tracking-tight">{p.name} <span className="text-xs font-normal text-dim">({p.kind})</span></p>
-                  <p className="mt-1 text-sm text-muted">Target {p.target}. Daily {p.daily}. Max {p.max}.</p>
+                  <p className="mt-1 text-sm text-muted">Desk note — target {p.target}. Daily {p.daily}. Max {p.max}.</p>
                   <p className="mt-1 text-xs text-dim">{p.note}</p>
                 </div>
               ))}

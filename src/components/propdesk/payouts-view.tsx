@@ -94,7 +94,7 @@ function FocusCard({
               <GlassStat label="Days / week" value={detail.daysPerWeek} />
               <GlassStat label="Busiest day" value={detail.busiest} />
               <GlassStat label="Last print" value={detail.lastPayout} />
-              <GlassStat label="30d rank" value={detail.rank} />
+              <GlassStat label="Board slot" value={detail.rank} />
               <GlassStat label="Share of 30d" value={detail.share} />
             </div>
             {detail.recent.length ? (
@@ -245,7 +245,12 @@ export function PayoutsView() {
                     <td className="sticky left-0 z-10 bg-bg py-2.5 pr-3">
                       <span className="flex items-center gap-2 font-medium">
                         <FirmLogo firm={firm} size={16} />
-                        {f.short}
+                        <span>
+                          {f.short}
+                          {f.tracked ? null : (
+                            <span className="mt-0.5 block text-[11px] font-normal text-dim">Not on this chain</span>
+                          )}
+                        </span>
                       </span>
                     </td>
                     {f.last30d || f.allTime ? (
@@ -261,7 +266,7 @@ export function PayoutsView() {
                       </>
                     ) : (
                       <td className="py-2.5 pr-3 text-muted" colSpan={4}>
-                        Not on this chain — open Match
+                        Not on this chain — wire payouts will not show as $0
                       </td>
                     )}
                     <td className="py-2.5 pr-3 text-xs text-dim tabular-nums">

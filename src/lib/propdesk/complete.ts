@@ -39,6 +39,7 @@ function lastUserText(messages: ChatTurn[]) {
 function needsWebSearch(text: string) {
   const t = text.toLowerCase();
   return (
+    /drawdown|daily loss|max loss|trailing|profit target|payout|withdraw|consistency|news|expert advisor|\bea\b|copy trad|kyc|minimum day|trading day|weekend|overnight|which plan|1-step|2-step/.test(t) ||
     /last month|this month|this week|yesterday|today|right now|currently|as of|2025|2026/.test(t) ||
     /highest payout|biggest payout|single payout|largest payout|payout proof|who paid|must pay/.test(t) ||
     /average (payout|processing)|processing time|how long.{0,20}payout|payout.{0,20}(sla|speed|time)/.test(t) ||
@@ -47,6 +48,21 @@ function needsWebSearch(text: string) {
       t,
     )
   );
+}
+
+const deskHits = new Map<string, number[]>();
+
+function allowDesk(sessionId: string) {
+  const key = sessionId.slice(0, 80) || "anon";
+  const now = Date.now();
+  const recent = (deskHits.get(key) ?? []).filter((t) => now - t < 10 * 60 * 1000);
+  if (recent.length >= 8) {
+    deskHits.set(key, recent);
+    return false;
+  }
+  recent.push(now);
+  deskHits.set(key, recent);
+  return true;
 }
 
 function systemPrompt(
@@ -80,9 +96,9 @@ function systemPrompt(
 You CAN and SHOULD open live firm websites. Checking the official pages is in scope. Never say searching or scraping is out of scope. Never say this desk does not check live sites.
 
 How to know things:
-- Use the FAQ pack for standard rules when it already answers.
-- If the pack is silent, vague, or the trader asks to check the site / current / last-month / highest / average figures — search the official pages below and answer from what you find.
+- On a specific rule question, open the official page first. The pack is the checklist underneath, not the only source.
 - Official pages beat the pack when they disagree.
+- Do not rank firms, name a best firm, or mention coupons.
 - If a ranked last-month payout leaderboard is not published, say that after looking, then report published split and advertised processing time.
 - When you list firms, put Goat Funded Trader first if it is in the set. Do not invent facts for it.
 
@@ -99,7 +115,7 @@ Voice: you are the desk. Answer in one pass. Never describe process. Never say y
 
 A specific question can touch several FAQ lines (payouts also pull consistency, KYC, min days, and the first-payout checklist; drawdown pulls daily, max, and each plan card). Answer from every matching rule, not the single closest line. Do not drop a related gate because it overlaps. A full rule list is attached after your answer — do not reprint that list. Say what applies, what differs by SKU, and what the pack does not publish.
 
-${live ? "Use official pages if the pack is silent, then answer. Do not mention the search." : "Answer from the pack. Name the official URL only if they should confirm a number."}
+${live ? "Open the official page for this rule, then answer. The pack list is attached after your answer. Do not mention the search." : "Answer from the pack. Name the official URL only if they should confirm a number."}
 
 ${mode === "compare" ? `Compare snapshot:\n${table}\n` : ""}FAQ packs (background; live pages win):
 ${packs}
@@ -429,12 +445,14 @@ export const completeTicket = createServerFn({ method: "POST" })
     firmIds?: string[];
     mode?: DeskMode;
     messages: ChatTurn[];
+    sessionId?: string;
   }) => ({
     firmId: String(input.firmId || "goat"),
     firmIds: Array.isArray(input.firmIds)
       ? input.firmIds.map(String).slice(0, 4)
       : [],
     mode: input.mode === "compare" ? ("compare" as const) : ("desk" as const),
+    sessionId: String(input.sessionId || "").slice(0, 80),
     messages: (input.messages || []).slice(-10).map((m) => ({
       role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
       content: String(m.content || "").slice(0, 2000),
@@ -445,6 +463,7 @@ export const completeTicket = createServerFn({ method: "POST" })
     const xaiKey = (process.env.XAI_API_KEY || "").trim();
     if (!groqKey && !xaiKey) return { ok: false as const, error: "unavailable" };
     if (!data.messages.length) return { ok: false as const, error: "unavailable" };
+    if (!allowDesk(data.sessionId)) return { ok: false as const, error: "capped" };
 
     const pack = await import("./catalog.server");
     const cat = await pack.cachedCatalog();
