@@ -48,7 +48,6 @@ export const getLiveRuleStamp = createServerFn({ method: "POST" })
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) throw new Error(String(res.status));
-      const previous = hit?.stamp.lines.join(" ") ?? "";
       const stamp: LiveRuleStamp = {
         id: data.firmId,
         checkedAt: new Date().toISOString(),
