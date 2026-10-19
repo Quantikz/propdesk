@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/propdesk/logo";
+import { ScatterPage } from "@/components/propdesk/scatter";
 import { adminAdd, adminFirm, adminFirms, adminRemove, adminSave, adminSession, type FirmEdit } from "@/lib/propdesk/admin";
 
 function Icon({ d }: { d: string }) {
@@ -181,6 +182,7 @@ export function AdminDesk() {
 
   return (
     <div className="fixed inset-0 overflow-y-auto overscroll-contain bg-[#efe8dc] text-[#1a1714]">
+      <ScatterPage>
       <header className="sticky top-0 z-10 border-b border-[#e4dccb] bg-[#fbfaf7]">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
           <span className="flex items-center gap-2">
@@ -248,6 +250,7 @@ export function AdminDesk() {
           </>
         )}
       </main>
+      </ScatterPage>
     </div>
   );
 }

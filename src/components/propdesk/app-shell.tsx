@@ -8,6 +8,7 @@ import { HomeLanding } from "@/components/propdesk/home-landing";
 import { SitePage } from "@/components/propdesk/site-pages";
 import { RulesView } from "@/components/propdesk/rules-view";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
+import { ScatterPage } from "@/components/propdesk/scatter";
 import { Sidebar } from "@/components/propdesk/sidebar";
 import { Thread } from "@/components/propdesk/thread";
 import { Topbar } from "@/components/propdesk/topbar";
@@ -131,6 +132,7 @@ export function AppShell() {
       <section className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col bg-bg">
         <Topbar />
         <div key={path} className="page-enter flex min-h-0 min-w-0 flex-1 flex-col">
+          <ScatterPage>
           {home ? (
             <HomeLanding />
           ) : comparing ? (
@@ -151,6 +153,7 @@ export function AppShell() {
               <Composer />
             </>
           )}
+          </ScatterPage>
         </div>
       </section>
 
