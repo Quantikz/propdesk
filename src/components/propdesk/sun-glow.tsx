@@ -21,6 +21,32 @@ function glowTexture() {
 }
 
 type Ant = { x: number; y: number; a: number; s: number; w: number };
+type Mark = { x: number; y: number; w: number };
+
+function pickWord(): Mark | null {
+  const hits: Mark[] = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const parent = node.parentElement;
+    if (parent && !parent.closest("[data-no-scatter], script, style, canvas, svg")) {
+      const text = node.textContent || "";
+      const re = /\S{3,}/g;
+      let match: RegExpExecArray | null;
+      while ((match = re.exec(text))) {
+        const range = document.createRange();
+        range.setStart(node, match.index);
+        range.setEnd(node, match.index + match[0].length);
+        const rect = range.getBoundingClientRect();
+        if (rect.width > 8 && rect.top > 36 && rect.bottom < window.innerHeight - 12) {
+          hits.push({ x: rect.left, y: rect.bottom, w: rect.width });
+        }
+      }
+    }
+    node = walker.nextNode();
+  }
+  return hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
+}
 
 export function SunGlow() {
   const host = useRef<HTMLDivElement>(null);
@@ -48,79 +74,6 @@ export function SunGlow() {
     wash.scale.set(1.7, 1.7, 1);
     scene.add(wash, halo, core);
 
-    const lineMat = new THREE.LineBasicMaterial({ color: 0x161310, transparent: true, opacity: 0.55 });
-    const body = new THREE.Line(new THREE.BufferGeometry(), lineMat);
-    const legs = new THREE.LineSegments(new THREE.BufferGeometry(), lineMat);
-    const trail = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0x161310, transparent: true, opacity: 0.28 }));
-    const spider = new THREE.Group();
-    spider.add(body, legs);
-    spider.scale.set(0.32, 0.32, 0.32);
-    scene.add(spider, trail);
-    const from = new THREE.Vector3(0.2, -0.2, 0);
-    const to = from.clone();
-    const pos = from.clone();
-    let lastTap = 0;
-    let prey: { x: number; y: number; w: number } | null = null;
-    let holdUntil = 0;
-
-    function toNdc(x: number, y: number) {
-      return new THREE.Vector3((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1, 0);
-    }
-
-    function pickWord() {
-      const hits: { x: number; y: number; w: number }[] = [];
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-      let node = walker.nextNode();
-      while (node) {
-        const parent = node.parentElement;
-        if (parent && !parent.closest("[data-no-scatter], script, style, canvas, svg")) {
-          const text = node.textContent || "";
-          const re = /\S{3,}/g;
-          let match: RegExpExecArray | null;
-          while ((match = re.exec(text))) {
-            const range = document.createRange();
-            range.setStart(node, match.index);
-            range.setEnd(node, match.index + match[0].length);
-            const rect = range.getBoundingClientRect();
-            if (rect.width > 8 && rect.top > 36 && rect.bottom < window.innerHeight - 12) {
-              hits.push({ x: rect.left, y: rect.bottom, w: rect.width });
-            }
-          }
-        }
-        node = walker.nextNode();
-      }
-      prey = hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
-      from.copy(pos);
-      to.copy(prey ? toNdc(prey.x + prey.w / 2, prey.y - 2) : new THREE.Vector3(Math.random() * 1.4 - 0.7, Math.random() * 1.4 - 0.7, 0));
-    }
-
-    function buildSpider(t: number) {
-      const chassis: THREE.Vector3[] = [
-        new THREE.Vector3(-0.03, -0.012, 0),
-        new THREE.Vector3(0.02, -0.012, 0),
-        new THREE.Vector3(0.028, 0, 0.004),
-        new THREE.Vector3(0.02, 0.012, 0),
-        new THREE.Vector3(-0.03, 0.012, 0),
-        new THREE.Vector3(-0.036, 0, 0.004),
-        new THREE.Vector3(-0.03, -0.012, 0),
-      ];
-      const head = new THREE.Vector3(0.04, 0, 0.006);
-      body.geometry.dispose();
-      body.geometry = new THREE.BufferGeometry().setFromPoints([...chassis, chassis[chassis.length - 1], head]);
-      const legPts: THREE.Vector3[] = [];
-      for (let i = 0; i < 8; i++) {
-        const side = i < 4 ? 1 : -1;
-        const n = i % 4;
-        const step = Math.sin(t * 14 + n * 1.4) * 0.008;
-        const hip = new THREE.Vector3(-0.02 + n * 0.012, side * 0.01, 0);
-        const joint = new THREE.Vector3(-0.01 + n * 0.014, side * 0.028, 0.01);
-        const foot = new THREE.Vector3(-0.018 + n * 0.016 + step, side * 0.046, -0.004);
-        legPts.push(hip, joint, joint, foot);
-      }
-      legs.geometry.dispose();
-      legs.geometry = new THREE.BufferGeometry().setFromPoints(legPts);
-    }
-
     const ctx = canvas.getContext("2d");
     const ants: Ant[] = Array.from({ length: 9 }, () => ({
       x: Math.random(),
@@ -129,6 +82,7 @@ export function SunGlow() {
       s: 0.012 + Math.random() * 0.018,
       w: Math.random() * Math.PI * 2,
     }));
+    let mark = pickWord();
 
     function resize() {
       const w = window.innerWidth;
@@ -139,17 +93,12 @@ export function SunGlow() {
     }
     resize();
 
-    function onPoint(e: PointerEvent) {
-      lastTap = performance.now();
-      prey = null;
-      from.copy(pos);
-      to.copy(toNdc(e.clientX, e.clientY));
-    }
-    window.addEventListener("pointerdown", onPoint);
-    pickWord();
-
     const clock = new THREE.Clock();
     let frame = 0;
+    const wordTimer = window.setInterval(() => {
+      mark = pickWord();
+    }, 1000);
+
     function tick() {
       const t = clock.getElapsedTime();
       const mix = (Math.sin(t * 0.45) + 1) / 2;
@@ -195,33 +144,16 @@ export function SunGlow() {
           }
           ctx.restore();
         }
-        if (prey && pos.distanceTo(to) < 0.012) {
+        if (mark) {
           ctx.strokeStyle = "#c4473a";
           ctx.globalAlpha = 0.9;
           ctx.lineWidth = 1.6;
           ctx.beginPath();
-          ctx.moveTo(prey.x, prey.y + 1);
-          ctx.lineTo(prey.x + prey.w, prey.y + 1);
+          ctx.moveTo(mark.x, mark.y + 1);
+          ctx.lineTo(mark.x + mark.w, mark.y + 1);
           ctx.stroke();
         }
       }
-      if (performance.now() - lastTap > 1400 && pos.distanceTo(to) < 0.01) {
-        if (!holdUntil) holdUntil = performance.now() + 700;
-        if (performance.now() > holdUntil) {
-          holdUntil = 0;
-          pickWord();
-        }
-      }
-      const tapping = lastTap && performance.now() - lastTap < 1400;
-      const step = tapping ? 0.012 : 0.004;
-      const gap = pos.distanceTo(to);
-      if (gap <= step) pos.copy(to);
-      else pos.add(to.clone().sub(pos).setLength(step));
-      spider.position.copy(pos);
-      spider.lookAt(to.x, to.y, 0.2);
-      buildSpider(t);
-      trail.geometry.dispose();
-      trail.geometry = new THREE.BufferGeometry().setFromPoints([from, to]);
       frame = requestAnimationFrame(tick);
     }
     tick();
@@ -229,8 +161,8 @@ export function SunGlow() {
     window.addEventListener("resize", resize);
     return () => {
       cancelAnimationFrame(frame);
+      window.clearInterval(wordTimer);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointerdown", onPoint);
       renderer.dispose();
       tex.dispose();
       if (renderer.domElement.parentNode === root) root.removeChild(renderer.domElement);
