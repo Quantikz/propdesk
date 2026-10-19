@@ -91,7 +91,7 @@ export function SunGlow() {
       }
       prey = hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
       from.copy(pos);
-      to.copy(prey ? toNdc(prey.x + prey.w / 2, prey.y - 6) : new THREE.Vector3(Math.random() * 1.4 - 0.7, Math.random() * 1.4 - 0.7, 0));
+      to.copy(prey ? toNdc(prey.x + prey.w / 2, prey.y - 2) : new THREE.Vector3(Math.random() * 1.4 - 0.7, Math.random() * 1.4 - 0.7, 0));
     }
 
     function buildSpider(t: number) {
@@ -195,7 +195,7 @@ export function SunGlow() {
           }
           ctx.restore();
         }
-        if (prey && pos.distanceTo(to) < 0.06) {
+        if (prey && pos.distanceTo(to) < 0.012) {
           ctx.strokeStyle = "#c4473a";
           ctx.globalAlpha = 0.9;
           ctx.lineWidth = 1.6;
@@ -205,14 +205,18 @@ export function SunGlow() {
           ctx.stroke();
         }
       }
-      if (performance.now() - lastTap > 1400 && pos.distanceTo(to) < 0.04) {
+      if (performance.now() - lastTap > 1400 && pos.distanceTo(to) < 0.01) {
         if (!holdUntil) holdUntil = performance.now() + 700;
         if (performance.now() > holdUntil) {
           holdUntil = 0;
           pickWord();
         }
       }
-      pos.lerp(to, lastTap && performance.now() - lastTap < 1400 ? 0.28 : 0.08);
+      const tapping = lastTap && performance.now() - lastTap < 1400;
+      const step = tapping ? 0.012 : 0.004;
+      const gap = pos.distanceTo(to);
+      if (gap <= step) pos.copy(to);
+      else pos.add(to.clone().sub(pos).setLength(step));
       spider.position.copy(pos);
       spider.lookAt(to.x, to.y, 0.2);
       buildSpider(t);
