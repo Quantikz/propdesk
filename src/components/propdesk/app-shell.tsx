@@ -30,6 +30,7 @@ export function AppShell() {
   const payouts = path.startsWith("/payouts");
   const sheet = path.startsWith("/firm");
   const firms = path.startsWith("/firms");
+  const rules = path.startsWith("/rules");
   const site = ["/tools", "/about", "/contact", "/forpropfirms", "/methodology", "/corrections", "/help", "/privacy", "/terms", "/disclaimer"].some((p) => path.startsWith(p));
 
   useEffect(() => {
