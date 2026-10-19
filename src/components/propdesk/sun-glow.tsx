@@ -59,6 +59,40 @@ export function SunGlow() {
     const from = new THREE.Vector3(0.2, -0.2, 0);
     const to = from.clone();
     const pos = from.clone();
+    let lastTap = 0;
+    let prey: { x: number; y: number; w: number } | null = null;
+    let holdUntil = 0;
+
+    function toNdc(x: number, y: number) {
+      return new THREE.Vector3((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1, 0);
+    }
+
+    function pickWord() {
+      const hits: { x: number; y: number; w: number }[] = [];
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node = walker.nextNode();
+      while (node) {
+        const parent = node.parentElement;
+        if (parent && !parent.closest("[data-no-scatter], script, style, canvas, svg")) {
+          const text = node.textContent || "";
+          const re = /\S{3,}/g;
+          let match: RegExpExecArray | null;
+          while ((match = re.exec(text))) {
+            const range = document.createRange();
+            range.setStart(node, match.index);
+            range.setEnd(node, match.index + match[0].length);
+            const rect = range.getBoundingClientRect();
+            if (rect.width > 8 && rect.top > 36 && rect.bottom < window.innerHeight - 12) {
+              hits.push({ x: rect.left, y: rect.bottom, w: rect.width });
+            }
+          }
+        }
+        node = walker.nextNode();
+      }
+      prey = hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
+      from.copy(pos);
+      to.copy(prey ? toNdc(prey.x + prey.w / 2, prey.y - 6) : new THREE.Vector3(Math.random() * 1.4 - 0.7, Math.random() * 1.4 - 0.7, 0));
+    }
 
     function buildSpider(t: number) {
       const chassis: THREE.Vector3[] = [
@@ -106,10 +140,13 @@ export function SunGlow() {
     resize();
 
     function onPoint(e: PointerEvent) {
+      lastTap = performance.now();
+      prey = null;
       from.copy(pos);
-      to.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0);
+      to.copy(toNdc(e.clientX, e.clientY));
     }
     window.addEventListener("pointerdown", onPoint);
+    pickWord();
 
     const clock = new THREE.Clock();
     let frame = 0;
@@ -142,14 +179,14 @@ export function SunGlow() {
           ctx.save();
           ctx.translate(x, y);
           ctx.rotate(ant.a);
-          ctx.globalAlpha = 0.62;
-          ctx.strokeStyle = "#161310";
-          ctx.lineWidth = 1.2;
+          ctx.globalAlpha = 0.9;
+          ctx.strokeStyle = "#050403";
+          ctx.lineWidth = 1.4;
           ctx.beginPath();
           ctx.moveTo(-4, 0);
           ctx.lineTo(4, 0);
           ctx.stroke();
-          ctx.fillStyle = "#161310";
+          ctx.fillStyle = "#050403";
           for (let i = -3; i <= 3; i += 2) {
             ctx.beginPath();
             ctx.arc(i, -1.4, 0.6, 0, Math.PI * 2);
@@ -158,8 +195,24 @@ export function SunGlow() {
           }
           ctx.restore();
         }
+        if (prey && pos.distanceTo(to) < 0.06) {
+          ctx.strokeStyle = "#c4473a";
+          ctx.globalAlpha = 0.9;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(prey.x, prey.y + 1);
+          ctx.lineTo(prey.x + prey.w, prey.y + 1);
+          ctx.stroke();
+        }
       }
-      pos.lerp(to, 0.28);
+      if (performance.now() - lastTap > 1400 && pos.distanceTo(to) < 0.04) {
+        if (!holdUntil) holdUntil = performance.now() + 700;
+        if (performance.now() > holdUntil) {
+          holdUntil = 0;
+          pickWord();
+        }
+      }
+      pos.lerp(to, lastTap && performance.now() - lastTap < 1400 ? 0.28 : 0.08);
       spider.position.copy(pos);
       spider.lookAt(to.x, to.y, 0.2);
       buildSpider(t);
@@ -174,7 +227,6 @@ export function SunGlow() {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointerdown", onPoint);
-      window.removeEventListener("pointermove", onPoint);
       renderer.dispose();
       tex.dispose();
       if (renderer.domElement.parentNode === root) root.removeChild(renderer.domElement);
