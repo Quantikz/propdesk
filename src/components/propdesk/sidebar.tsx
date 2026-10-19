@@ -137,6 +137,14 @@ export function Sidebar({
           <Banknote className="size-6 shrink-0" />
           Payouts
         </NavLink>
+        <NavLink to="/tools" active={path.startsWith("/tools")} onNavigate={onNavigate}>
+          <Columns2 className="size-6 shrink-0" />
+          Tools
+        </NavLink>
+        <NavLink to="/about" active={path.startsWith("/about")} onNavigate={onNavigate}>
+          <House className="size-6 shrink-0" />
+          About
+        </NavLink>
       </nav>
 
       <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />

@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { BrandLockup } from "@/components/propdesk/logo";
-import { DeskDisclaimer } from "@/components/propdesk/disclaimer";
+import { SiteFooter } from "@/components/propdesk/site-footer";
 import { firmList } from "@/lib/propdesk/engine";
 import { libraryTopics, TOPICS } from "@/lib/propdesk/explain";
 import { useDeskStore } from "@/lib/propdesk/store";
@@ -40,9 +40,9 @@ export function HomeLanding() {
       <div className="mx-auto w-full max-w-4xl px-4 py-6 desk:px-8 desk:py-8">
         <BrandLockup size="lg" />
         <p className="mt-6 font-display text-[11px] tracking-[0.16em] text-dim uppercase">Independent research desk</p>
-        <h1 className="page-title mt-2 max-w-2xl">Understand the rules before you buy.</h1>
+        <h1 className="page-title mt-2 max-w-2xl">Know the rules before you trade.</h1>
         <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted">
-          Understand drawdown, payouts, news, consistency, and the restrictions that can affect your account.
+          PropDesk helps you understand a firm’s rules before you buy a challenge. It is research, not a shop and not a ranking.
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
@@ -133,7 +133,47 @@ export function HomeLanding() {
             </Link>
           ))}
         </div>
-        <DeskDisclaimer />
+        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Important rules</h2>
+        <p className="mt-1 text-sm text-muted">These differ by firm, by account type, and between the challenge and the funded account. No firm uses all of them the same way.</p>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {[
+            ["Daily drawdown", "Floating loss can count. Confirm balance versus equity."],
+            ["Maximum drawdown", "Static and trailing are different books."],
+            ["Consistency", "A best day can block a payout even after a pass."],
+            ["Payout gates", "KYC, minimum days, and a request window."],
+            ["News", "Allowed on one SKU, banned on another."],
+            ["EAs and copy", "A copier can be a denial even when an EA is allowed."],
+          ].map(([title, blurb]) => (
+            <Link key={title} to="/rules" className="rounded-md border border-line bg-elev px-3 py-3">
+              <span className="block font-display text-sm font-semibold">{title}</span>
+              <span className="mt-1 block text-xs text-muted">{blurb}</span>
+            </Link>
+          ))}
+        </div>
+
+        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Tools</h2>
+        <p className="mt-1 text-sm text-muted">Calculators show the arithmetic. They do not replace the firm’s definition.</p>
+        <Link to="/tools" className="mt-3 inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Open tools</Link>
+
+        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Sources</h2>
+        <p className="mt-1 text-sm text-muted">A rule should trace to an official page. A live stamp is a check. A desk note is not. Firm submissions are reviewed, not auto-published.</p>
+        <Link to="/methodology" className="mt-3 inline-flex text-sm text-fg underline">Methodology</Link>
+
+        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Help us keep your rules accurate.</h2>
+        <p className="mt-1 text-sm text-muted">Prop firms can send a rulebook, a policy change, or a correction. Contact does not buy placement.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link to="/forpropfirms" className="inline-flex h-10 items-center rounded-md bg-paper px-4 font-display text-sm font-semibold text-ink">For prop firms</Link>
+          <Link to="/contact" className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Contact</Link>
+        </div>
+
+        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Questions</h2>
+        <div className="mt-3 space-y-2 text-sm text-muted">
+          <p><span className="text-fg">What is PropDesk?</span> A rules desk. Not a broker and not an affiliate board.</p>
+          <p><span className="text-fg">Where do rules come from?</span> Official pages first. The pack is the checklist underneath.</p>
+          <p><span className="text-fg">Why do numbers differ?</span> Account type and phase. A funded account is often stricter than the challenge.</p>
+          <p><span className="text-fg">Something is wrong.</span> Use Corrections. Firms use For Prop Firms.</p>
+        </div>
+        <SiteFooter />
       </div>
     </div>
   );
