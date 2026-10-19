@@ -156,11 +156,11 @@ export function HomeLanding() {
         <Link to="/tools" className="mt-3 inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Open tools</Link>
 
         <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Sources</h2>
-        <p className="mt-1 text-sm text-muted">A rule should trace to an official page. A live stamp is a check. A desk note is not. Firm submissions are reviewed, not auto-published.</p>
+        <p className="mt-1 text-sm text-muted">A rule should trace to an official page. A live stamp is a check. A desk note is not.</p>
         <Link to="/methodology" className="mt-3 inline-flex text-sm text-fg underline">Methodology</Link>
 
-        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Help us keep your rules accurate.</h2>
-        <p className="mt-1 text-sm text-muted">Prop firms can send a rulebook, a policy change, or a correction. Contact does not buy placement.</p>
+        <h2 className="mt-8 font-display text-xl font-bold tracking-tight">For prop firms</h2>
+        <p className="mt-1 text-sm text-muted">Write to us and we will list your firm. Traders read rules here before they buy. A listing is not a ranking and not a paid spot.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Link to="/forpropfirms" className="inline-flex h-10 items-center rounded-md bg-paper px-4 font-display text-sm font-semibold text-ink">For prop firms</Link>
           <Link to="/contact" className="inline-flex h-10 items-center rounded-md border border-line px-4 font-display text-sm font-semibold">Contact</Link>
@@ -171,7 +171,7 @@ export function HomeLanding() {
           <p><span className="text-fg">What is PropDesk?</span> A rules desk. Not a broker and not an affiliate board.</p>
           <p><span className="text-fg">Where do rules come from?</span> Official pages first. The pack is the checklist underneath.</p>
           <p><span className="text-fg">Why do numbers differ?</span> Account type and phase. A funded account is often stricter than the challenge.</p>
-          <p><span className="text-fg">Something is wrong.</span> Use Corrections. Firms use For Prop Firms.</p>
+          <p><span className="text-fg">Can a firm be listed?</span> Yes. A representative writes through For Prop Firms. We list from the official page.</p>
         </div>
         <SiteFooter />
       </div>

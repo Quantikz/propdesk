@@ -4,21 +4,17 @@ import { PublicPage } from "@/components/propdesk/public-page";
 
 export const Route = createFileRoute("/forpropfirms")({
   component: () => (
-    <PublicPage title="Help us keep your rules accurate.">
-      <p>PropDesk helps traders understand prop firm rules before purchasing a challenge. If you represent a prop firm, work with us so published information reflects your official policies.</p>
-      <p>Contact does not purchase placement, a ranking, or a guarantee of publication. A firm can supply evidence. It cannot dictate the editorial conclusion.</p>
-      <h2 className="font-display text-xl font-bold text-fg">Submit Official Rules</h2>
-      <p>Rulebooks, terms, help-center articles, and account-specific rules.</p>
-      <h2 className="font-display text-xl font-bold text-fg">Report a Policy Change</h2>
-      <p>Drawdown, payout conditions, challenge requirements, trading restrictions, or termination rules.</p>
-      <h2 className="font-display text-xl font-bold text-fg">Request a Correction</h2>
-      <p>Point at the incorrect line and give the official source.</p>
-      <h2 className="font-display text-xl font-bold text-fg">Independent review</h2>
-      <p>Submissions are stored as Received, then reviewed. Conflicting sources are flagged, not guessed. Firm statements stay distinct from what the desk verified.</p>
-      <EnquiryForm
-        kind="firm"
-        types={["Submit Official Rules", "Report a Policy Change", "Request a Correction", "Update Firm Information", "Clarify a Rule", "General Enquiry"]}
-      />
+    <PublicPage title="List your firm on PropDesk.">
+      <p>Traders come here to read the rules before they buy a challenge. If you represent a prop firm, write to us and we will list you.</p>
+      <h2 className="font-display text-xl font-bold text-fg">Why be listed</h2>
+      <ul className="list-disc space-y-1 pl-5">
+        <li>Traders see your firm when they are comparing rules, not ads.</li>
+        <li>Your official page is the source. The desk links to it.</li>
+        <li>Drawdown, payouts, news, and restrictions are explained in one place.</li>
+        <li>A listing is not a ranking and not a paid placement.</li>
+      </ul>
+      <p>Send your firm name, official site, and a business email. We list from the official page. We do not take a rulebook upload.</p>
+      <EnquiryForm kind="firm" types={["List our firm", "Update our listing", "General enquiry"]} />
     </PublicPage>
   ),
 });
