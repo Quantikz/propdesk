@@ -221,8 +221,51 @@ html[data-theme="light"] {
   to { opacity: 1; transform: none; }
 }
 
-.page-enter {
-  animation: pd-enter var(--motion-fast) var(--ease-smooth-out);
+.pd-scatter {
+  opacity: 0;
+  transform: translate(var(--sx, 24px), var(--sy, 36px)) rotate(var(--sr, 2deg)) scale(0.94);
+  will-change: transform, opacity;
+}
+
+.pd-scatter.pd-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 620ms var(--ease-smooth-out),
+    transform 720ms var(--ease-smooth-out);
+  transition-delay: var(--sd, 0ms);
+}
+
+.pd-lift {
+  transition:
+    transform var(--motion-fast) var(--ease-smooth-out),
+    box-shadow var(--motion-fast) var(--ease-smooth-out),
+    border-color var(--motion-fast) var(--ease-smooth-out),
+    background-color var(--motion-fast) var(--ease-smooth-out);
+}
+
+.pd-lift:hover {
+  transform: translateY(-4px) scale(1.015);
+  border-color: color-mix(in srgb, var(--color-fg) 28%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 22%, transparent),
+    0 18px 36px color-mix(in srgb, black 18%, transparent);
+}
+
+button.pd-lift:hover,
+a.pd-lift:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.pd-lift:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-scatter {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 button,
