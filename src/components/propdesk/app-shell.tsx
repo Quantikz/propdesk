@@ -4,7 +4,7 @@ import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
 import { FirmSheet } from "@/components/propdesk/firm-sheet";
 import { FirmsView } from "@/components/propdesk/firms-view";
-import { HomeLanding } from "@/components/propdesk/home-landing";
+import { SitePage } from "@/components/propdesk/site-pages";
 import { RulesView } from "@/components/propdesk/rules-view";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
 import { Sidebar } from "@/components/propdesk/sidebar";
@@ -30,7 +30,7 @@ export function AppShell() {
   const payouts = path.startsWith("/payouts");
   const sheet = path.startsWith("/firm");
   const firms = path.startsWith("/firms");
-  const rules = path.startsWith("/rules");
+  const site = ["/tools", "/about", "/contact", "/forpropfirms", "/methodology", "/corrections", "/help", "/privacy", "/terms", "/disclaimer"].some((p) => path.startsWith(p));
 
   useEffect(() => {
     void useDeskStore.persist.rehydrate();
@@ -141,6 +141,8 @@ export function AppShell() {
             <FirmsView />
           ) : rules ? (
             <RulesView />
+          ) : site ? (
+            <SitePage />
           ) : (
             <>
               <Thread />

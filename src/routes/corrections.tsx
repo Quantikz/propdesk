@@ -1,12 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { PublicPage } from "@/components/propdesk/public-page";
+import { createFileRoute } from "@tanstack/react-router";
+import { AppShell } from "@/components/propdesk/app-shell";
 
-export const Route = createFileRoute("/corrections")({
-  component: () => (
-    <PublicPage title="Corrections and Updates">
-      <p>If a rule, date, or source is wrong, send the official page. Do not send a screenshot of a dashboard as the only source unless the firm publishes that card.</p>
-      <p>If a rule, date, or source is wrong, send the official page. Firm representatives who want a listing should use <Link to="/forpropfirms" className="text-fg underline">For Prop Firms</Link>. A wrong line on an existing sheet can be reported here or on <Link to="/contact" className="text-fg underline">Contact</Link>.</p>
-      <p>A correction is stored with a reference. Private contact details and submitted documents are not published.</p>
-    </PublicPage>
-  ),
-});
+export const Route = createFileRoute("/corrections")({ component: () => <AppShell /> });
