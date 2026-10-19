@@ -117,38 +117,31 @@ export function Sidebar({
       </Link>
 
       <nav className="flex shrink-0 flex-col gap-1.5 px-2.5">
-        <NavLink to="/" active={onHome} onNavigate={onNavigate}>
+        <NavLink to="/firms" active={path.startsWith("/firms") || path.startsWith("/firm")} onNavigate={onNavigate}>
           <House className="size-6 shrink-0" />
-          Home
-        </NavLink>
-        <NavLink to="/desk" active={onDesk} onNavigate={onNavigate}>
-          <Inbox className="size-6 shrink-0" />
-          Desk
+          Firms
         </NavLink>
         <NavLink to="/compare" active={onCompare} onNavigate={onNavigate}>
           <Columns2 className="size-6 shrink-0" />
           Compare
         </NavLink>
-        <NavLink to="/rules" active={onRules} onNavigate={onNavigate}>
+        <NavLink to="/rules" active={onRules || onPayouts} onNavigate={onNavigate}>
           <Inbox className="size-6 shrink-0" />
           Rules
         </NavLink>
-        <NavLink to="/payouts" active={onPayouts} onNavigate={onNavigate}>
-          <Banknote className="size-6 shrink-0" />
-          Payouts
+        <NavLink to="/desk" active={onDesk} onNavigate={onNavigate}>
+          <Inbox className="size-6 shrink-0" />
+          Ask
         </NavLink>
         <NavLink to="/tools" active={path.startsWith("/tools")} onNavigate={onNavigate}>
           <Columns2 className="size-6 shrink-0" />
           Tools
         </NavLink>
-        <NavLink to="/about" active={path.startsWith("/about")} onNavigate={onNavigate}>
-          <House className="size-6 shrink-0" />
-          About
-        </NavLink>
       </nav>
 
-      <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />
+      {path === "/" ? null : <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />}
 
+      {path === "/" ? null : (
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 pt-5 pb-4">
         <div className="flex items-center justify-between gap-2 px-3.5 pb-1.5">
           <h2 className="font-display text-[12px] tracking-[0.14em] text-dim uppercase">Chats</h2>
@@ -196,6 +189,7 @@ export function Sidebar({
           ))
         )}
       </div>
+      )}
     </div>
   );
 }

@@ -326,7 +326,7 @@ export function PayoutsView() {
 
         <h3 className="font-display mt-8 text-xl font-bold tracking-tight">Payout rules</h3>
         <p className="mt-1 text-xs text-dim">
-          Packed {rulesAt}. Confirm the live plan card before you pay — firms change SKUs.
+          Packed {rulesAt}. Confirm the live plan card before you pay. Account types change.
         </p>
         <div className="mt-3 overflow-x-auto overscroll-x-contain">
           <table className="w-full min-w-[48rem] border-collapse text-left text-sm">

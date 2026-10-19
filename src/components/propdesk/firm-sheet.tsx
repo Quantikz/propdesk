@@ -142,7 +142,7 @@ export function FirmSheet() {
               ))}
             </div>
             <h2 className="mt-8 font-display text-xl font-bold tracking-tight">Challenge and funded</h2>
-            <p className="mt-1 text-xs text-dim">These books are not the same. A pass does not keep the challenge rules.</p>
+            <p className="mt-1 text-xs text-dim">These are not the same. A pass does not keep the challenge rules.</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <div className="rounded-md border border-line bg-elev px-3 py-3">
                 <p className="font-display text-[11px] tracking-[0.12em] text-dim uppercase">Challenge</p>

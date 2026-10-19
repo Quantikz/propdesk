@@ -30,7 +30,7 @@ export const Route = createRootRoute({
       { property: "og:title", content: "PropDesk — Understand the rules before you buy" },
       {
         property: "og:description",
-        content: "A research desk for prop-firm rules. No ranking. No best-firm pitch.",
+        content: "Understand prop-firm rules before you buy. Drawdown, payouts, news, consistency, explained with sources.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

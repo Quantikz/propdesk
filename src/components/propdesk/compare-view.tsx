@@ -11,7 +11,7 @@ const ROWS: { key: string; label: string; value: (id: string) => string }[] = [
   { key: "max", label: "Max drawdown", value: (id) => getFirm(id).drawdown },
   { key: "daily", label: "Daily drawdown", value: (id) => getFirm(id).drawdown },
   { key: "news", label: "News trading", value: (id) => getFirm(id).news },
-  { key: "week", label: "Weekend holding", value: () => "Confirm on the live SKU. Not always published as a single line." },
+  { key: "week", label: "Weekend holding", value: () => "Confirm on the live account type. Not always published as a single line." },
   { key: "pay", label: "Payout requirement", value: (id) => firstPayout(id).request },
   { key: "con", label: "Consistency", value: (id) => getFirm(id).consistency },
 ];
