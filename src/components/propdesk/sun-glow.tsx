@@ -110,7 +110,6 @@ export function SunGlow() {
       to.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0);
     }
     window.addEventListener("pointerdown", onPoint);
-    window.addEventListener("pointermove", onPoint);
 
     const clock = new THREE.Clock();
     let frame = 0;
