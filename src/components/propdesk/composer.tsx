@@ -46,7 +46,7 @@ export function Composer({ surface = "desk" }: { surface?: "desk" | "compare" })
   const canSend = !sending && draft.trim().length > 0;
 
   return (
-    <div className="shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 desk:px-4 desk:pb-5">
+    <div data-no-scatter className="sticky bottom-0 z-20 shrink-0 bg-bg px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1 desk:px-4 desk:pb-5">
       <div className="mx-auto w-full max-w-[780px] rounded-md border border-line bg-input px-2 py-1.5 desk:px-3 desk:py-2">
         <div className="flex items-end gap-1">
           <textarea

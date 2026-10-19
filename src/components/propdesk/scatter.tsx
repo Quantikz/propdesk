@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-const SKIP = "input, textarea, select, option, [data-no-scatter], .pd-no-scatter";
+const SKIP = "input, textarea, select, option, [data-no-scatter], .pd-no-scatter, [role='dialog'], [aria-modal='true']";
 
 function isCard(el: Element) {
   if (!(el instanceof HTMLElement)) return false;
@@ -17,6 +17,9 @@ function collect(root: HTMLElement) {
   const chosen: HTMLElement[] = [];
   for (const el of nodes) {
     if (el.matches(SKIP) || el.closest(SKIP) || el.closest(".pd-no-scatter")) continue;
+    if (el.closest("[role='dialog'], [aria-modal='true']")) continue;
+    const style = getComputedStyle(el);
+    if (style.position === "fixed" || style.position === "sticky") continue;
     if (el.closest("[data-scattered]")) continue;
     const text = el.textContent?.trim();
     if (!text && !isCard(el)) continue;
@@ -53,7 +56,6 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const scroller = root.querySelector<HTMLElement>(".overflow-y-auto, .overflow-auto") ?? null;
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -63,7 +65,7 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
           }
         }
       },
-      { root: scroller, threshold: 0.08, rootMargin: "40px 0px 40px 0px" },
+      { threshold: 0.01, rootMargin: "80px 0px" },
     );
     const mark = () => {
       const items = collect(root);
@@ -73,9 +75,13 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
       });
     };
     mark();
+    const failsafe = window.setTimeout(() => {
+      root.querySelectorAll<HTMLElement>(".pd-scatter:not(.pd-in)").forEach((el) => el.classList.add("pd-in"));
+    }, 900);
     const mo = new MutationObserver(() => mark());
     mo.observe(root, { childList: true, subtree: true });
     return () => {
+      window.clearTimeout(failsafe);
       mo.disconnect();
       io.disconnect();
     };

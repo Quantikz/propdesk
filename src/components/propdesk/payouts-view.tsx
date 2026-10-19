@@ -94,7 +94,7 @@ function FocusCard({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`${firm.name} payouts`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`${firm.name} payouts`} data-no-scatter>
       <button type="button" className="pd-scrim absolute inset-0 backdrop-blur-2xl" aria-label="Close payout card" onClick={onClose} />
       <article className="pd-glass-card relative aspect-square w-[min(100%,34rem)] overflow-y-auto overscroll-contain rounded-3xl p-5 backdrop-blur-2xl">
         <div className="flex items-start justify-between gap-3">

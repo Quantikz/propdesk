@@ -260,11 +260,12 @@ a.pd-lift:hover {
   transform: translateY(0) scale(0.98);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pd-scatter {
-    opacity: 1;
-    transform: none;
-  }
+[role="dialog"],
+[role="dialog"] *,
+[data-no-scatter],
+[data-no-scatter] * {
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 button,
