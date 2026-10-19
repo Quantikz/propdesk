@@ -21,31 +21,22 @@ function glowTexture() {
 }
 
 type Ant = { x: number; y: number; a: number; s: number; w: number };
-type Mark = { x: number; y: number; w: number };
+type Puff = { x: number; y: number; r: number; a: number; vx: number; vy: number; life: number };
 
-function pickWord(): Mark | null {
-  const hits: Mark[] = [];
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  let node = walker.nextNode();
-  while (node) {
-    const parent = node.parentElement;
-    if (parent && !parent.closest("[data-no-scatter], script, style, canvas, svg")) {
-      const text = node.textContent || "";
-      const re = /\S{3,}/g;
-      let match: RegExpExecArray | null;
-      while ((match = re.exec(text))) {
-        const range = document.createRange();
-        range.setStart(node, match.index);
-        range.setEnd(node, match.index + match[0].length);
-        const rect = range.getBoundingClientRect();
-        if (rect.width > 8 && rect.top > 36 && rect.bottom < window.innerHeight - 12) {
-          hits.push({ x: rect.left, y: rect.bottom, w: rect.width });
-        }
-      }
-    }
-    node = walker.nextNode();
-  }
-  return hits.length ? hits[Math.floor(Math.random() * hits.length)] : null;
+function smokeTexture() {
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const g = ctx.createRadialGradient(size / 2, size / 2, 4, size / 2, size / 2, size / 2);
+  g.addColorStop(0, "rgba(90,86,80,0.55)");
+  g.addColorStop(0.35, "rgba(70,66,60,0.22)");
+  g.addColorStop(1, "rgba(70,66,60,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  return canvas;
 }
 
 export function SunGlow() {
@@ -82,7 +73,9 @@ export function SunGlow() {
       s: 0.012 + Math.random() * 0.018,
       w: Math.random() * Math.PI * 2,
     }));
-    let mark = pickWord();
+    const smoke = smokeTexture();
+    const puffs: Puff[] = [];
+    let nextSmoke = 2.5;
 
     function resize() {
       const w = window.innerWidth;
@@ -95,9 +88,20 @@ export function SunGlow() {
 
     const clock = new THREE.Clock();
     let frame = 0;
-    const wordTimer = window.setInterval(() => {
-      mark = pickWord();
-    }, 1000);
+
+    function spawn(x: number, y: number) {
+      for (let i = 0; i < 14; i++) {
+        puffs.push({
+          x: x + (Math.random() - 0.5) * 18,
+          y: y + (Math.random() - 0.5) * 8,
+          r: 8 + Math.random() * 10,
+          a: 0.16 + Math.random() * 0.12,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: -0.25 - Math.random() * 0.35,
+          life: 1,
+        });
+      }
+    }
 
     function tick() {
       const t = clock.getElapsedTime();
@@ -144,14 +148,25 @@ export function SunGlow() {
           }
           ctx.restore();
         }
-        if (mark) {
-          ctx.strokeStyle = "#c4473a";
-          ctx.globalAlpha = 0.9;
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          ctx.moveTo(mark.x, mark.y + 1);
-          ctx.lineTo(mark.x + mark.w, mark.y + 1);
-          ctx.stroke();
+        if (t > nextSmoke) {
+          spawn(40 + Math.random() * (canvas.width - 80), canvas.height * (0.35 + Math.random() * 0.4));
+          nextSmoke = t + 7 + Math.random() * 5;
+        }
+        if (smoke) {
+          for (let i = puffs.length - 1; i >= 0; i--) {
+            const p = puffs[i];
+            p.x += p.vx + Math.sin(t + i) * 0.12;
+            p.y += p.vy;
+            p.r += 0.18;
+            p.life -= 0.004;
+            p.a *= 0.992;
+            if (p.life <= 0) {
+              puffs.splice(i, 1);
+              continue;
+            }
+            ctx.globalAlpha = p.a * p.life;
+            ctx.drawImage(smoke, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+          }
         }
       }
       frame = requestAnimationFrame(tick);
@@ -161,7 +176,6 @@ export function SunGlow() {
     window.addEventListener("resize", resize);
     return () => {
       cancelAnimationFrame(frame);
-      window.clearInterval(wordTimer);
       window.removeEventListener("resize", resize);
       renderer.dispose();
       tex.dispose();
