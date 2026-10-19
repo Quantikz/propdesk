@@ -5,6 +5,8 @@ export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 64 64"
+      width="32"
+      height="32"
       className={cn("shrink-0 text-fg", className)}
       aria-hidden
       xmlns="http://www.w3.org/2000/svg"
