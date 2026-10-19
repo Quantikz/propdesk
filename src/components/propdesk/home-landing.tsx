@@ -163,6 +163,9 @@ export function HomeLanding() {
         </div>
         <SiteFooter />
       </div>
+      <Link to="/desk" className="fixed bottom-3 left-1/2 z-30 inline-flex h-11 -translate-x-1/2 items-center rounded-full bg-paper px-5 font-display text-sm font-semibold text-ink desk:hidden">
+        Ask a rule question
+      </Link>
     </div>
   );
 }
