@@ -53,6 +53,7 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
+    const scroller = root.querySelector<HTMLElement>(".overflow-y-auto, .overflow-auto") ?? null;
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -62,7 +63,7 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
           }
         }
       },
-      { threshold: 0.08, rootMargin: "0px 0px -6% 0px" },
+      { root: scroller, threshold: 0.08, rootMargin: "40px 0px 40px 0px" },
     );
     const mark = () => {
       const items = collect(root);
@@ -81,7 +82,7 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
   }, []);
 
   return (
-    <div ref={ref} className={cn("min-h-0 min-w-0 flex-1", className)}>
+    <div ref={ref} className={cn("flex min-h-0 min-w-0 flex-1 flex-col", className)}>
       {children}
     </div>
   );

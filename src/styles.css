@@ -224,7 +224,6 @@ html[data-theme="light"] {
 .pd-scatter {
   opacity: 0;
   transform: translate(var(--sx, 24px), var(--sy, 36px)) rotate(var(--sr, 2deg)) scale(0.94);
-  will-change: transform, opacity;
 }
 
 .pd-scatter.pd-in {
