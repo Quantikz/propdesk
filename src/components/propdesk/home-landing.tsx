@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { FirmLogo } from "@/components/propdesk/firm-logo";
 import { BrandLockup } from "@/components/propdesk/logo";
 import { SiteFooter } from "@/components/propdesk/site-footer";
+import { SunGlow } from "@/components/propdesk/sun-glow";
 import { firmList } from "@/lib/propdesk/engine";
 import { libraryTopics } from "@/lib/propdesk/explain";
 import { useDeskStore } from "@/lib/propdesk/store";
@@ -56,6 +57,7 @@ export function HomeLanding() {
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <SunGlow />
       <div className="mx-auto w-full max-w-4xl px-4 py-8 pb-24 desk:px-8 desk:py-10">
           <BrandLockup size="lg" />
           <p className="mt-8 font-display text-[11px] tracking-[0.16em] text-dim uppercase">Independent research desk</p>
