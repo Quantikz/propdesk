@@ -90,7 +90,6 @@ export function SunGlow() {
       s: 0.012 + Math.random() * 0.018,
       w: Math.random() * Math.PI * 2,
     }));
-    const spiderState = { x: 0.5, y: 0.5 };
 
     function resize() {
       const w = window.innerWidth;
