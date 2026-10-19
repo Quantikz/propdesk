@@ -129,9 +129,13 @@ export function Sidebar({
           <Columns2 className="size-6 shrink-0" />
           Compare
         </NavLink>
-        <NavLink to="/rules" active={onRules || onPayouts} onNavigate={onNavigate}>
+        <NavLink to="/rules" active={onRules} onNavigate={onNavigate}>
           <Inbox className="size-6 shrink-0" />
           Rules
+        </NavLink>
+        <NavLink to="/payouts" active={onPayouts} onNavigate={onNavigate}>
+          <Banknote className="size-6 shrink-0" />
+          Payouts
         </NavLink>
         <NavLink to="/desk" active={onDesk} onNavigate={onNavigate}>
           <Inbox className="size-6 shrink-0" />
@@ -143,9 +147,8 @@ export function Sidebar({
         </NavLink>
       </nav>
 
-      {path === "/" ? null : <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />}
+      <FirmPicker idPrefix={idPrefix} onNavigate={onNavigate} />
 
-      {path === "/" ? null : (
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 pt-5 pb-4">
         <div className="flex items-center justify-between gap-2 px-3.5 pb-1.5">
           <h2 className="font-display text-[12px] tracking-[0.14em] text-dim uppercase">Chats</h2>
@@ -193,7 +196,6 @@ export function Sidebar({
           ))
         )}
       </div>
-      )}
     </div>
   );
 }

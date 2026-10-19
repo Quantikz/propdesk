@@ -103,7 +103,7 @@ export function AppShell() {
       className="relative flex h-dvh min-h-0 overflow-hidden bg-bg text-fg"
       style={{ "--firm": firm.color } as CSSProperties}
     >
-      <aside className={cn("relative z-10 hidden h-full w-80 shrink-0 flex-col border-r border-border desk:flex", home && "desk:hidden")}>
+      <aside className="relative z-10 hidden h-full w-80 shrink-0 flex-col border-r border-border desk:flex">
         <Sidebar idPrefix="desk" />
       </aside>
 
