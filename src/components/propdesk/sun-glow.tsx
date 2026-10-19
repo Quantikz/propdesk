@@ -54,29 +54,34 @@ export function SunGlow() {
     const trail = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0x161310, transparent: true, opacity: 0.28 }));
     const spider = new THREE.Group();
     spider.add(body, legs);
-    spider.scale.set(1.6, 1.6, 1.6);
+    spider.scale.set(0.32, 0.32, 0.32);
     scene.add(spider, trail);
     const from = new THREE.Vector3(0.2, -0.2, 0);
     const to = from.clone();
     const pos = from.clone();
 
     function buildSpider(t: number) {
-      const bodyPts: THREE.Vector3[] = [];
-      for (let i = 0; i <= 24; i++) {
-        const a = (i / 24) * Math.PI * 2;
-        bodyPts.push(new THREE.Vector3(Math.cos(a) * 0.045, Math.sin(a) * 0.028, Math.sin(a * 2) * 0.012));
-      }
+      const chassis: THREE.Vector3[] = [
+        new THREE.Vector3(-0.03, -0.012, 0),
+        new THREE.Vector3(0.02, -0.012, 0),
+        new THREE.Vector3(0.028, 0, 0.004),
+        new THREE.Vector3(0.02, 0.012, 0),
+        new THREE.Vector3(-0.03, 0.012, 0),
+        new THREE.Vector3(-0.036, 0, 0.004),
+        new THREE.Vector3(-0.03, -0.012, 0),
+      ];
+      const head = new THREE.Vector3(0.04, 0, 0.006);
       body.geometry.dispose();
-      body.geometry = new THREE.BufferGeometry().setFromPoints(bodyPts);
+      body.geometry = new THREE.BufferGeometry().setFromPoints([...chassis, chassis[chassis.length - 1], head]);
       const legPts: THREE.Vector3[] = [];
       for (let i = 0; i < 8; i++) {
         const side = i < 4 ? 1 : -1;
         const n = i % 4;
-        const swing = Math.sin(t * 8 + n) * 0.02;
+        const step = Math.sin(t * 14 + n * 1.4) * 0.008;
         const hip = new THREE.Vector3(-0.02 + n * 0.012, side * 0.01, 0);
-        const knee = new THREE.Vector3(-0.04 + n * 0.02 + swing, side * 0.05, 0.02);
-        const foot = new THREE.Vector3(-0.07 + n * 0.03, side * 0.085, -0.01);
-        legPts.push(hip, knee, knee, foot);
+        const joint = new THREE.Vector3(-0.01 + n * 0.014, side * 0.028, 0.01);
+        const foot = new THREE.Vector3(-0.018 + n * 0.016 + step, side * 0.046, -0.004);
+        legPts.push(hip, joint, joint, foot);
       }
       legs.geometry.dispose();
       legs.geometry = new THREE.BufferGeometry().setFromPoints(legPts);
@@ -100,11 +105,12 @@ export function SunGlow() {
     }
     resize();
 
-    function onTap(e: PointerEvent) {
+    function onPoint(e: PointerEvent) {
       from.copy(pos);
       to.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0);
     }
-    window.addEventListener("pointerdown", onTap);
+    window.addEventListener("pointerdown", onPoint);
+    window.addEventListener("pointermove", onPoint);
 
     const clock = new THREE.Clock();
     let frame = 0;
@@ -154,10 +160,9 @@ export function SunGlow() {
           ctx.restore();
         }
       }
-      pos.lerp(to, 0.06);
+      pos.lerp(to, 0.28);
       spider.position.copy(pos);
-      spider.lookAt(to.x, to.y, 0.4);
-      spider.rotateZ(Math.sin(t * 3) * 0.15);
+      spider.lookAt(to.x, to.y, 0.2);
       buildSpider(t);
       trail.geometry.dispose();
       trail.geometry = new THREE.BufferGeometry().setFromPoints([from, to]);
@@ -169,7 +174,8 @@ export function SunGlow() {
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointerdown", onTap);
+      window.removeEventListener("pointerdown", onPoint);
+      window.removeEventListener("pointermove", onPoint);
       renderer.dispose();
       tex.dispose();
       if (renderer.domElement.parentNode === root) root.removeChild(renderer.domElement);
