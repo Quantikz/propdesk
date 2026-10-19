@@ -117,6 +117,10 @@ export function Sidebar({
       </Link>
 
       <nav className="flex shrink-0 flex-col gap-1.5 px-2.5">
+        <NavLink to="/" active={onHome} onNavigate={onNavigate}>
+          <House className="size-6 shrink-0" />
+          Home
+        </NavLink>
         <NavLink to="/firms" active={path.startsWith("/firms") || path.startsWith("/firm")} onNavigate={onNavigate}>
           <House className="size-6 shrink-0" />
           Firms

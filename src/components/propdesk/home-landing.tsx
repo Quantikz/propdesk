@@ -77,7 +77,6 @@ export function HomeLanding() {
             <p className="mt-2 text-sm leading-relaxed text-muted">Weekend holding depends on the account type. Some firms require a flatten before the close. Confirm the live plan card.</p>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               <a href={sample.portal} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-2.5 py-1 text-link">Official page</a>
-              <span className="font-mono text-link">Verified [PLACEHOLDER]</span>
             </div>
           </article>
         ) : null}
@@ -121,7 +120,6 @@ export function HomeLanding() {
               <span className="min-w-0">
                 <span className="block truncate font-display text-sm font-semibold">{f.name}</span>
                 <span className="block truncate font-mono text-xs text-dim">{f.models.slice(0, 2).map(planLabel).join(" · ") || "Plan on the official page"}</span>
-                <span className="block text-xs text-link">Last verified [PLACEHOLDER]</span>
               </span>
             </Link>
           ))}
