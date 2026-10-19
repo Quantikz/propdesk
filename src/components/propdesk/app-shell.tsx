@@ -4,6 +4,7 @@ import { CompareView } from "@/components/propdesk/compare-view";
 import { Composer } from "@/components/propdesk/composer";
 import { FirmSheet } from "@/components/propdesk/firm-sheet";
 import { FirmsView } from "@/components/propdesk/firms-view";
+import { HomeLanding } from "@/components/propdesk/home-landing";
 import { SitePage } from "@/components/propdesk/site-pages";
 import { RulesView } from "@/components/propdesk/rules-view";
 import { PayoutsView } from "@/components/propdesk/payouts-view";
