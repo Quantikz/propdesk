@@ -31,23 +31,10 @@ function collect(root: HTMLElement) {
   return chosen;
 }
 
-function arm(el: HTMLElement, index: number) {
+function arm(el: HTMLElement) {
   if (el.dataset.scattered) return;
   el.dataset.scattered = "1";
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) {
-    el.classList.add("pd-in");
-    return;
-  }
-  const sx = (Math.random() * 110 - 55).toFixed(1);
-  const sy = (Math.random() * 80 - 16).toFixed(1);
-  const sr = (Math.random() * 7 - 3.5).toFixed(1);
-  el.style.setProperty("--sx", `${sx}px`);
-  el.style.setProperty("--sy", `${sy}px`);
-  el.style.setProperty("--sr", `${sr}deg`);
-  el.style.setProperty("--sd", `${(index % 12) * 45}ms`);
   el.classList.add("pd-scatter");
-  if (el.matches("a, button, article, .rule-card") || isCard(el)) el.classList.add("pd-lift");
 }
 
 export function ScatterPage({ children, className }: { children: ReactNode; className?: string }) {
@@ -69,15 +56,15 @@ export function ScatterPage({ children, className }: { children: ReactNode; clas
     );
     const mark = () => {
       const items = collect(root);
-      items.forEach((el, i) => {
-        arm(el, i);
+      items.forEach((el) => {
+        arm(el);
         if (!el.classList.contains("pd-in")) io.observe(el);
       });
     };
     mark();
     const failsafe = window.setTimeout(() => {
       root.querySelectorAll<HTMLElement>(".pd-scatter:not(.pd-in)").forEach((el) => el.classList.add("pd-in"));
-    }, 900);
+    }, 400);
     const mo = new MutationObserver(() => mark());
     mo.observe(root, { childList: true, subtree: true });
     return () => {
